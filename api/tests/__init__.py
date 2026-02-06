@@ -1,0 +1,1 @@
+# Tests GéoClic Suite API

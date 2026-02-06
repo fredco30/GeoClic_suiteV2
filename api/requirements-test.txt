@@ -1,0 +1,24 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# GéoClic Suite - Dépendances pour les tests
+# ═══════════════════════════════════════════════════════════════════════════════
+# Installation: pip install -r requirements-test.txt
+
+# Inclure les dépendances principales
+-r requirements.txt
+
+# Framework de test
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0
+
+# Client HTTP async pour tester FastAPI
+httpx>=0.26.0
+
+# Base de données de test (SQLite async)
+aiosqlite>=0.19.0
+
+# Factories pour générer des données de test
+faker>=22.0.0
+
+# Fix compatibilité passlib/bcrypt (bcrypt 4.1+ cause des erreurs)
+bcrypt==4.0.1

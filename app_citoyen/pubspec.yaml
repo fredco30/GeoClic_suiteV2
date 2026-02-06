@@ -1,0 +1,63 @@
+name: app_citoyen
+description: Application mobile citoyenne GéoClic - Signalements et suivi des demandes
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # UI
+  cupertino_icons: ^1.0.6
+  google_fonts: ^6.1.0
+
+  # State Management
+  provider: ^6.1.1
+
+  # HTTP & API
+  http: ^1.1.0
+  dio: ^5.4.0
+
+  # Storage
+  shared_preferences: ^2.2.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # Maps & Location
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+  geolocator: ^10.1.0
+  geocoding: ^2.1.1
+
+  # Camera & Photos
+  image_picker: ^1.0.7
+  image: ^4.1.4
+
+  # QR Code
+  mobile_scanner: ^4.0.1
+
+  # Utils
+  intl: ^0.18.1
+  url_launcher: ^6.2.2
+  connectivity_plus: ^5.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.8
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/

@@ -1,0 +1,39 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# GéoClic V12 Pro - API FastAPI - Dépendances
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Framework Web
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.6
+
+# Base de données
+asyncpg>=0.29.0
+sqlalchemy[asyncio]>=2.0.25
+geoalchemy2>=0.14.3
+
+# Validation & Sérialisation
+pydantic>=2.5.3
+pydantic-settings>=2.1.0
+email-validator>=2.1.0
+
+# Authentification
+python-jose[cryptography]>=3.3.0
+passlib>=1.7.4
+bcrypt==4.0.1  # Version fixée pour compatibilité avec passlib
+
+# Utilitaires
+python-dateutil>=2.8.2
+pillow>=10.2.0
+httpx>=0.26.0  # Pour Microsoft Graph API (Office 365 emails)
+
+# Géospatial (versions avec wheels Windows)
+shapely>=2.0.0
+fiona>=1.9.0  # Lecture Shapefile, GeoPackage, etc.
+
+# Export
+geojson>=3.1.0
+
+# QR Codes
+qrcode[pil]>=7.4.0
+reportlab>=4.0.0
