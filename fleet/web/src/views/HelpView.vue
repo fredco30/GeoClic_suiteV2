@@ -97,11 +97,22 @@ function toggle(id: string) {
             <li>Options : aucune nécessaire</li>
           </ol>
 
-          <h3>Étape 2 : Ajouter la clé SSH pendant la commande</h3>
-          <p>Pendant la commande OVH, vous pouvez ajouter une clé SSH. Utilisez la clé fleet affichée dans <router-link to="/add">Ajouter un serveur</router-link>.</p>
-          <div class="warn-box">
-            Si vous oubliez d'ajouter la clé pendant la commande, vous pourrez le faire après via l'espace client OVH ou en vous connectant en SSH avec le mot de passe.
+          <h3>Étape 2 : Pré-installer la clé SSH chez OVH (recommandé)</h3>
+          <p>Pour ne plus avoir à copier manuellement la clé SSH sur chaque nouveau VPS, enregistrez-la une fois pour toutes dans votre espace OVH :</p>
+          <ol>
+            <li>Connectez-vous à l'<a href="https://www.ovh.com/manager/" target="_blank">espace client OVH</a></li>
+            <li>Allez dans <strong>Public Cloud</strong> ou <strong>Bare Metal Cloud &gt; Clés SSH</strong></li>
+            <li>Cliquez <strong>Ajouter une clé SSH</strong></li>
+            <li>Nom : <strong>geoclic-fleet</strong></li>
+            <li>Clé : collez la clé SSH affichée dans le <router-link to="/">Dashboard</router-link> (section "Clé SSH Fleet")</li>
+            <li>Validez</li>
+          </ol>
+          <div class="info-box">
+            <strong>Résultat :</strong> Lors de la commande d'un nouveau VPS, sélectionnez la clé "geoclic-fleet" dans les options SSH. Le VPS sera livré avec la clé déjà installée — aucune manipulation manuelle nécessaire !
           </div>
+
+          <h3>Alternative : Ajouter la clé après la commande</h3>
+          <p>Si vous n'avez pas pré-installé la clé, vous pouvez le faire après la livraison du VPS via l'espace client OVH ou en vous connectant en SSH avec le mot de passe.</p>
 
           <h3>Étape 3 : Récupérer l'IP</h3>
           <p>Une fois le VPS livré (quelques minutes), notez l'adresse IP dans votre espace client OVH.</p>

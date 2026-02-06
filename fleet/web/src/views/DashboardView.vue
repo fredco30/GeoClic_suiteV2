@@ -18,6 +18,8 @@ const servers = ref<Server[]>([])
 const loading = ref(true)
 const refreshing = ref(false)
 const error = ref('')
+const sshKey = ref('')
+const showSshKey = ref(false)
 let interval: ReturnType<typeof setInterval>
 
 const onlineCount = computed(() => servers.value.filter(s => s.health_http === '200').length)
@@ -32,6 +34,18 @@ async function loadServers() {
   } finally {
     loading.value = false
   }
+}
+
+async function loadSshKey() {
+  try {
+    const data = await api.getSshKey()
+    sshKey.value = data.public_key
+  } catch { /* ignore */ }
+}
+
+function copySshKey() {
+  navigator.clipboard.writeText(sshKey.value)
+  alert('Clé SSH copiée !')
 }
 
 async function refreshStatus() {
@@ -58,6 +72,7 @@ async function updateAll() {
 
 onMounted(() => {
   loadServers()
+  loadSshKey()
   // Auto-refresh toutes les 60 secondes
   interval = setInterval(() => {
     if (!refreshing.value) refreshStatus()
@@ -112,6 +127,19 @@ function getStatusClass(server: Server): string {
       <div class="kpi-card kpi-error" v-if="offlineCount > 0">
         <div class="kpi-value">{{ offlineCount }}</div>
         <div class="kpi-label">Hors ligne</div>
+      </div>
+    </div>
+
+    <!-- Clé SSH Fleet -->
+    <div v-if="sshKey" class="ssh-key-card card">
+      <div class="ssh-key-header" @click="showSshKey = !showSshKey">
+        <span>🔑 Clé SSH Fleet</span>
+        <span class="chevron">{{ showSshKey ? '▼' : '▶' }}</span>
+      </div>
+      <div v-show="showSshKey" class="ssh-key-content">
+        <p class="ssh-key-info">Cette clé doit être ajoutée sur chaque nouveau VPS pour permettre la connexion.</p>
+        <code class="ssh-key-value">{{ sshKey }}</code>
+        <button class="btn btn-outline btn-sm" @click="copySshKey">Copier la clé</button>
       </div>
     </div>
 
@@ -359,5 +387,56 @@ function getStatusClass(server: Server): string {
 
 .detail span:last-child {
   font-size: 13px;
+}
+
+.ssh-key-card {
+  margin-bottom: 24px;
+  background: #fafbff;
+  border: 1px solid #c5cae9;
+}
+
+.ssh-key-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.ssh-key-header:hover { color: var(--primary); }
+
+.ssh-key-content {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.ssh-key-info {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.ssh-key-value {
+  display: block;
+  background: #1a1a2e;
+  color: #a4e400;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  word-break: break-all;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.btn-sm {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+.chevron {
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 </style>
