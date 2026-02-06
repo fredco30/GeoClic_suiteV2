@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fonctionnalités - GéoClic Suite</title>
+    <meta name="description" content="Découvrez les fonctionnalités de GéoClic Suite : SIG Web, gestion de patrimoine, application mobile terrain, portail citoyen.">
+    <style>
+        :root {
+            --primary: #1565C0;
+            --primary-dark: #0D47A1;
+            --primary-light: #1976D2;
+            --secondary: #37474F;
+            --accent: #FF6F00;
+            --success: #2E7D32;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --text: #212121;
+            --text-light: #757575;
+            --border: #E0E0E0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--background);
+        }
+
+        /* Navigation */
+        nav {
+            background: var(--surface);
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            background: #E65100;
+        }
+
+        /* Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 120px 20px 60px;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .page-header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Section */
+        .section {
+            padding: 80px 20px;
+        }
+
+        .section-alt {
+            background: var(--surface);
+        }
+
+        .section-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Feature Block */
+        .feature-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+
+        .feature-block:last-child {
+            margin-bottom: 0;
+        }
+
+        .feature-block.reverse {
+            direction: rtl;
+        }
+
+        .feature-block.reverse > * {
+            direction: ltr;
+        }
+
+        .feature-content h2 {
+            font-size: 1.8em;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+
+        .feature-content .subtitle {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .feature-content p {
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .feature-content ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-content li {
+            padding: 8px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .feature-content li .check {
+            color: var(--success);
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-top: 2px;
+        }
+
+        .feature-image {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        .feature-image img {
+            width: 100%;
+            display: block;
+        }
+
+        /* Templates Section */
+        .templates-section {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .templates-section h2 {
+            text-align: center;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .templates-section .intro {
+            text-align: center;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .template-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+
+        .template-card:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .template-card .icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .template-card h3 {
+            font-size: 1em;
+            margin-bottom: 8px;
+        }
+
+        .template-card p {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        /* Comparison Section */
+        .comparison-section {
+            background: #F5F7FA;
+        }
+
+        .comparison-section h2 {
+            text-align: center;
+            font-size: 1.8em;
+            color: var(--secondary);
+            margin-bottom: 40px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 18px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table .problem {
+            color: #C62828;
+        }
+
+        .comparison-table .solution {
+            color: var(--success);
+            font-weight: 500;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .cta-section h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .cta-section p {
+            font-size: 1.1em;
+            opacity: 0.95;
+            margin-bottom: 30px;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--secondary);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        footer a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .feature-block {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .feature-block.reverse {
+                direction: ltr;
+            }
+
+            .comparison-table {
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo"><img src="assets/logo.png" alt="GéoClic">GéoClic<span>Suite</span></a>
+            <div class="nav-links">
+                <a href="fonctionnalites.html">Fonctionnalités</a>
+                <a href="tarifs.html">Tarifs</a>
+                <a href="tarifs.html#contact">Contact</a>
+                <a href="tarifs.html" class="btn btn-primary">Demander une démo</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="page-header">
+        <h1>Fonctionnalités</h1>
+        <p>Une suite complète pour gérer votre patrimoine territorial, du terrain à l'administration, en passant par la relation citoyen.</p>
+    </header>
+
+    <!-- SIG Web -->
+    <section class="section">
+        <div class="section-container">
+            <div class="feature-block">
+                <div class="feature-content">
+                    <p class="subtitle">Cartographie</p>
+                    <h2>SIG Web</h2>
+                    <p>Une application cartographique professionnelle accessible à tous, sans expertise SIG requise.</p>
+                    <ul>
+                        <li><span class="check">✓</span> <strong>Fonds IGN inclus</strong> : Plan, Ortho, Cadastre, Carte topographique, Photos historiques</li>
+                        <li><span class="check">✓</span> <strong>Outils de mesure</strong> : Distance en mètres/km, surface en m²/hectares</li>
+                        <li><span class="check">✓</span> <strong>Création d'entités</strong> : Points, lignes, polygones avec saisie des attributs</li>
+                        <li><span class="check">✓</span> <strong>Gestion des périmètres</strong> : Définissez vos zones d'intervention</li>
+                        <li><span class="check">✓</span> <strong>Import GeoJSON</strong> : Glissez-déposez vos fichiers directement</li>
+                        <li><span class="check">✓</span> <strong>Multi-projets</strong> : Gérez plusieurs collectivités ou services</li>
+                    </ul>
+                </div>
+                <div class="feature-image">
+                    <img src="screenshots/sig-web.png" alt="SIG Web - Cartographie IGN">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- GéoClic Data -->
+    <section class="section section-alt">
+        <div class="section-container">
+            <div class="feature-block reverse">
+                <div class="feature-content">
+                    <p class="subtitle">Administration</p>
+                    <h2>GéoClic Data</h2>
+                    <p>Le centre de contrôle de votre patrimoine. Interface d'administration complète et intuitive.</p>
+                    <ul>
+                        <li><span class="check">✓</span> <strong>Tableau de bord</strong> : Vue d'ensemble de vos données et activité</li>
+                        <li><span class="check">✓</span> <strong>Lexique hiérarchique</strong> : Organisez vos équipements sur 6 niveaux</li>
+                        <li><span class="check">✓</span> <strong>Champs dynamiques</strong> : 13 types (texte, nombre, date, liste, photo...)</li>
+                        <li><span class="check">✓</span> <strong>Import multi-formats</strong> : CSV, GeoJSON, Shapefile</li>
+                        <li><span class="check">✓</span> <strong>Export avec filtres</strong> : Téléchargez vos données selon vos critères</li>
+                        <li><span class="check">✓</span> <strong>QR Codes</strong> : Générez des étiquettes pour vos équipements</li>
+                        <li><span class="check">✓</span> <strong>Gestion utilisateurs</strong> : Rôles et permissions personnalisables</li>
+                    </ul>
+                </div>
+                <div class="feature-image">
+                    <img src="screenshots/geoclic-data.png" alt="GéoClic Data - Administration">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mobile PWA -->
+    <section class="section">
+        <div class="section-container">
+            <div class="feature-block">
+                <div class="feature-content">
+                    <p class="subtitle">Terrain</p>
+                    <h2>Mobile PWA</h2>
+                    <p>L'outil de vos agents sur le terrain. Fonctionne sur smartphone et tablette, sans installation App Store.</p>
+                    <ul>
+                        <li><span class="check">✓</span> <strong>GPS haute précision</strong> : Géolocalisation automatique de chaque relevé</li>
+                        <li><span class="check">✓</span> <strong>Photos géotaggées</strong> : Compression automatique pour ne pas saturer le réseau</li>
+                        <li><span class="check">✓</span> <strong>Mode hors-ligne</strong> : Travaillez sans réseau, synchronisez au retour</li>
+                        <li><span class="check">✓</span> <strong>Formulaires dynamiques</strong> : Les champs s'adaptent au type d'équipement</li>
+                        <li><span class="check">✓</span> <strong>Installable (PWA)</strong> : Ajoutez l'app sur l'écran d'accueil en un clic</li>
+                        <li><span class="check">✓</span> <strong>Pas de MDM</strong> : Aucune gestion de flotte nécessaire</li>
+                    </ul>
+                </div>
+                <div class="feature-image">
+                    <img src="screenshots/mobile-pwa.png" alt="Mobile PWA - Application terrain">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portail Citoyen + Demandes -->
+    <section class="section section-alt">
+        <div class="section-container">
+            <div class="feature-block reverse">
+                <div class="feature-content">
+                    <p class="subtitle">Relation Citoyen</p>
+                    <h2>Portail Citoyen & Gestion des Demandes</h2>
+                    <p>Permettez à vos administrés de signaler les problèmes et suivez le traitement en interne.</p>
+                    <ul>
+                        <li><span class="check">✓</span> <strong>Signalement simple</strong> : Localisation sur carte + photo + description</li>
+                        <li><span class="check">✓</span> <strong>Scan QR Code</strong> : Les citoyens identifient l'équipement concerné</li>
+                        <li><span class="check">✓</span> <strong>Suivi par token</strong> : Pas de compte à créer, suivi par numéro unique</li>
+                        <li><span class="check">✓</span> <strong>Workflow complet</strong> : Nouveau → Modération → En cours → Traité</li>
+                        <li><span class="check">✓</span> <strong>Notifications email</strong> : Les citoyens sont informés de l'avancement</li>
+                        <li><span class="check">✓</span> <strong>Statistiques</strong> : Délais moyens, volumes, catégories</li>
+                    </ul>
+                </div>
+                <div class="feature-image">
+                    <img src="screenshots/portail.png" alt="Portail citoyen et gestion des demandes">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Templates -->
+    <section class="section templates-section">
+        <div class="section-container">
+            <h2>Templates métiers prêts à l'emploi</h2>
+            <p class="intro">Démarrez rapidement avec des structures de lexique préconfigurées pour les métiers courants des collectivités.</p>
+
+            <div class="templates-grid">
+                <div class="template-card">
+                    <div class="icon">💡</div>
+                    <h3>Éclairage Public</h3>
+                    <p>Candélabres, luminaires, armoires</p>
+                </div>
+                <div class="template-card">
+                    <div class="icon">🪑</div>
+                    <h3>Mobilier Urbain</h3>
+                    <p>Bancs, poubelles, abris bus</p>
+                </div>
+                <div class="template-card">
+                    <div class="icon">🌳</div>
+                    <h3>Espaces Verts</h3>
+                    <p>Arbres, massifs, aires de jeux</p>
+                </div>
+                <div class="template-card">
+                    <div class="icon">🛣️</div>
+                    <h3>Voirie</h3>
+                    <p>Chaussées, trottoirs, signalisation</p>
+                </div>
+                <div class="template-card">
+                    <div class="icon">🔧</div>
+                    <h3>Réseaux</h3>
+                    <p>Eau, assainissement, électricité</p>
+                </div>
+                <div class="template-card">
+                    <div class="icon">🏛️</div>
+                    <h3>Bâtiments</h3>
+                    <p>Mairie, écoles, équipements</p>
+                </div>
+                <div class="template-card">
+                    <div class="icon">⚱️</div>
+                    <h3>Cimetières</h3>
+                    <p>Concessions, columbariums</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section class="section comparison-section">
+        <div class="section-container">
+            <h2>GéoClic vs. les solutions traditionnelles</h2>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Problème courant</th>
+                        <th>Solution GéoClic</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="problem">Les logiciels SIG (QGIS, ArcGIS) sont trop complexes pour nos agents</td>
+                        <td class="solution">Interface intuitive pensée pour les non-spécialistes</td>
+                    </tr>
+                    <tr>
+                        <td class="problem">Les licences GeoServer / MapInfo coûtent cher</td>
+                        <td class="solution">Fonds IGN gratuits, pas de licence cartographique</td>
+                    </tr>
+                    <tr>
+                        <td class="problem">Nos données sont éparpillées dans des fichiers Excel</td>
+                        <td class="solution">Base centralisée avec import Excel/CSV</td>
+                    </tr>
+                    <tr>
+                        <td class="problem">L'application mobile nécessite un déploiement MDM</td>
+                        <td class="solution">PWA installable directement depuis le navigateur</td>
+                    </tr>
+                    <tr>
+                        <td class="problem">Chaque module est facturé séparément</td>
+                        <td class="solution">Tout inclus dans un tarif unique</td>
+                    </tr>
+                    <tr>
+                        <td class="problem">Les données sont hébergées à l'étranger</td>
+                        <td class="solution">Hébergement France, conforme RGPD</td>
+                    </tr>
+                    <tr>
+                        <td class="problem">Le coût augmente avec le nombre d'utilisateurs</td>
+                        <td class="solution">Utilisateurs illimités, tarif fixe</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>Prêt à simplifier votre gestion territoriale ?</h2>
+        <p>Demandez une démonstration gratuite de 30 minutes.</p>
+        <a href="mailto:contact@geoclic.fr?subject=Demande démonstration GéoClic" class="btn btn-accent">Demander une démo</a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 GéoClic Suite - <a href="index.html">Accueil</a> | <a href="fonctionnalites.html">Fonctionnalités</a> | <a href="tarifs.html">Tarifs</a></p>
+    </footer>
+</body>
+</html>

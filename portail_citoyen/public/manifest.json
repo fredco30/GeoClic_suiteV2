@@ -1,0 +1,27 @@
+{
+  "name": "Portail Citoyen GéoClic",
+  "short_name": "Signalement",
+  "description": "Signalez un problème dans votre commune",
+  "start_url": "/portail/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "scope": "/portail/",
+  "icons": [
+    {
+      "src": "/portail/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/portail/favicon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["utilities", "lifestyle"],
+  "lang": "fr-FR"
+}
