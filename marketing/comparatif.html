@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparatif - GéoClic Suite vs la concurrence</title>
+    <meta name="description" content="Comparez GéoClic Suite avec Neocity, Illiwap, Tell My City et les solutions SIG. La seule suite intégrée SIG + Signalements citoyens.">
+    <style>
+        :root {
+            --primary: #1565C0;
+            --primary-dark: #0D47A1;
+            --primary-light: #1976D2;
+            --secondary: #37474F;
+            --accent: #FF6F00;
+            --success: #2E7D32;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --text: #212121;
+            --text-light: #757575;
+            --border: #E0E0E0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--background);
+        }
+
+        nav {
+            background: var(--surface);
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .logo img { height: 40px; width: auto; }
+        .logo span { color: var(--secondary); }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--primary); }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+            font-size: 1em;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-accent { background: var(--accent); color: white; }
+        .btn-accent:hover { background: #E65100; }
+        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-outline:hover { background: var(--primary); color: white; }
+        .btn-large { padding: 15px 40px; font-size: 1.1em; }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 120px 20px 60px;
+            text-align: center;
+        }
+
+        .page-header h1 { font-size: 2.5em; margin-bottom: 15px; }
+        .page-header p { font-size: 1.2em; opacity: 0.95; max-width: 700px; margin: 0 auto; }
+
+        .section { padding: 80px 20px; }
+        .section-container { max-width: 1100px; margin: 0 auto; }
+
+        .section-title { text-align: center; margin-bottom: 50px; }
+        .section-title h2 { font-size: 2em; color: var(--secondary); margin-bottom: 15px; }
+        .section-title p { color: var(--text-light); font-size: 1.1em; max-width: 700px; margin: 0 auto; }
+
+        /* Unique selling point */
+        .usp-section { background: var(--surface); }
+
+        .usp-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .usp-content h2 { font-size: 1.8em; color: var(--secondary); margin-bottom: 15px; }
+        .usp-content p { color: var(--text-light); margin-bottom: 20px; font-size: 1.05em; }
+
+        .usp-diagram {
+            background: #1a1a2e;
+            color: #a4e400;
+            padding: 30px;
+            border-radius: 12px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre;
+        }
+
+        /* Comparison table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            font-size: 0.95em;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 16px 14px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            background: var(--secondary);
+            color: white;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .comparison-table th:first-child,
+        .comparison-table td:first-child {
+            text-align: left;
+            font-weight: 500;
+            min-width: 200px;
+        }
+
+        .comparison-table th.geoclic-col {
+            background: var(--primary);
+            font-size: 1em;
+        }
+
+        .comparison-table td.geoclic-col {
+            background: #E3F2FD;
+            font-weight: 600;
+        }
+
+        .comparison-table tr:last-child td { border-bottom: none; }
+        .comparison-table tr:hover { background: #F5F7FA; }
+        .comparison-table tr:hover td.geoclic-col { background: #BBDEFB; }
+
+        .check { color: var(--success); font-size: 1.2em; }
+        .cross { color: #C62828; font-size: 1.2em; }
+        .partial { color: var(--accent); font-size: 0.9em; }
+
+        /* PWA Explainer */
+        .pwa-section { background: #F5F7FA; }
+
+        .pwa-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .pwa-card {
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .pwa-card .icon { font-size: 2.5em; margin-bottom: 15px; }
+        .pwa-card h3 { color: var(--secondary); margin-bottom: 10px; font-size: 1.1em; }
+        .pwa-card p { color: var(--text-light); font-size: 0.95em; }
+
+        /* Price comparison */
+        .price-section { background: var(--surface); }
+
+        .price-compare-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .price-card {
+            background: var(--background);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid var(--border);
+        }
+
+        .price-card.geoclic { border-color: var(--primary); background: #E3F2FD; }
+
+        .price-card h3 { color: var(--secondary); margin-bottom: 5px; }
+        .price-card .price-value { font-size: 2em; font-weight: 700; color: var(--primary); margin: 10px 0; }
+        .price-card .price-detail { color: var(--text-light); font-size: 0.9em; }
+        .price-card.geoclic .price-value { color: var(--success); }
+
+        /* RGPD section */
+        .rgpd-section { background: var(--secondary); color: white; }
+        .rgpd-section .section-title h2 { color: white; }
+        .rgpd-section .section-title p { color: rgba(255,255,255,0.8); }
+
+        .rgpd-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .rgpd-item { text-align: center; }
+        .rgpd-item .icon { font-size: 2.5em; margin-bottom: 15px; }
+        .rgpd-item h3 { margin-bottom: 10px; }
+        .rgpd-item p { opacity: 0.85; font-size: 0.95em; }
+
+        /* CTA */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .cta-section h2 { font-size: 2em; margin-bottom: 15px; }
+        .cta-section p { font-size: 1.1em; opacity: 0.95; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto; }
+
+        footer {
+            background: var(--secondary);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        footer a { color: rgba(255,255,255,0.8); text-decoration: none; }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .usp-grid { grid-template-columns: 1fr; }
+            .comparison-table { font-size: 0.8em; }
+            .comparison-table th, .comparison-table td { padding: 10px 6px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo"><img src="assets/logo.png" alt="GéoClic">GéoClic<span>Suite</span></a>
+            <div class="nav-links">
+                <a href="fonctionnalites.html">Fonctionnalités</a>
+                <a href="comparatif.html">Comparatif</a>
+                <a href="tarifs.html">Tarifs</a>
+                <a href="tarifs.html#contact" class="btn btn-primary">Demander une démo</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="page-header">
+        <h1>La seule suite qui combine SIG et signalements</h1>
+        <p>Les solutions de signalement citoyen n'ont pas de SIG. Les solutions SIG n'ont pas de signalements. GéoClic fait les deux.</p>
+    </header>
+
+    <!-- USP Section -->
+    <section class="section usp-section">
+        <div class="section-container">
+            <div class="usp-grid">
+                <div class="usp-content">
+                    <h2>Deux mondes, une seule solution</h2>
+                    <p>Aujourd'hui, les collectivités doivent jongler entre un logiciel SIG pour le patrimoine et une application séparée pour les signalements citoyens. C'est coûteux, complexe, et les données ne communiquent pas entre elles.</p>
+                    <p>GéoClic Suite est la <strong>première solution française</strong> qui intègre cartographie de patrimoine (SIG), relevé terrain mobile, portail citoyen et gestion des demandes dans un <strong>écosystème unifié</strong>.</p>
+                    <p>Un signalement citoyen apparaît directement sur votre carte SIG. Un équipement inventorié sur le terrain est immédiatement consultable par tous. Tout est connecté.</p>
+                </div>
+                <div class="usp-diagram">
+         SOLUTIONS CLASSIQUES          GéoClic Suite
+    ┌──────────────────────┐    ┌──────────────────────┐
+    │  App Signalements    │    │                      │
+    │  (Neocity, Illiwap)  │    │   SIG + Patrimoine   │
+    │  179-399 €/mois      │    │   + Signalements     │
+    ├──────────────────────┤    │   + Terrain mobile   │
+    │  Logiciel SIG        │    │   + Portail citoyen  │
+    │  (SOGEFI, GeoVoirie) │    │   + Back-office      │
+    │  Sur devis (cher)    │    │                      │
+    └──────────────────────┘    │   149 €/mois         │
+     = 2 contrats, 2 outils     └──────────────────────┘
+     = données séparées          = 1 contrat, tout relié
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Table -->
+    <section class="section">
+        <div class="section-container">
+            <div class="section-title">
+                <h2>Comparatif fonctionnel détaillé</h2>
+                <p>GéoClic Suite face aux principales solutions du marché français pour les collectivités.</p>
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Fonctionnalité</th>
+                        <th class="geoclic-col">GéoClic Suite</th>
+                        <th>Neocity</th>
+                        <th>Illiwap</th>
+                        <th>Tell My City</th>
+                        <th>SOGEFI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Signalements -->
+                    <tr>
+                        <td><strong>Signalement citoyen</strong></td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Photos géolocalisées</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Catégories hiérarchiques</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="partial">Basique</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Détection de doublons</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Suivi en temps réel par le citoyen</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="partial">Limité</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                    </tr>
+
+                    <!-- Back-office -->
+                    <tr>
+                        <td><strong>Back-office complet</strong></td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="partial">Basique</span></td>
+                        <td><span class="partial">Basique</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Affectation aux services / agents</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Tchat back-office / terrain</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Planification d'interventions</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Notifications email citoyen</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Dashboard dirigeant / statistiques</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                    </tr>
+
+                    <!-- SIG & Patrimoine -->
+                    <tr>
+                        <td><strong>SIG / Cartographie patrimoine</strong></td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Fonds IGN (Plan, Ortho, Cadastre)</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Relevé terrain mobile (offline)</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="partial">Partiel</span></td>
+                    </tr>
+                    <tr>
+                        <td>Champs dynamiques conditionnels</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Zones géographiques hiérarchiques</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Import Shapefile / GeoJSON / CSV</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                    </tr>
+
+                    <!-- Technique -->
+                    <tr>
+                        <td><strong>White-labeling (logo, couleurs)</strong></td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="cross">&#10007;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Utilisateurs illimités</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="partial">Selon offre</span></td>
+                        <td><span class="partial">Selon offre</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="partial">Selon licence</span></td>
+                    </tr>
+                    <tr>
+                        <td>Hébergement France</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Conforme RGPD</td>
+                        <td class="geoclic-col"><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                        <td><span class="check">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td>Application mobile</td>
+                        <td class="geoclic-col">PWA</td>
+                        <td>Native</td>
+                        <td>Native</td>
+                        <td>Web</td>
+                        <td>Web</td>
+                    </tr>
+
+                    <!-- Prix -->
+                    <tr style="background: #F5F7FA; font-weight: 600;">
+                        <td><strong>Prix</strong></td>
+                        <td class="geoclic-col" style="color: var(--success); font-size: 1.1em;">149 €/mois</td>
+                        <td>179-399 €/mois</td>
+                        <td>Sur devis</td>
+                        <td>Gratuit*</td>
+                        <td>Sur devis</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p style="text-align: center; color: var(--text-light); margin-top: 15px; font-size: 0.9em;">* Tell My City (Thelma) : gratuit pour les signalements, fonctionnalités avancées payantes. SOGEFI : tarif non public, généralement plusieurs milliers d'euros/an.</p>
+        </div>
+    </section>
+
+    <!-- PWA Explainer -->
+    <section class="section pwa-section">
+        <div class="section-container">
+            <div class="section-title">
+                <h2>Qu'est-ce qu'une PWA ?</h2>
+                <p>GéoClic utilise la technologie <strong>Progressive Web App</strong> : une application mobile qui fonctionne directement depuis le navigateur, sans téléchargement sur l'App Store ou le Play Store.</p>
+            </div>
+
+            <div class="pwa-grid">
+                <div class="pwa-card">
+                    <div class="icon">📲</div>
+                    <h3>Installation instantanée</h3>
+                    <p>L'utilisateur ouvre le lien dans son navigateur et clique "Ajouter à l'écran d'accueil". L'application s'installe en 2 secondes, sans passer par l'App Store.</p>
+                </div>
+
+                <div class="pwa-card">
+                    <div class="icon">🔄</div>
+                    <h3>Toujours à jour</h3>
+                    <p>Les mises à jour sont automatiques et instantanées. Pas besoin d'attendre une validation Apple ou Google. Les corrections sont déployées en quelques minutes.</p>
+                </div>
+
+                <div class="pwa-card">
+                    <div class="icon">📴</div>
+                    <h3>Fonctionne hors-ligne</h3>
+                    <p>Les agents terrain peuvent travailler sans connexion internet. Les données sont synchronisées automatiquement dès que la connexion revient.</p>
+                </div>
+
+                <div class="pwa-card">
+                    <div class="icon">💰</div>
+                    <h3>Aucun coût App Store</h3>
+                    <p>Pas de frais Apple Developer (99 €/an) ni de commission sur les transactions. Pas de processus de validation de plusieurs jours à chaque mise à jour.</p>
+                </div>
+
+                <div class="pwa-card">
+                    <div class="icon">🖥️</div>
+                    <h3>Multi-plateformes</h3>
+                    <p>Fonctionne sur iPhone, Android, tablette et ordinateur avec la même URL. Pas besoin de développer et maintenir 2 applications séparées.</p>
+                </div>
+
+                <div class="pwa-card">
+                    <div class="icon">🏢</div>
+                    <h3>Pas de MDM</h3>
+                    <p>Aucune solution de gestion de flotte mobile (MDM) nécessaire. Les agents installent l'application directement — idéal pour les collectivités sans DSI.</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px; padding: 30px; background: var(--surface); border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                <p style="font-size: 1.1em; color: var(--text); margin-bottom: 10px;"><strong>Qui utilise les PWA ?</strong></p>
+                <p style="color: var(--text-light);">Twitter, Starbucks, Uber, Pinterest et des milliers d'entreprises utilisent des PWA. Google et Microsoft recommandent activement cette technologie comme l'avenir des applications mobiles.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Price Comparison -->
+    <section class="section price-section">
+        <div class="section-container">
+            <div class="section-title">
+                <h2>Comparez les coûts sur 3 ans</h2>
+                <p>GéoClic combine ce que d'autres vendent séparément, pour une fraction du prix.</p>
+            </div>
+
+            <div class="price-compare-grid">
+                <div class="price-card geoclic">
+                    <h3>GéoClic Suite</h3>
+                    <p style="color: var(--text-light); font-size: 0.9em;">SIG + Signalements + Terrain</p>
+                    <div class="price-value">5 364 €</div>
+                    <p class="price-detail">149 € x 36 mois</p>
+                    <p class="price-detail"><strong>Tout inclus</strong></p>
+                </div>
+
+                <div class="price-card">
+                    <h3>Neocity seul</h3>
+                    <p style="color: var(--text-light); font-size: 0.9em;">Signalements uniquement</p>
+                    <div class="price-value" style="color: var(--accent);">~10 000 €</div>
+                    <p class="price-detail">~280 € x 36 mois</p>
+                    <p class="price-detail">Pas de SIG, pas de terrain</p>
+                </div>
+
+                <div class="price-card">
+                    <h3>Neocity + SOGEFI</h3>
+                    <p style="color: var(--text-light); font-size: 0.9em;">Signalements + SIG séparés</p>
+                    <div class="price-value" style="color: #C62828;">20 000+ €</div>
+                    <p class="price-detail">Estimation basse</p>
+                    <p class="price-detail">2 contrats, 2 interlocuteurs</p>
+                </div>
+
+                <div class="price-card">
+                    <h3>Développement sur mesure</h3>
+                    <p style="color: var(--text-light); font-size: 0.9em;">Agence de développement</p>
+                    <div class="price-value" style="color: #C62828;">80 000+ €</div>
+                    <p class="price-detail">Estimation standard</p>
+                    <p class="price-detail">6-12 mois de développement</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RGPD Section -->
+    <section class="section rgpd-section">
+        <div class="section-container">
+            <div class="section-title">
+                <h2>Conformité RGPD</h2>
+                <p>GéoClic Suite est conçu dans le respect du Règlement Général sur la Protection des Données (RGPD).</p>
+            </div>
+
+            <div class="rgpd-grid">
+                <div class="rgpd-item">
+                    <div class="icon">🇫🇷</div>
+                    <h3>Hébergement en France</h3>
+                    <p>Toutes les données sont hébergées chez OVH en France (datacenter Gravelines ou Strasbourg). Aucun transfert hors UE.</p>
+                </div>
+
+                <div class="rgpd-item">
+                    <div class="icon">🔒</div>
+                    <h3>Données chiffrées</h3>
+                    <p>Connexions HTTPS/SSL obligatoires. Mots de passe hashés (bcrypt). Tokens JWT avec expiration. Aucune donnée en clair.</p>
+                </div>
+
+                <div class="rgpd-item">
+                    <div class="icon">👤</div>
+                    <h3>Minimisation des données</h3>
+                    <p>Les signalements citoyens ne nécessitent qu'un email. Pas de nom, pas de téléphone, pas de carte d'identité. Seul le nécessaire est collecté.</p>
+                </div>
+
+                <div class="rgpd-item">
+                    <div class="icon">🗑️</div>
+                    <h3>Droit à l'effacement</h3>
+                    <p>Les données personnelles des citoyens peuvent être supprimées sur demande. Les signalements peuvent être anonymisés en conservant les données utiles.</p>
+                </div>
+
+                <div class="rgpd-item">
+                    <div class="icon">📋</div>
+                    <h3>Isolation des données</h3>
+                    <p>Chaque collectivité dispose de son propre serveur avec sa propre base de données. Aucune donnée n'est partagée entre clients.</p>
+                </div>
+
+                <div class="rgpd-item">
+                    <div class="icon">💾</div>
+                    <h3>Sauvegardes sécurisées</h3>
+                    <p>Sauvegardes quotidiennes automatiques. Rétention 28 jours. Restauration possible en cas d'incident. Les sauvegardes restent sur le serveur français.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section" id="contact">
+        <h2>Convaincu ? Voyez par vous-même</h2>
+        <p>Demandez une démonstration personnalisée gratuite de 30 minutes. Nous vous montrerons GéoClic en action avec vos données.</p>
+        <a href="mailto:contact@geoclic.fr?subject=Demande de démonstration GéoClic" class="btn btn-accent btn-large">Demander une démonstration gratuite</a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 GéoClic Suite - Solution française pour les collectivités - <a href="index.html">Accueil</a> | <a href="fonctionnalites.html">Fonctionnalités</a> | <a href="comparatif.html">Comparatif</a> | <a href="tarifs.html">Tarifs</a></p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,62 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Docker Compose Override - GéoClic Fleet Manager
+# UNIQUEMENT sur le serveur maître (geoclic.fr)
+# Ce fichier est chargé automatiquement par docker-compose
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Installation:
+#   cp fleet/docker-compose.fleet.yml deploy/docker-compose.override.yml
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+version: "3.9"
+
+services:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # FLEET MANAGER (API + Dashboard web)
+  # ═══════════════════════════════════════════════════════════════════════════
+  fleet:
+    build:
+      context: ..
+      dockerfile: fleet/Dockerfile
+    container_name: geoclic_fleet
+    restart: unless-stopped
+    environment:
+      JWT_SECRET_KEY: "${JWT_SECRET_KEY:-change_this_secret_key_in_production}"
+    volumes:
+      # Clés SSH pour se connecter aux clients
+      - ${SSH_DIR:-/home/ubuntu/.ssh}:/root/.ssh:ro
+      # Registre des clients et logs (persistant)
+      - ../fleet/clients.conf:/opt/geoclic/fleet/clients.conf
+      - fleet_logs:/opt/geoclic/fleet/logs
+      - fleet_tasks:/opt/geoclic/fleet/tasks
+      # Le code source complet (pour rsync vers les clients)
+      - ..:/opt/geoclic:ro
+    networks:
+      - geoclic_network
+
+  # Override nginx pour ajouter la route /fleet/
+  nginx:
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+      - ./www:/var/www:ro
+      - photos_data:/app/photos:ro
+    depends_on:
+      - api
+      - admin
+      - portail
+      - demandes
+      - mobile
+      - sig
+      - services
+      - terrain
+      - fleet
+
+volumes:
+  fleet_logs:
+    name: geoclic_fleet_logs
+  fleet_tasks:
+    name: geoclic_fleet_tasks
