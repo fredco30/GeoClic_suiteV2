@@ -3,247 +3,813 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GéoClic Suite - Gestion de patrimoine territorial</title>
-    <meta name="description" content="Solution française de gestion de patrimoine territorial pour les collectivités.">
-    <link rel="stylesheet" href="style.css">
+    <title>GéoClic Suite - Gestion de patrimoine territorial pour les collectivités</title>
+    <meta name="description" content="Solution française de gestion de patrimoine territorial. Cartographie IGN, application mobile terrain, portail citoyen. Conçu pour les collectivités.">
     <style>
-        /* Hero réduit */
-        .hero {
-            padding: 20px 40px !important;
+        :root {
+            --primary: #1565C0;
+            --primary-dark: #0D47A1;
+            --primary-light: #1976D2;
+            --secondary: #37474F;
+            --accent: #FF6F00;
+            --success: #2E7D32;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --text: #212121;
+            --text-light: #757575;
+            --border: #E0E0E0;
         }
-        .hero-content h1 { font-size: 1.8em !important; margin-bottom: 8px !important; }
-        .hero-content p { font-size: 0.95em !important; margin-bottom: 12px !important; }
-        .hero-image { max-width: 380px !important; }
 
-        /* Bouton blanc */
-        .btn-white {
-            background: transparent;
-            color: white !important;
-            padding: 8px 16px;
-            border: 2px solid white;
-            border-radius: 5px;
-            font-weight: 600;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--background);
+        }
+
+        /* Navigation */
+        nav {
+            background: var(--surface);
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--primary);
             text-decoration: none;
         }
-        .btn-white:hover {
-            background: white;
-            color: var(--primary) !important;
+
+        .logo img {
+            height: 40px;
+            width: auto;
         }
 
-        /* Modules plus compacts */
-        .modules {
-            padding: 12px 30px !important;
-        }
-        .module {
-            padding: 10px 15px !important;
-            min-width: 100px !important;
+        .logo span {
+            color: var(--secondary);
         }
 
-        /* Section Écosystème */
-        .ecosystem {
+        .nav-links {
             display: flex;
-            gap: 40px;
-            padding: 20px 50px;
-            background: var(--bg);
-            justify-content: center;
+            gap: 30px;
+            align-items: center;
         }
 
-        .eco-box {
-            background: white;
-            border-radius: 10px;
-            padding: 20px 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            flex: 1;
-            max-width: 480px;
+        .nav-links a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
         }
 
-        .eco-box h3 {
+        .nav-links a:hover {
             color: var(--primary);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
             font-size: 1em;
-            margin-bottom: 15px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            background: #E65100;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 140px 20px 80px;
             text-align: center;
         }
 
-        /* Workflow */
-        .workflow {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 12px;
+        .hero-container {
+            max-width: 1000px;
+            margin: 0 auto;
         }
 
-        .workflow-step {
+        .hero h1 {
+            font-size: 2.8em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero .subtitle {
+            font-size: 1.3em;
+            opacity: 0.95;
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 50px;
+        }
+
+        .hero-screenshot {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-top: 20px;
+        }
+
+        /* Trust badges */
+        .trust-section {
+            background: var(--surface);
+            padding: 30px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .trust-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .trust-item {
             display: flex;
             align-items: center;
-            gap: 5px;
-            font-size: 0.8em;
-            color: var(--text);
+            gap: 10px;
+            color: var(--text-light);
         }
 
-        .workflow-step .icon {
-            font-size: 1.2em;
+        .trust-item svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--success);
         }
 
-        .workflow-arrow {
+        /* Features Section */
+        .section {
+            padding: 80px 20px;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-size: 2.2em;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+
+        .section-title p {
+            color: var(--text-light);
+            font-size: 1.1em;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Modules Grid */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .module-card {
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        .module-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            object-position: top;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .module-card-content {
+            padding: 25px;
+        }
+
+        .module-card h3 {
             color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .module-card p {
+            color: var(--text-light);
+            margin-bottom: 15px;
+        }
+
+        .module-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .module-card li {
+            padding: 5px 0;
+            color: var(--text);
+            font-size: 0.95em;
+        }
+
+        .module-card li::before {
+            content: "✓ ";
+            color: var(--success);
             font-weight: bold;
         }
 
-        .eco-box .description {
-            font-size: 0.8em;
-            color: var(--text-light);
+        /* Advantages Section */
+        .advantages {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .advantages .section-title h2 {
+            color: white;
+        }
+
+        .advantages .section-title p {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .advantages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+        }
+
+        .advantage-item {
             text-align: center;
-            font-style: italic;
         }
 
-        /* Cibles */
-        .targets {
+        .advantage-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
             display: flex;
-            flex-direction: column;
-            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 1.8em;
         }
 
-        .target {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .target .icon {
+        .advantage-item h3 {
+            margin-bottom: 10px;
             font-size: 1.2em;
         }
 
-        .target-info h4 {
+        .advantage-item p {
+            opacity: 0.85;
+            font-size: 0.95em;
+        }
+
+        /* Pricing Preview */
+        .pricing-preview {
+            background: #F5F7FA;
+        }
+
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .pricing-card.featured {
+            border: 3px solid var(--primary);
+            position: relative;
+        }
+
+        .pricing-card.featured::before {
+            content: "Recommandé";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
             font-size: 0.85em;
-            color: var(--text);
-            margin: 0;
+            font-weight: 600;
         }
 
-        .target-info p {
-            font-size: 0.75em;
+        .pricing-card h3 {
+            color: var(--secondary);
+            font-size: 1.4em;
+            margin-bottom: 10px;
+        }
+
+        .pricing-card .price {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 20px 0;
+        }
+
+        .pricing-card .price span {
+            font-size: 0.4em;
             color: var(--text-light);
-            margin: 2px 0 0 0;
+            font-weight: 400;
         }
 
-        @media (max-width: 900px) {
-            .ecosystem {
-                flex-direction: column;
-                align-items: center;
+        .pricing-card .description {
+            color: var(--text-light);
+            margin-bottom: 25px;
+        }
+
+        .pricing-card ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .pricing-card li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .pricing-card li:last-child {
+            border-bottom: none;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .cta-section h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .cta-section p {
+            font-size: 1.1em;
+            opacity: 0.95;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--secondary);
+            color: white;
+            padding: 50px 20px 30px;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-section li {
+            margin-bottom: 10px;
+        }
+
+        .footer-section a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
             }
-            .eco-box {
-                max-width: 100%;
+
+            .hero h1 {
+                font-size: 2em;
+            }
+
+            .hero .subtitle {
+                font-size: 1.1em;
+            }
+
+            .trust-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-cards {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Navigation -->
     <nav>
-        <a href="index.html" class="logo">
-            <img src="assets/logo.png" alt="GéoClic">
-            <span>GéoClic</span> Suite
-        </a>
-        <div class="nav-links">
-            <a href="fonctionnalites.html">Fonctionnalités</a>
-            <a href="tarifs.html">Tarifs</a>
-            <a href="mailto:contact@geoclic.fr">Contact</a>
-            <a href="mailto:contact@geoclic.fr?subject=Demande de démonstration" class="btn-demo">Demander une démo</a>
+        <div class="nav-container">
+            <a href="index.html" class="logo"><img src="assets/logo.png" alt="GéoClic">GéoClic<span>Suite</span></a>
+            <div class="nav-links">
+                <a href="fonctionnalites.html">Fonctionnalités</a>
+                <a href="comparatif.html">Comparatif</a>
+                <a href="tarifs.html">Tarifs</a>
+                <a href="#contact">Contact</a>
+                <a href="tarifs.html" class="btn btn-primary">Demander une démo</a>
+            </div>
         </div>
     </nav>
 
-    <main class="hero">
-        <div class="hero-content">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
             <h1>Gérez votre patrimoine territorial simplement</h1>
-            <p>Solution française tout-en-un pour les collectivités : cartographie IGN, application mobile terrain, portail citoyen. Utilisateurs illimités.</p>
+            <p class="subtitle">La solution française tout-en-un pour les collectivités : cartographie IGN, application mobile terrain, portail citoyen et gestion des demandes.</p>
             <div class="hero-buttons">
-                <a href="mailto:contact@geoclic.fr?subject=Demande de démonstration" class="btn-primary">Demander une démonstration</a>
-                <a href="fonctionnalites.html" class="btn-white">Voir les fonctionnalités</a>
+                <a href="tarifs.html" class="btn btn-accent">Demander une démonstration</a>
+                <a href="fonctionnalites.html" class="btn btn-outline" style="color: white; border-color: white;">Découvrir les fonctionnalités</a>
             </div>
-        </div>
-        <div class="hero-image">
-            <img src="screenshots/sig-web.png" alt="GéoClic SIG Web">
-        </div>
-    </main>
-
-    <section class="modules">
-        <div class="module" onclick="location.href='fonctionnalites.html#sig'">
-            <div class="module-icon">🗺️</div>
-            <h3>SIG Web</h3>
-            <p>Cartographie IGN</p>
-        </div>
-        <div class="module" onclick="location.href='fonctionnalites.html#data'">
-            <div class="module-icon">📊</div>
-            <h3>GéoClic Data</h3>
-            <p>Administration</p>
-        </div>
-        <div class="module" onclick="location.href='fonctionnalites.html#mobile'">
-            <div class="module-icon">📱</div>
-            <h3>Mobile PWA</h3>
-            <p>Relevés terrain</p>
-        </div>
-        <div class="module" onclick="location.href='fonctionnalites.html#portail'">
-            <div class="module-icon">🏛️</div>
-            <h3>Portail Citoyen</h3>
-            <p>Signalements</p>
-        </div>
-        <div class="module" onclick="location.href='fonctionnalites.html#demandes'">
-            <div class="module-icon">📋</div>
-            <h3>Demandes</h3>
-            <p>Back-office</p>
+            <img src="screenshots/sig-web.png" alt="GéoClic SIG Web - Cartographie avec fonds IGN" class="hero-screenshot">
         </div>
     </section>
 
-    <section class="ecosystem">
-        <div class="eco-box">
-            <h3>Comment ça marche ?</h3>
-            <div class="workflow">
-                <div class="workflow-step"><span class="icon">📱</span> Terrain</div>
-                <span class="workflow-arrow">→</span>
-                <div class="workflow-step"><span class="icon">📊</span> Admin</div>
-                <span class="workflow-arrow">→</span>
-                <div class="workflow-step"><span class="icon">🗺️</span> Carto</div>
-                <span class="workflow-arrow">→</span>
-                <div class="workflow-step"><span class="icon">🏛️</span> Citoyen</div>
-                <span class="workflow-arrow">→</span>
-                <div class="workflow-step"><span class="icon">📋</span> Traitement</div>
+    <!-- Trust Section -->
+    <section class="trust-section">
+        <div class="trust-container">
+            <div class="trust-item">
+                <svg viewBox="0 0 24 24"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/></svg>
+                <span>Hébergement France</span>
             </div>
-            <p class="description">Vos données circulent automatiquement entre les applications. De l'inventaire terrain au suivi des demandes citoyennes.</p>
-        </div>
-
-        <div class="eco-box">
-            <h3>Pour qui ?</h3>
-            <div class="targets">
-                <div class="target">
-                    <span class="icon">🏛️</span>
-                    <div class="target-info">
-                        <h4>Communes</h4>
-                        <p>Petites et moyennes collectivités</p>
-                    </div>
-                </div>
-                <div class="target">
-                    <span class="icon">🏢</span>
-                    <div class="target-info">
-                        <h4>Intercommunalités</h4>
-                        <p>EPCI, syndicats, communautés</p>
-                    </div>
-                </div>
-                <div class="target">
-                    <span class="icon">🔧</span>
-                    <div class="target-info">
-                        <h4>Services techniques</h4>
-                        <p>Voirie, espaces verts, éclairage, bâtiments</p>
-                    </div>
-                </div>
+            <div class="trust-item">
+                <svg viewBox="0 0 24 24"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/></svg>
+                <span>Conforme RGPD</span>
+            </div>
+            <div class="trust-item">
+                <svg viewBox="0 0 24 24"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/></svg>
+                <span>Fonds IGN gratuits</span>
+            </div>
+            <div class="trust-item">
+                <svg viewBox="0 0 24 24"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/></svg>
+                <span>Utilisateurs illimités</span>
             </div>
         </div>
     </section>
 
+    <!-- Modules Section -->
+    <section class="section">
+        <div class="section-container">
+            <div class="section-title">
+                <h2>Un écosystème complet</h2>
+                <p>5 applications intégrées pour couvrir tous vos besoins, de l'inventaire terrain au suivi des demandes citoyennes.</p>
+            </div>
+
+            <div class="modules-grid">
+                <!-- SIG Web -->
+                <div class="module-card">
+                    <img src="screenshots/sig-web.png" alt="SIG Web">
+                    <div class="module-card-content">
+                        <h3>SIG Web</h3>
+                        <p>Cartographie professionnelle accessible à tous</p>
+                        <ul>
+                            <li>Fonds IGN : Plan, Ortho, Cadastre, Historique</li>
+                            <li>Outils de mesure distance et surface</li>
+                            <li>Création de points, lignes, polygones</li>
+                            <li>Import/Export GeoJSON</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- GéoClic Data -->
+                <div class="module-card">
+                    <img src="screenshots/geoclic-data.png" alt="GéoClic Data">
+                    <div class="module-card-content">
+                        <h3>GéoClic Data</h3>
+                        <p>Administration complète de votre patrimoine</p>
+                        <ul>
+                            <li>Tableau de bord et statistiques</li>
+                            <li>Lexique hiérarchique (6 niveaux)</li>
+                            <li>Import CSV, GeoJSON, Shapefile</li>
+                            <li>Génération de QR codes</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Mobile PWA -->
+                <div class="module-card">
+                    <img src="screenshots/mobile-pwa.png" alt="Mobile PWA">
+                    <div class="module-card-content">
+                        <h3>Mobile PWA</h3>
+                        <p>Relevés terrain sur smartphone ou tablette</p>
+                        <ul>
+                            <li>Géolocalisation GPS précise</li>
+                            <li>Photos compressées automatiquement</li>
+                            <li>Mode hors-ligne avec synchronisation</li>
+                            <li>Fonctionne sans App Store</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Portail Citoyen -->
+                <div class="module-card">
+                    <img src="screenshots/portail-citoyen.png" alt="Portail Citoyen">
+                    <div class="module-card-content">
+                        <h3>Portail Citoyen</h3>
+                        <p>Interface de signalement pour vos administrés</p>
+                        <ul>
+                            <li>Signalement géolocalisé avec photos</li>
+                            <li>Scan QR code sur équipements</li>
+                            <li>Suivi de demande par token</li>
+                            <li>Interface simple et accessible</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Gestion Demandes -->
+                <div class="module-card">
+                    <img src="screenshots/demandes.png" alt="Gestion des Demandes">
+                    <div class="module-card-content">
+                        <h3>Gestion des Demandes</h3>
+                        <p>Back-office pour traiter les signalements</p>
+                        <ul>
+                            <li>Workflow complet de traitement</li>
+                            <li>Notifications email automatiques</li>
+                            <li>Statistiques et délais moyens</li>
+                            <li>Affectation aux agents</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advantages Section -->
+    <section class="section advantages">
+        <div class="section-container">
+            <div class="section-title">
+                <h2>Pourquoi choisir GéoClic ?</h2>
+                <p>Une solution pensée pour les collectivités qui veulent l'essentiel, sans complexité.</p>
+            </div>
+
+            <div class="advantages-grid">
+                <div class="advantage-item">
+                    <div class="advantage-icon">🇫🇷</div>
+                    <h3>Souveraineté</h3>
+                    <p>Solution française, données hébergées en France, conforme RGPD. Vos données restent les vôtres.</p>
+                </div>
+
+                <div class="advantage-item">
+                    <div class="advantage-icon">🎯</div>
+                    <h3>Simplicité</h3>
+                    <p>Interface intuitive, pas besoin d'expert SIG. Conçu pour les agents de terrain, pas pour les techniciens.</p>
+                </div>
+
+                <div class="advantage-item">
+                    <div class="advantage-icon">📦</div>
+                    <h3>Tout-en-un</h3>
+                    <p>5 applications intégrées pour un tarif unique. Pas de modules à acheter séparément.</p>
+                </div>
+
+                <div class="advantage-item">
+                    <div class="advantage-icon">🗺️</div>
+                    <h3>Fonds IGN inclus</h3>
+                    <p>Cartes Plan, Ortho, Cadastre de l'IGN Géoplateforme. Aucun coût supplémentaire.</p>
+                </div>
+
+                <div class="advantage-item">
+                    <div class="advantage-icon">👥</div>
+                    <h3>Utilisateurs illimités</h3>
+                    <p>Pas de tarification par utilisateur. Toute votre équipe peut utiliser la solution.</p>
+                </div>
+
+                <div class="advantage-item">
+                    <div class="advantage-icon">📱</div>
+                    <h3>Mobile sans App Store</h3>
+                    <p>Application PWA installable directement depuis le navigateur. Pas de déploiement MDM.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Preview -->
+    <section class="section pricing-preview">
+        <div class="section-container">
+            <div class="section-title">
+                <h2>Un tarif adapté à votre commune</h2>
+                <p>Tout inclus, utilisateurs illimités. Le prix varie uniquement selon la taille de votre collectivité.</p>
+            </div>
+
+            <div class="pricing-cards" style="max-width: 1100px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));">
+                <div class="pricing-card">
+                    <h3>Village</h3>
+                    <div class="price">79 €<span>HT / mois</span></div>
+                    <p class="description">&lt; 1 000 habitants</p>
+                    <ul>
+                        <li>7 applications incluses</li>
+                        <li>Utilisateurs illimités</li>
+                        <li>Hébergement France</li>
+                    </ul>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>Bourg</h3>
+                    <div class="price">119 €<span>HT / mois</span></div>
+                    <p class="description">1 000 - 3 500 hab.</p>
+                    <ul>
+                        <li>7 applications incluses</li>
+                        <li>Utilisateurs illimités</li>
+                        <li>Hébergement France</li>
+                    </ul>
+                </div>
+
+                <div class="pricing-card featured">
+                    <h3>Petite ville</h3>
+                    <div class="price">179 €<span>HT / mois</span></div>
+                    <p class="description">3 500 - 10 000 hab.</p>
+                    <ul>
+                        <li>7 applications incluses</li>
+                        <li>Utilisateurs illimités</li>
+                        <li>Support prioritaire</li>
+                    </ul>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>Ville moyenne</h3>
+                    <div class="price">249 €<span>HT / mois</span></div>
+                    <p class="description">10 000 - 25 000 hab.</p>
+                    <ul>
+                        <li>7 applications incluses</li>
+                        <li>Serveur dédié</li>
+                        <li>Support prioritaire</li>
+                    </ul>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>Grande ville</h3>
+                    <div class="price">399 €<span>HT / mois</span></div>
+                    <p class="description">&gt; 25 000 hab.</p>
+                    <ul>
+                        <li>7 applications incluses</li>
+                        <li>Serveur performant</li>
+                        <li>Support prioritaire + tél</li>
+                    </ul>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 20px;"><a href="tarifs.html" class="btn btn-primary">Voir tous les tarifs</a></p>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section" id="contact">
+        <h2>Prêt à simplifier la gestion de votre patrimoine ?</h2>
+        <p>Demandez une démonstration personnalisée. Nous vous présenterons la solution en 30 minutes.</p>
+        <a href="mailto:contact@geoclic.fr?subject=Demande de démonstration GéoClic" class="btn btn-accent">Demander une démonstration</a>
+    </section>
+
+    <!-- Footer -->
     <footer>
-        <div class="trust">
-            <span>✓ Hébergement France</span>
-            <span>✓ Conforme RGPD</span>
-            <span>✓ Fonds IGN gratuits</span>
-            <span>✓ Utilisateurs illimités</span>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>GéoClic Suite</h4>
+                <p style="opacity: 0.8; font-size: 0.9em;">Solution française de gestion de patrimoine territorial pour les collectivités.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Produit</h4>
+                <ul>
+                    <li><a href="fonctionnalites.html">Fonctionnalités</a></li>
+                    <li><a href="tarifs.html">Tarifs</a></li>
+                    <li><a href="#">Documentation</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Ressources</h4>
+                <ul>
+                    <li><a href="#">Guide de démarrage</a></li>
+                    <li><a href="#">API Documentation</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <ul>
+                    <li><a href="mailto:contact@geoclic.fr">contact@geoclic.fr</a></li>
+                    <li><a href="#">Mentions légales</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 GéoClic Suite - Solution française pour les collectivités</p>
         </div>
     </footer>
 </body>
