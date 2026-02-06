@@ -22,7 +22,7 @@ services:
     container_name: geoclic_fleet
     restart: unless-stopped
     environment:
-      JWT_SECRET_KEY: "${JWT_SECRET_KEY}"
+      JWT_SECRET_KEY: "${JWT_SECRET_KEY:-change_this_secret_key_in_production}"
     volumes:
       # Clés SSH pour se connecter aux clients
       - ${SSH_DIR:-/home/ubuntu/.ssh}:/root/.ssh:ro

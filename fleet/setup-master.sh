@@ -101,7 +101,7 @@ services:
     container_name: geoclic_fleet
     restart: unless-stopped
     environment:
-      JWT_SECRET_KEY: "\${JWT_SECRET_KEY}"
+      JWT_SECRET_KEY: "\${JWT_SECRET_KEY:-change_this_secret_key_in_production}"
     volumes:
       - $SSH_DIR:/root/.ssh:ro
       - $FLEET_DIR/clients.conf:/opt/geoclic/fleet/clients.conf
