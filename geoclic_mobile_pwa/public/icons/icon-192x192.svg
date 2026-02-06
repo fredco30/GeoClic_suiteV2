@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1976D2"/>
+      <stop offset="100%" style="stop-color:#1565C0"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="40" fill="url(#bg)"/>
+  <g transform="translate(96, 96)">
+    <!-- Pin marker -->
+    <path d="M0,-50 C-20,-50 -36,-34 -36,-14 C-36,10 0,50 0,50 C0,50 36,10 36,-14 C36,-34 20,-50 0,-50 Z" fill="white"/>
+    <circle cx="0" cy="-14" r="14" fill="#1976D2"/>
+  </g>
+</svg>
