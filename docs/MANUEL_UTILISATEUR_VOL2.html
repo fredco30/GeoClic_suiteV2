@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manuel Utilisateur GéoClic Data - Volume 2 : Lexique, Points et Cartographie</title>
+    <style>
+        :root {
+            --primary: #1976D2;
+            --primary-dark: #1565C0;
+            --secondary: #424242;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --error: #F44336;
+            --info: #2196F3;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --text: #212121;
+            --text-secondary: #757575;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--background);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .volume-info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: inline-block;
+        }
+
+        nav.toc {
+            background: var(--surface);
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        nav.toc ul {
+            list-style: none;
+        }
+
+        nav.toc > ul > li {
+            margin-bottom: 15px;
+        }
+
+        nav.toc a {
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        nav.toc a:hover {
+            color: var(--primary);
+        }
+
+        nav.toc .chapter-link {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        nav.toc ul ul {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        nav.toc ul ul li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 15px;
+        }
+
+        nav.toc ul ul li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+        }
+
+        section {
+            background: var(--surface);
+            padding: 40px;
+            margin: 30px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        h3 {
+            color: var(--secondary);
+            font-size: 1.4em;
+            margin: 30px 0 15px 0;
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .warning {
+            background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--warning);
+        }
+
+        .success {
+            background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--success);
+        }
+
+        .error {
+            background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--error);
+        }
+
+        .tip {
+            background: linear-gradient(135deg, #F3E5F5, #E1BEE7);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #9C27B0;
+        }
+
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #E0E0E0;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #F5F5F5;
+        }
+
+        tr:hover {
+            background: #E3F2FD;
+        }
+
+        .step-box {
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: var(--primary);
+        }
+
+        .icon-table td:first-child {
+            width: 60px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .field-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin: 2px;
+        }
+
+        .field-text { background: #E3F2FD; color: #1565C0; }
+        .field-number { background: #E8F5E9; color: #2E7D32; }
+        .field-date { background: #FFF3E0; color: #EF6C00; }
+        .field-select { background: #F3E5F5; color: #7B1FA2; }
+        .field-photo { background: #FCE4EC; color: #C2185B; }
+        .field-geo { background: #E0F2F1; color: #00695C; }
+
+        .hierarchy-example {
+            font-family: monospace;
+            background: #263238;
+            color: #ECEFF1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .hierarchy-example .level-0 { color: #FF5722; font-weight: bold; }
+        .hierarchy-example .level-1 { color: #FFC107; margin-left: 20px; }
+        .hierarchy-example .level-2 { color: #8BC34A; margin-left: 40px; }
+        .hierarchy-example .level-3 { color: #03A9F4; margin-left: 60px; }
+        .hierarchy-example .level-4 { color: #E91E63; margin-left: 80px; }
+        .hierarchy-example .level-5 { color: #9C27B0; margin-left: 100px; }
+
+        .button-example {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin: 5px;
+            cursor: default;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-error { background: var(--error); color: white; }
+        .btn-secondary { background: #9E9E9E; color: white; }
+
+        .screenshot-placeholder {
+            background: linear-gradient(135deg, #ECEFF1, #CFD8DC);
+            border: 2px dashed #90A4AE;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            color: #546E7A;
+            margin: 20px 0;
+        }
+
+        .nav-volumes {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .nav-volumes a {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            background: var(--surface);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .nav-volumes a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            background: var(--primary);
+            color: white;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+            border-top: 1px solid #E0E0E0;
+            margin-top: 40px;
+        }
+
+        @media print {
+            header { background: var(--primary); -webkit-print-color-adjust: exact; }
+            section { box-shadow: none; border: 1px solid #E0E0E0; }
+            .nav-volumes { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8em; }
+            section { padding: 20px; }
+            .container { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Manuel Utilisateur GéoClic Data</h1>
+        <p>Solution de Gestion de Données Territoriales pour les Collectivités Françaises</p>
+        <div class="volume-info">
+            <strong>Volume 2 : Lexique, Points et Cartographie</strong><br>
+            Gestion des catégories, saisie de données et visualisation cartographique
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Table des matières -->
+        <nav class="toc">
+            <h2>Table des Matières - Volume 2</h2>
+            <ul>
+                <li>
+                    <a href="#chapitre-5" class="chapter-link">Chapitre 5 : Le Lexique Hiérarchique</a>
+                    <ul>
+                        <li><a href="#5-1">5.1 Comprendre le concept de lexique</a></li>
+                        <li><a href="#5-2">5.2 Structure hiérarchique à 6 niveaux</a></li>
+                        <li><a href="#5-3">5.3 Créer une catégorie principale (Niveau 0)</a></li>
+                        <li><a href="#5-4">5.4 Créer des sous-catégories</a></li>
+                        <li><a href="#5-5">5.5 Personnaliser les catégories (icônes et couleurs)</a></li>
+                        <li><a href="#5-6">5.6 Réorganiser et supprimer des catégories</a></li>
+                        <li><a href="#5-7">5.7 Bonnes pratiques de structuration</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#chapitre-6" class="chapter-link">Chapitre 6 : Les Champs Dynamiques</a>
+                    <ul>
+                        <li><a href="#6-1">6.1 Principe des champs dynamiques</a></li>
+                        <li><a href="#6-2">6.2 Les 13 types de champs disponibles</a></li>
+                        <li><a href="#6-3">6.3 Créer un champ texte</a></li>
+                        <li><a href="#6-4">6.4 Créer un champ numérique</a></li>
+                        <li><a href="#6-5">6.5 Créer un champ date</a></li>
+                        <li><a href="#6-6">6.6 Créer un champ sélection simple</a></li>
+                        <li><a href="#6-7">6.7 Créer un champ sélection multiple</a></li>
+                        <li><a href="#6-8">6.8 Créer un champ photo</a></li>
+                        <li><a href="#6-9">6.9 Créer un champ fichier</a></li>
+                        <li><a href="#6-10">6.10 Créer un champ géométrie</a></li>
+                        <li><a href="#6-11">6.11 Créer un champ slider</a></li>
+                        <li><a href="#6-12">6.12 Créer un champ couleur</a></li>
+                        <li><a href="#6-13">6.13 Créer un champ signature</a></li>
+                        <li><a href="#6-14">6.14 Créer un champ QR Code</a></li>
+                        <li><a href="#6-15">6.15 Créer un champ calculé</a></li>
+                        <li><a href="#6-16">6.16 Organiser et ordonner les champs</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#chapitre-7" class="chapter-link">Chapitre 7 : Gestion des Points</a>
+                    <ul>
+                        <li><a href="#7-1">7.1 Qu'est-ce qu'un point ?</a></li>
+                        <li><a href="#7-2">7.2 Créer un nouveau point</a></li>
+                        <li><a href="#7-3">7.3 Saisir les coordonnées GPS</a></li>
+                        <li><a href="#7-4">7.4 Remplir les champs dynamiques</a></li>
+                        <li><a href="#7-5">7.5 Modifier un point existant</a></li>
+                        <li><a href="#7-6">7.6 Rechercher et filtrer les points</a></li>
+                        <li><a href="#7-7">7.7 Supprimer un point</a></li>
+                        <li><a href="#7-8">7.8 Import et export de points</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#chapitre-8" class="chapter-link">Chapitre 8 : La Cartographie</a>
+                    <ul>
+                        <li><a href="#8-1">8.1 Présentation de la carte interactive</a></li>
+                        <li><a href="#8-2">8.2 Navigation sur la carte</a></li>
+                        <li><a href="#8-3">8.3 Filtrer les points affichés</a></li>
+                        <li><a href="#8-4">8.4 Sélectionner un point sur la carte</a></li>
+                        <li><a href="#8-5">8.5 Créer un point depuis la carte</a></li>
+                        <li><a href="#8-6">8.6 Changer de fond de carte</a></li>
+                        <li><a href="#8-7">8.7 Exporter la vue cartographique</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Chapitre 5 : Le Lexique Hiérarchique -->
+        <section id="chapitre-5">
+            <h2>Chapitre 5 : Le Lexique Hiérarchique</h2>
+
+            <h3 id="5-1">5.1 Comprendre le concept de lexique</h3>
+            <p>Le <strong>lexique</strong> est le coeur de GéoClic Data. Il définit la structure et l'organisation de toutes vos données. Pensez au lexique comme à un système de classement intelligent qui vous permet de catégoriser tous les éléments de votre territoire.</p>
+
+            <div class="highlight">
+                <strong>Analogie simple :</strong> Imaginez une grande armoire de rangement. Le lexique représente les tiroirs, les compartiments et les sous-compartiments de cette armoire. Chaque tiroir peut contenir d'autres tiroirs plus petits, jusqu'à 6 niveaux de profondeur.
+            </div>
+
+            <p><strong>Exemples concrets de lexique pour une commune :</strong></p>
+            <ul>
+                <li><strong>Voirie</strong> : Routes, Chemins, Trottoirs, Signalisation</li>
+                <li><strong>Espaces verts</strong> : Parcs, Jardins, Arbres, Massifs floraux</li>
+                <li><strong>Mobilier urbain</strong> : Bancs, Poubelles, Lampadaires, Abribus</li>
+                <li><strong>Réseaux</strong> : Eau potable, Assainissement, Électricité</li>
+                <li><strong>Patrimoine</strong> : Monuments, Bâtiments historiques, Croix</li>
+            </ul>
+
+            <h3 id="5-1b">5.1b Templates de lexique prédéfinis</h3>
+            <p>GéoClic propose des <strong>templates prédéfinis</strong> pour vous aider à démarrer rapidement. Ces templates contiennent une structure de lexique complète adaptée aux besoins courants des collectivités.</p>
+
+            <div class="highlight">
+                <strong>Avantage :</strong> Lors de la création d'un nouveau projet, vous pouvez choisir un template pour pré-remplir automatiquement le lexique avec les catégories correspondantes.
+            </div>
+
+            <p><strong>Templates disponibles :</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Template</th>
+                        <th>Description</th>
+                        <th>Catégories incluses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Éclairage Public</strong></td>
+                        <td>Gestion du parc luminaire</td>
+                        <td>Candélabres, Luminaires, Armoires électriques, Supports, Foyers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mobilier Urbain</strong></td>
+                        <td>Équipements de voirie</td>
+                        <td>Bancs, Poubelles, Abris bus, Barrières, Bornes, Jardinières</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Espaces Verts</strong></td>
+                        <td>Patrimoine végétal</td>
+                        <td>Arbres, Massifs, Aires de jeux, Pelouses, Haies, Points d'eau</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Voirie</strong></td>
+                        <td>Infrastructure routière</td>
+                        <td>Chaussées, Trottoirs, Signalisation, Marquage, Accotements</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Réseaux</strong></td>
+                        <td>Canalisations et réseaux</td>
+                        <td>Eau, Assainissement, Électricité, Télécom, Regards</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bâtiments</strong></td>
+                        <td>Patrimoine immobilier</td>
+                        <td>Mairie, Écoles, Équipements sportifs, Salles, Annexes</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cimetières</strong></td>
+                        <td>Gestion funéraire</td>
+                        <td>Concessions, Columbariums, Allées, Ossuaires, Équipements</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="tip">
+                <strong>Conseil :</strong> Vous pouvez ensuite personnaliser le lexique importé depuis le template selon vos besoins spécifiques. Ajoutez, modifiez ou supprimez des catégories comme bon vous semble.
+            </div>
+
+            <h3 id="5-2">5.2 Structure hiérarchique à 6 niveaux</h3>
+            <p>GéoClic Data permet de créer une arborescence de catégories sur <strong>6 niveaux de profondeur</strong> (de 0 à 5). Cette profondeur offre une grande flexibilité pour organiser vos données de manière très précise.</p>
+
+            <div class="hierarchy-example">
+                <div class="level-0">Niveau 0 : VOIRIE</div>
+                <div class="level-1">├── Niveau 1 : Routes</div>
+                <div class="level-2">│   ├── Niveau 2 : Routes communales</div>
+                <div class="level-3">│   │   ├── Niveau 3 : Revêtement bitume</div>
+                <div class="level-4">│   │   │   ├── Niveau 4 : État bon</div>
+                <div class="level-5">│   │   │   │   └── Niveau 5 : Entretien préventif</div>
+                <div class="level-4">│   │   │   ├── Niveau 4 : État moyen</div>
+                <div class="level-4">│   │   │   └── Niveau 4 : État dégradé</div>
+                <div class="level-3">│   │   └── Niveau 3 : Revêtement gravier</div>
+                <div class="level-2">│   └── Niveau 2 : Routes départementales</div>
+                <div class="level-1">├── Niveau 1 : Trottoirs</div>
+                <div class="level-1">└── Niveau 1 : Signalisation</div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Niveau</th>
+                        <th>Description</th>
+                        <th>Exemple Voirie</th>
+                        <th>Exemple Espaces Verts</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>0</strong></td>
+                        <td>Catégorie principale (racine)</td>
+                        <td>VOIRIE</td>
+                        <td>ESPACES VERTS</td>
+                    </tr>
+                    <tr>
+                        <td><strong>1</strong></td>
+                        <td>Sous-catégorie majeure</td>
+                        <td>Routes</td>
+                        <td>Arbres</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2</strong></td>
+                        <td>Type spécifique</td>
+                        <td>Routes communales</td>
+                        <td>Arbres d'alignement</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3</strong></td>
+                        <td>Caractéristique</td>
+                        <td>Revêtement bitume</td>
+                        <td>Tilleul</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4</strong></td>
+                        <td>État ou attribut</td>
+                        <td>État bon</td>
+                        <td>Jeune (0-5 ans)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5</strong></td>
+                        <td>Détail fin</td>
+                        <td>Entretien préventif</td>
+                        <td>Taille de formation</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="tip">
+                <strong>Conseil :</strong> Vous n'êtes pas obligé d'utiliser les 6 niveaux. Adaptez la profondeur à vos besoins réels. Une structure trop complexe peut devenir difficile à gérer. Commencez simple et affinez progressivement.
+            </div>
+
+            <h3 id="5-3">5.3 Créer une catégorie principale (Niveau 0)</h3>
+            <p>Les catégories de niveau 0 sont les grandes familles qui structurent l'ensemble de vos données. Voici comment créer votre première catégorie :</p>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Accéder au module Lexique</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Dans le menu latéral gauche, cliquez sur <strong>"Lexique"</strong>. L'icône ressemble à un livre ou un dictionnaire.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Cliquer sur "Nouvelle catégorie"</span>
+                <p style="margin-top: 10px; margin-left: 50px;">En haut de la page, cliquez sur le bouton <span class="button-example btn-primary">+ Nouvelle catégorie</span></p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Remplir le formulaire</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Une fenêtre de dialogue s'ouvre avec les champs suivants :</p>
+                <ul style="margin-left: 50px;">
+                    <li><strong>Code</strong> : Identifiant unique (ex: "VOIRIE", "ESP_VERT"). Utilisez des majuscules sans espaces ni accents.</li>
+                    <li><strong>Libellé</strong> : Nom affiché (ex: "Voirie", "Espaces Verts"). C'est le nom visible par les utilisateurs.</li>
+                    <li><strong>Catégorie parente</strong> : Laissez vide pour créer une catégorie de niveau 0.</li>
+                    <li><strong>Icône</strong> : Choisissez une icône représentative (optionnel mais recommandé).</li>
+                    <li><strong>Couleur</strong> : Sélectionnez une couleur pour identifier visuellement la catégorie.</li>
+                    <li><strong>Actif</strong> : Cochez pour rendre la catégorie utilisable.</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Enregistrer</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur <span class="button-example btn-success">Enregistrer</span> pour créer la catégorie.</p>
+            </div>
+
+            <div class="warning">
+                <strong>Important - Le Code :</strong> Le code est un identifiant technique unique. Une fois créé, il ne peut plus être modifié. Choisissez-le avec soin. Conventions recommandées :
+                <ul>
+                    <li>Majuscules uniquement</li>
+                    <li>Pas d'espaces (utilisez _ ou -)</li>
+                    <li>Pas d'accents ni de caractères spéciaux</li>
+                    <li>Maximum 50 caractères</li>
+                    <li>Exemples : VOIRIE, ESP_VERT, MOB_URB, RESEAU_EAU</li>
+                </ul>
+            </div>
+
+            <h3 id="5-4">5.4 Créer des sous-catégories</h3>
+            <p>Une fois vos catégories principales créées, vous pouvez ajouter des sous-catégories pour affiner la structure.</p>
+
+            <p><strong>Méthode 1 : Depuis le formulaire de création</strong></p>
+            <ol>
+                <li>Cliquez sur <span class="button-example btn-primary">+ Nouvelle catégorie</span></li>
+                <li>Remplissez le code et le libellé</li>
+                <li>Dans le champ <strong>"Catégorie parente"</strong>, sélectionnez la catégorie parent</li>
+                <li>Le niveau sera automatiquement calculé (parent + 1)</li>
+                <li>Enregistrez</li>
+            </ol>
+
+            <p><strong>Méthode 2 : Depuis l'arborescence</strong></p>
+            <ol>
+                <li>Dans la vue arborescence, cliquez sur une catégorie existante</li>
+                <li>Cliquez sur l'icône <strong>"+"</strong> à côté de la catégorie</li>
+                <li>Le formulaire s'ouvre avec la catégorie parente pré-sélectionnée</li>
+                <li>Complétez et enregistrez</li>
+            </ol>
+
+            <div class="success">
+                <strong>Exemple pratique :</strong> Créer la sous-catégorie "Routes" sous "VOIRIE"
+                <ul>
+                    <li>Code : VOIRIE_ROUTES</li>
+                    <li>Libellé : Routes</li>
+                    <li>Catégorie parente : VOIRIE</li>
+                    <li>Niveau : 1 (calculé automatiquement)</li>
+                </ul>
+            </div>
+
+            <h3 id="5-5">5.5 Personnaliser les catégories (icônes et couleurs)</h3>
+            <p>La personnalisation visuelle des catégories améliore considérablement l'ergonomie de l'application, notamment sur la carte et dans les listes.</p>
+
+            <h4>Choix des icônes</h4>
+            <p>GéoClic Data propose une bibliothèque d'icônes Material Design Icons. Pour choisir une icône :</p>
+            <ol>
+                <li>Lors de la création ou modification d'une catégorie</li>
+                <li>Cliquez sur le champ "Icône"</li>
+                <li>Une fenêtre de sélection s'ouvre</li>
+                <li>Recherchez par mot-clé (en anglais : tree, road, water...)</li>
+                <li>Cliquez sur l'icône souhaitée</li>
+            </ol>
+
+            <table class="icon-table">
+                <thead>
+                    <tr>
+                        <th>Icône</th>
+                        <th>Nom</th>
+                        <th>Usage suggéré</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>🛣️</td><td>mdi-road</td><td>Voirie, routes</td></tr>
+                    <tr><td>🌳</td><td>mdi-tree</td><td>Arbres, espaces verts</td></tr>
+                    <tr><td>💡</td><td>mdi-lightbulb</td><td>Éclairage public</td></tr>
+                    <tr><td>💧</td><td>mdi-water</td><td>Réseau d'eau</td></tr>
+                    <tr><td>🏛️</td><td>mdi-bank</td><td>Bâtiments publics</td></tr>
+                    <tr><td>🪧</td><td>mdi-sign-direction</td><td>Signalisation</td></tr>
+                    <tr><td>🗑️</td><td>mdi-trash-can</td><td>Poubelles, collecte</td></tr>
+                    <tr><td>🪑</td><td>mdi-bench</td><td>Mobilier urbain</td></tr>
+                    <tr><td>⚠️</td><td>mdi-alert</td><td>Dangers, signalement</td></tr>
+                    <tr><td>🔧</td><td>mdi-wrench</td><td>Maintenance, travaux</td></tr>
+                </tbody>
+            </table>
+
+            <h4>Choix des couleurs</h4>
+            <p>Les couleurs permettent d'identifier rapidement les catégories sur la carte. Cliquez sur le sélecteur de couleur pour ouvrir la palette.</p>
+
+            <div class="tip">
+                <strong>Bonnes pratiques couleurs :</strong>
+                <ul>
+                    <li>Utilisez des couleurs distinctes pour les catégories de niveau 0</li>
+                    <li>Les sous-catégories peuvent utiliser des nuances de la couleur parente</li>
+                    <li>Évitez les couleurs trop claires (difficilement visibles sur la carte)</li>
+                    <li>Convention suggérée : Vert pour nature, Bleu pour eau, Gris pour voirie, Orange pour signalement</li>
+                </ul>
+            </div>
+
+            <h3 id="5-6">5.6 Réorganiser et supprimer des catégories</h3>
+
+            <h4>Réorganiser l'ordre d'affichage</h4>
+            <p>L'ordre des catégories peut être modifié par glisser-déposer :</p>
+            <ol>
+                <li>Placez votre curseur sur l'icône de déplacement (≡) à gauche de la catégorie</li>
+                <li>Maintenez le clic enfoncé</li>
+                <li>Faites glisser la catégorie vers sa nouvelle position</li>
+                <li>Relâchez</li>
+            </ol>
+
+            <h4>Modifier une catégorie</h4>
+            <ol>
+                <li>Cliquez sur la catégorie dans la liste</li>
+                <li>Cliquez sur l'icône de modification (crayon) ou double-cliquez</li>
+                <li>Modifiez les champs souhaités (sauf le code)</li>
+                <li>Enregistrez</li>
+            </ol>
+
+            <h4>Supprimer une catégorie</h4>
+            <div class="error">
+                <strong>Attention :</strong> La suppression d'une catégorie est une action sensible :
+                <ul>
+                    <li>Une catégorie ne peut être supprimée que si elle n'a pas d'enfants</li>
+                    <li>Une catégorie ne peut être supprimée que si aucun point ne l'utilise</li>
+                    <li>Supprimez d'abord les sous-catégories, puis la catégorie parente</li>
+                </ul>
+            </div>
+
+            <p>Pour supprimer :</p>
+            <ol>
+                <li>Sélectionnez la catégorie</li>
+                <li>Cliquez sur l'icône corbeille ou le bouton "Supprimer"</li>
+                <li>Confirmez la suppression dans la boîte de dialogue</li>
+            </ol>
+
+            <h4>Désactiver une catégorie</h4>
+            <p>Plutôt que de supprimer, vous pouvez désactiver une catégorie :</p>
+            <ul>
+                <li>La catégorie reste dans la base de données</li>
+                <li>Elle n'apparaît plus dans les listes de sélection</li>
+                <li>Les points existants utilisant cette catégorie restent visibles</li>
+                <li>Vous pouvez la réactiver ultérieurement</li>
+            </ul>
+
+            <h3 id="5-7">5.7 Bonnes pratiques de structuration</h3>
+
+            <div class="success">
+                <strong>Recommandations pour une structure efficace :</strong>
+                <ol>
+                    <li><strong>Commencez simple</strong> : Créez d'abord les grandes catégories, puis affinez progressivement</li>
+                    <li><strong>Pensez "terrain"</strong> : La structure doit correspondre à la réalité du travail sur le terrain</li>
+                    <li><strong>Évitez les doublons</strong> : Un élément ne doit appartenir qu'à une seule catégorie</li>
+                    <li><strong>Nommez clairement</strong> : Les libellés doivent être compréhensibles par tous les utilisateurs</li>
+                    <li><strong>Documentez</strong> : Notez les règles de classement pour maintenir la cohérence</li>
+                    <li><strong>Limitez la profondeur</strong> : 3-4 niveaux suffisent généralement</li>
+                </ol>
+            </div>
+
+            <p><strong>Exemple de structure complète pour une commune :</strong></p>
+            <div class="hierarchy-example">
+                <div class="level-0">VOIRIE</div>
+                <div class="level-1">├── Chaussées</div>
+                <div class="level-2">│   ├── Routes communales</div>
+                <div class="level-2">│   ├── Chemins ruraux</div>
+                <div class="level-2">│   └── Parkings</div>
+                <div class="level-1">├── Trottoirs</div>
+                <div class="level-1">└── Signalisation</div>
+                <div class="level-2">    ├── Panneaux</div>
+                <div class="level-2">    └── Marquage au sol</div>
+                <br>
+                <div class="level-0">ESPACES_VERTS</div>
+                <div class="level-1">├── Arbres</div>
+                <div class="level-2">│   ├── Arbres d'alignement</div>
+                <div class="level-2">│   └── Arbres isolés</div>
+                <div class="level-1">├── Massifs</div>
+                <div class="level-1">└── Pelouses</div>
+                <br>
+                <div class="level-0">MOBILIER_URBAIN</div>
+                <div class="level-1">├── Bancs</div>
+                <div class="level-1">├── Poubelles</div>
+                <div class="level-1">├── Abribus</div>
+                <div class="level-1">└── Aires de jeux</div>
+                <br>
+                <div class="level-0">ECLAIRAGE</div>
+                <div class="level-1">├── Lampadaires</div>
+                <div class="level-1">└── Armoires électriques</div>
+                <br>
+                <div class="level-0">RESEAUX</div>
+                <div class="level-1">├── Eau potable</div>
+                <div class="level-2">│   ├── Vannes</div>
+                <div class="level-2">│   ├── Bouches à clé</div>
+                <div class="level-2">│   └── Poteaux incendie</div>
+                <div class="level-1">└── Assainissement</div>
+                <div class="level-2">    ├── Regards</div>
+                <div class="level-2">    └── Avaloirs</div>
+            </div>
+        </section>
+
+        <!-- Chapitre 6 : Les Champs Dynamiques -->
+        <section id="chapitre-6">
+            <h2>Chapitre 6 : Les Champs Dynamiques</h2>
+
+            <h3 id="6-1">6.1 Principe des champs dynamiques</h3>
+            <p>Les <strong>champs dynamiques</strong> sont le coeur de la personnalisation de GéoClic Data. Ils permettent de définir quelles informations doivent être collectées pour chaque type d'élément.</p>
+
+            <div class="highlight">
+                <strong>Concept clé :</strong> Chaque catégorie du lexique peut avoir ses propres champs personnalisés. Par exemple :
+                <ul>
+                    <li>Un <strong>arbre</strong> aura des champs : Essence, Hauteur, Diamètre, État sanitaire, Date de plantation</li>
+                    <li>Un <strong>lampadaire</strong> aura des champs : Type de lampe, Puissance, Hauteur du mât, N° de circuit</li>
+                    <li>Un <strong>panneau de signalisation</strong> aura des champs : Code panneau, Dimensions, Support, État</li>
+                </ul>
+            </div>
+
+            <p>Les champs sont <strong>hérités</strong> : les champs définis sur une catégorie parente s'appliquent automatiquement aux sous-catégories. Vous pouvez ajouter des champs supplémentaires sur les sous-catégories pour plus de précision.</p>
+
+            <h3 id="6-2">6.2 Les 13 types de champs disponibles</h3>
+            <p>GéoClic Data propose 13 types de champs pour répondre à tous vos besoins de collecte de données :</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Exemple d'utilisation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="field-type field-text">Texte</span></td>
+                        <td>Champ de saisie libre pour du texte court ou long</td>
+                        <td>Nom, description, commentaires</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-type field-number">Nombre</span></td>
+                        <td>Valeur numérique avec min/max optionnels</td>
+                        <td>Hauteur, diamètre, quantité</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-type field-date">Date</span></td>
+                        <td>Sélecteur de date avec calendrier</td>
+                        <td>Date d'installation, dernière visite</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-type field-select">Sélection simple</span></td>
+                        <td>Liste déroulante à choix unique</td>
+                        <td>État (Bon/Moyen/Mauvais), Type</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-type field-select">Sélection multiple</span></td>
+                        <td>Liste à choix multiples (cases à cocher)</td>
+                        <td>Anomalies constatées, équipements</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-type field-photo">Photo</span></td>
+                        <td>Capture ou import de photo(s)</td>
+                        <td>Photo de l'élément, du défaut</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-type field-text">Fichier</span></td>
+                        <td>Téléversement de document (PDF, etc.)</td>
+                        <td>Plan, notice technique, facture</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-type field-geo">Géométrie</span></td>
+                        <td>Tracé sur la carte (ligne, polygone)</td>
+                        <td>Parcours, emprise au sol, zone</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-type field-number">Slider</span></td>
+                        <td>Curseur gradué pour notation</td>
+                        <td>Note de 0 à 10, pourcentage</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-type field-select">Couleur</span></td>
+                        <td>Sélecteur de couleur</td>
+                        <td>Couleur du mobilier, de la peinture</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-type field-photo">Signature</span></td>
+                        <td>Zone de signature manuscrite</td>
+                        <td>Validation sur site, réception</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-type field-text">QR Code</span></td>
+                        <td>Lecture/génération de QR codes</td>
+                        <td>Identification d'équipement, lien</td>
+                    </tr>
+                    <tr>
+                        <td><span class="field-type field-number">Calculé</span></td>
+                        <td>Valeur calculée automatiquement</td>
+                        <td>Surface, coût total, âge</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 id="6-3">6.3 Créer un champ texte</h3>
+            <p>Le champ texte est le plus simple et le plus polyvalent. Il permet de saisir du texte libre.</p>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Sélectionner la catégorie cible</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Dans le module Lexique, cliquez sur la catégorie à laquelle vous voulez ajouter un champ.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Accéder à l'onglet "Champs"</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Une fois la catégorie sélectionnée, cliquez sur l'onglet <strong>"Champs dynamiques"</strong> dans le panneau de droite.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Ajouter un nouveau champ</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur <span class="button-example btn-primary">+ Ajouter un champ</span></p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Configurer le champ texte</span>
+                <ul style="margin-left: 50px;">
+                    <li><strong>Nom du champ</strong> : ex. "description" (identifiant technique)</li>
+                    <li><strong>Libellé</strong> : ex. "Description" (affiché à l'utilisateur)</li>
+                    <li><strong>Type</strong> : Sélectionnez <strong>"Texte"</strong></li>
+                    <li><strong>Obligatoire</strong> : Cochez si ce champ doit être renseigné</li>
+                    <li><strong>Multiligne</strong> : Cochez pour un champ texte long (textarea)</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">5</span>
+                <span class="step-title">Enregistrer</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur <span class="button-example btn-success">Enregistrer</span></p>
+            </div>
+
+            <h3 id="6-4">6.4 Créer un champ numérique</h3>
+            <p>Le champ numérique permet de saisir des valeurs numériques avec des contraintes optionnelles.</p>
+
+            <p><strong>Options spécifiques :</strong></p>
+            <ul>
+                <li><strong>Valeur minimale</strong> : La valeur ne peut pas être inférieure à cette limite</li>
+                <li><strong>Valeur maximale</strong> : La valeur ne peut pas dépasser cette limite</li>
+                <li><strong>Décimales</strong> : Nombre de chiffres après la virgule autorisés</li>
+                <li><strong>Unité</strong> : Texte affiché après la valeur (m, cm, kg, €...)</li>
+            </ul>
+
+            <div class="success">
+                <strong>Exemple :</strong> Champ "Hauteur" pour un arbre
+                <ul>
+                    <li>Nom : hauteur</li>
+                    <li>Libellé : Hauteur</li>
+                    <li>Type : Nombre</li>
+                    <li>Minimum : 0</li>
+                    <li>Maximum : 50</li>
+                    <li>Décimales : 1</li>
+                    <li>Unité : m</li>
+                </ul>
+            </div>
+
+            <h3 id="6-5">6.5 Créer un champ date</h3>
+            <p>Le champ date affiche un calendrier pour faciliter la sélection.</p>
+
+            <p><strong>Options spécifiques :</strong></p>
+            <ul>
+                <li><strong>Date minimum</strong> : La date la plus ancienne sélectionnable</li>
+                <li><strong>Date maximum</strong> : La date la plus récente sélectionnable</li>
+                <li><strong>Valeur par défaut</strong> : Date pré-remplie (peut être "Aujourd'hui")</li>
+            </ul>
+
+            <div class="success">
+                <strong>Exemple :</strong> Champ "Date d'installation"
+                <ul>
+                    <li>Nom : date_installation</li>
+                    <li>Libellé : Date d'installation</li>
+                    <li>Type : Date</li>
+                    <li>Date minimum : 01/01/1900</li>
+                    <li>Date maximum : Aujourd'hui</li>
+                </ul>
+            </div>
+
+            <h3 id="6-6">6.6 Créer un champ sélection simple</h3>
+            <p>Le champ sélection simple propose une liste de choix prédéfinis. L'utilisateur ne peut sélectionner qu'une seule option.</p>
+
+            <p><strong>Configuration des options :</strong></p>
+            <ol>
+                <li>Sélectionnez le type "Sélection simple"</li>
+                <li>Dans la zone "Options", ajoutez chaque valeur possible</li>
+                <li>Cliquez sur <span class="button-example btn-secondary">+ Ajouter option</span> pour chaque choix</li>
+                <li>Utilisez les flèches pour réorganiser l'ordre</li>
+            </ol>
+
+            <div class="success">
+                <strong>Exemple :</strong> Champ "État" pour du mobilier urbain
+                <ul>
+                    <li>Nom : etat</li>
+                    <li>Libellé : État général</li>
+                    <li>Type : Sélection simple</li>
+                    <li>Options :
+                        <ol>
+                            <li>Neuf</li>
+                            <li>Bon état</li>
+                            <li>Usure normale</li>
+                            <li>À surveiller</li>
+                            <li>À remplacer</li>
+                        </ol>
+                    </li>
+                </ul>
+            </div>
+
+            <h3 id="6-7">6.7 Créer un champ sélection multiple</h3>
+            <p>Similaire à la sélection simple, mais permet de cocher plusieurs options simultanément.</p>
+
+            <div class="success">
+                <strong>Exemple :</strong> Champ "Anomalies" pour une inspection
+                <ul>
+                    <li>Nom : anomalies</li>
+                    <li>Libellé : Anomalies constatées</li>
+                    <li>Type : Sélection multiple</li>
+                    <li>Options :
+                        <ul>
+                            <li>Graffiti</li>
+                            <li>Dégradation volontaire</li>
+                            <li>Corrosion/rouille</li>
+                            <li>Pièce manquante</li>
+                            <li>Peinture écaillée</li>
+                            <li>Instabilité</li>
+                            <li>Aucune anomalie</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <h3 id="6-8">6.8 Créer un champ photo</h3>
+            <p>Le champ photo permet de capturer ou d'importer une ou plusieurs images.</p>
+
+            <p><strong>Options spécifiques :</strong></p>
+            <ul>
+                <li><strong>Nombre maximum de photos</strong> : Limite le nombre d'images (1 à 10)</li>
+                <li><strong>Qualité</strong> : Basse, Moyenne, Haute (affecte la taille des fichiers)</li>
+                <li><strong>Géolocaliser les photos</strong> : Ajoute les coordonnées GPS à la photo</li>
+            </ul>
+
+            <div class="tip">
+                <strong>Sur mobile :</strong> L'utilisateur pourra prendre une photo directement avec l'appareil ou sélectionner une image existante depuis la galerie.
+            </div>
+
+            <h3 id="6-9">6.9 Créer un champ fichier</h3>
+            <p>Le champ fichier permet d'attacher des documents au point.</p>
+
+            <p><strong>Options spécifiques :</strong></p>
+            <ul>
+                <li><strong>Types autorisés</strong> : pdf, doc, xls, etc.</li>
+                <li><strong>Taille maximale</strong> : En Mo</li>
+                <li><strong>Nombre de fichiers</strong> : 1 ou plusieurs</li>
+            </ul>
+
+            <h3 id="6-10">6.10 Créer un champ géométrie</h3>
+            <p>Le champ géométrie permet de tracer des formes sur la carte en complément du point.</p>
+
+            <p><strong>Types de géométrie :</strong></p>
+            <ul>
+                <li><strong>Ligne</strong> : Pour tracer un parcours, une canalisation</li>
+                <li><strong>Polygone</strong> : Pour délimiter une zone, une emprise</li>
+                <li><strong>Multi-point</strong> : Pour marquer plusieurs positions liées</li>
+            </ul>
+
+            <div class="success">
+                <strong>Exemple :</strong> Champ "Emprise" pour une aire de jeux
+                <ul>
+                    <li>Nom : emprise</li>
+                    <li>Libellé : Emprise au sol</li>
+                    <li>Type : Géométrie</li>
+                    <li>Géométrie : Polygone</li>
+                </ul>
+            </div>
+
+            <h3 id="6-11">6.11 Créer un champ slider</h3>
+            <p>Le slider est un curseur gradué, idéal pour les notations ou les pourcentages.</p>
+
+            <p><strong>Options spécifiques :</strong></p>
+            <ul>
+                <li><strong>Valeur minimale</strong> : Début de la graduation (ex: 0)</li>
+                <li><strong>Valeur maximale</strong> : Fin de la graduation (ex: 10 ou 100)</li>
+                <li><strong>Pas</strong> : Incrément (ex: 1, 0.5, 5)</li>
+                <li><strong>Afficher la valeur</strong> : Montrer le nombre au-dessus du curseur</li>
+            </ul>
+
+            <div class="success">
+                <strong>Exemple :</strong> Champ "Note d'état"
+                <ul>
+                    <li>Nom : note_etat</li>
+                    <li>Libellé : Note d'état (0-10)</li>
+                    <li>Type : Slider</li>
+                    <li>Minimum : 0</li>
+                    <li>Maximum : 10</li>
+                    <li>Pas : 1</li>
+                </ul>
+            </div>
+
+            <h3 id="6-12">6.12 Créer un champ couleur</h3>
+            <p>Le champ couleur affiche une palette de sélection de couleur.</p>
+
+            <div class="success">
+                <strong>Exemple :</strong> Champ "Couleur du mobilier"
+                <ul>
+                    <li>Nom : couleur</li>
+                    <li>Libellé : Couleur</li>
+                    <li>Type : Couleur</li>
+                </ul>
+            </div>
+
+            <h3 id="6-13">6.13 Créer un champ signature</h3>
+            <p>Le champ signature permet de capturer une signature manuscrite, utile pour les validations sur site.</p>
+
+            <p><strong>Cas d'usage :</strong></p>
+            <ul>
+                <li>Réception de travaux</li>
+                <li>Validation d'intervention</li>
+                <li>Accord d'un tiers (propriétaire, riverain)</li>
+            </ul>
+
+            <h3 id="6-14">6.14 Créer un champ QR Code</h3>
+            <p>Le champ QR Code permet de scanner ou générer des codes QR.</p>
+
+            <p><strong>Modes de fonctionnement :</strong></p>
+            <ul>
+                <li><strong>Lecture</strong> : Scanner un QR code existant pour récupérer l'information</li>
+                <li><strong>Génération</strong> : Créer un QR code unique pour identifier l'élément</li>
+            </ul>
+
+            <h3 id="6-15">6.15 Créer un champ calculé</h3>
+            <p>Le champ calculé génère automatiquement une valeur à partir d'autres champs.</p>
+
+            <p><strong>Configuration de la formule :</strong></p>
+            <ul>
+                <li>Utilisez les noms des autres champs entre accolades : {hauteur}, {largeur}</li>
+                <li>Opérateurs supportés : + - * / ( )</li>
+                <li>Fonctions : round(), abs(), sqrt()</li>
+            </ul>
+
+            <div class="success">
+                <strong>Exemple :</strong> Calcul de surface
+                <ul>
+                    <li>Nom : surface</li>
+                    <li>Libellé : Surface (m²)</li>
+                    <li>Type : Calculé</li>
+                    <li>Formule : {longueur} * {largeur}</li>
+                </ul>
+            </div>
+
+            <div class="success">
+                <strong>Exemple :</strong> Calcul d'âge
+                <ul>
+                    <li>Nom : age</li>
+                    <li>Libellé : Âge (années)</li>
+                    <li>Type : Calculé</li>
+                    <li>Formule : year(now()) - year({date_installation})</li>
+                </ul>
+            </div>
+
+            <h3 id="6-16">6.16 Organiser et ordonner les champs</h3>
+            <p>L'ordre des champs détermine leur affichage dans le formulaire de saisie.</p>
+
+            <p><strong>Réorganiser les champs :</strong></p>
+            <ol>
+                <li>Dans la liste des champs, utilisez les poignées de glisser-déposer</li>
+                <li>Maintenez le clic sur l'icône ≡</li>
+                <li>Faites glisser le champ vers sa nouvelle position</li>
+                <li>L'ordre est automatiquement sauvegardé</li>
+            </ol>
+
+            <div class="tip">
+                <strong>Conseils d'organisation :</strong>
+                <ul>
+                    <li>Placez les champs obligatoires en premier</li>
+                    <li>Regroupez les champs par thème (identification, état, mesures...)</li>
+                    <li>Terminez par les champs optionnels (photos, commentaires)</li>
+                    <li>Mettez les champs calculés à la fin (ils se remplissent automatiquement)</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Chapitre 7 : Gestion des Points -->
+        <section id="chapitre-7">
+            <h2>Chapitre 7 : Gestion des Points</h2>
+
+            <h3 id="7-1">7.1 Qu'est-ce qu'un point ?</h3>
+            <p>Un <strong>point</strong> représente un élément géolocalisé de votre territoire. C'est l'unité de base de GéoClic Data. Chaque point possède :</p>
+            <ul>
+                <li><strong>Des coordonnées GPS</strong> : Latitude et longitude précises</li>
+                <li><strong>Une catégorie</strong> : Issue du lexique (ex: Arbre, Lampadaire)</li>
+                <li><strong>Des attributs</strong> : Les valeurs des champs dynamiques de sa catégorie</li>
+                <li><strong>Des métadonnées</strong> : Date de création, créateur, date de modification</li>
+            </ul>
+
+            <div class="highlight">
+                <strong>Exemples de points :</strong>
+                <ul>
+                    <li>Un tilleul situé Place de la Mairie</li>
+                    <li>Le lampadaire n°47 de la rue principale</li>
+                    <li>Le poteau incendie devant l'école</li>
+                    <li>Le banc public du parc central</li>
+                </ul>
+            </div>
+
+            <h3 id="7-2">7.2 Créer un nouveau point</h3>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Accéder au module Points</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Dans le menu latéral, cliquez sur <strong>"Points"</strong>.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Cliquer sur "Nouveau point"</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur le bouton <span class="button-example btn-primary">+ Nouveau point</span> en haut de la liste.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Sélectionner la catégorie</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Choisissez la catégorie du point dans le lexique. Naviguez dans l'arborescence et sélectionnez la catégorie la plus précise possible.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Définir la position</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Plusieurs méthodes pour positionner le point :</p>
+                <ul style="margin-left: 50px;">
+                    <li><strong>Cliquer sur la carte</strong> : La méthode la plus simple</li>
+                    <li><strong>Saisir les coordonnées</strong> : Entrez latitude et longitude manuellement</li>
+                    <li><strong>Rechercher une adresse</strong> : Utilisez la barre de recherche</li>
+                    <li><strong>Position actuelle</strong> : Utilise le GPS de l'appareil (mobile)</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">5</span>
+                <span class="step-title">Remplir les champs</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Le formulaire affiche les champs dynamiques de la catégorie sélectionnée. Remplissez les champs obligatoires (marqués d'un *) et les champs optionnels selon vos besoins.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">6</span>
+                <span class="step-title">Enregistrer</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur <span class="button-example btn-success">Enregistrer</span> pour créer le point.</p>
+            </div>
+
+            <h3 id="7-3">7.3 Saisir les coordonnées GPS</h3>
+            <p>GéoClic Data utilise le système de coordonnées WGS84 (le standard GPS mondial).</p>
+
+            <h4>Format des coordonnées</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Format</th>
+                        <th>Exemple (Paris)</th>
+                        <th>Accepté</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Décimal (DD)</td>
+                        <td>48.8566, 2.3522</td>
+                        <td>Oui (recommandé)</td>
+                    </tr>
+                    <tr>
+                        <td>Degrés Minutes (DM)</td>
+                        <td>48°51.396'N, 2°21.132'E</td>
+                        <td>Oui</td>
+                    </tr>
+                    <tr>
+                        <td>Degrés Minutes Secondes (DMS)</td>
+                        <td>48°51'23.8"N, 2°21'7.9"E</td>
+                        <td>Oui</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="tip">
+                <strong>Astuce :</strong> Pour obtenir des coordonnées précises :
+                <ul>
+                    <li>Sur Google Maps : Clic droit sur un lieu → Les coordonnées s'affichent</li>
+                    <li>Sur mobile : Utilisez le GPS intégré pour une précision métrique</li>
+                    <li>Depuis un fichier : Importez des coordonnées depuis un CSV ou Excel</li>
+                </ul>
+            </div>
+
+            <h3 id="7-4">7.4 Remplir les champs dynamiques</h3>
+            <p>Les champs dynamiques apparaissent en fonction de la catégorie sélectionnée.</p>
+
+            <h4>Types de saisie selon le champ</h4>
+            <ul>
+                <li><strong>Texte</strong> : Tapez directement dans le champ</li>
+                <li><strong>Nombre</strong> : Entrez une valeur numérique (le clavier numérique s'affiche sur mobile)</li>
+                <li><strong>Date</strong> : Cliquez pour ouvrir le calendrier</li>
+                <li><strong>Sélection</strong> : Cliquez pour dérouler la liste, puis sélectionnez</li>
+                <li><strong>Photo</strong> : Cliquez pour prendre une photo ou importer depuis la galerie</li>
+                <li><strong>Signature</strong> : Dessinez avec le doigt ou la souris</li>
+            </ul>
+
+            <div class="warning">
+                <strong>Champs obligatoires :</strong> Les champs marqués d'un astérisque (*) doivent être remplis pour pouvoir enregistrer le point. Si un champ obligatoire est vide, le bouton Enregistrer sera grisé.
+            </div>
+
+            <h3 id="7-5">7.5 Modifier un point existant</h3>
+            <ol>
+                <li>Recherchez le point dans la liste ou sur la carte</li>
+                <li>Cliquez sur le point pour l'ouvrir</li>
+                <li>Cliquez sur <span class="button-example btn-primary">Modifier</span></li>
+                <li>Effectuez vos modifications</li>
+                <li>Cliquez sur <span class="button-example btn-success">Enregistrer</span></li>
+            </ol>
+
+            <div class="highlight">
+                <strong>Historique des modifications :</strong> GéoClic Data conserve l'historique des modifications. Vous pouvez voir qui a modifié le point et quand dans l'onglet "Historique" de la fiche point.
+            </div>
+
+            <h3 id="7-6">7.6 Rechercher et filtrer les points</h3>
+
+            <h4>Barre de recherche</h4>
+            <p>La barre de recherche en haut de la liste permet de rechercher par :</p>
+            <ul>
+                <li>Identifiant du point</li>
+                <li>Contenu des champs texte</li>
+                <li>Catégorie</li>
+            </ul>
+
+            <h4>Filtres avancés</h4>
+            <p>Cliquez sur l'icône d'entonnoir pour accéder aux filtres :</p>
+            <ul>
+                <li><strong>Par catégorie</strong> : Sélectionnez une ou plusieurs catégories du lexique</li>
+                <li><strong>Par date</strong> : Points créés ou modifiés entre deux dates</li>
+                <li><strong>Par créateur</strong> : Points créés par un utilisateur spécifique</li>
+                <li><strong>Par zone géographique</strong> : Dessinez une zone sur la carte</li>
+                <li><strong>Par valeur de champ</strong> : Filtrez sur les valeurs des champs dynamiques</li>
+            </ul>
+
+            <div class="success">
+                <strong>Exemple de filtre :</strong> Trouver tous les arbres en mauvais état
+                <ol>
+                    <li>Catégorie = "Arbres"</li>
+                    <li>Champ "État" = "Mauvais"</li>
+                    <li>Cliquez sur "Appliquer"</li>
+                </ol>
+            </div>
+
+            <h3 id="7-7">7.7 Supprimer un point</h3>
+            <ol>
+                <li>Ouvrez la fiche du point</li>
+                <li>Cliquez sur <span class="button-example btn-error">Supprimer</span></li>
+                <li>Confirmez la suppression dans la boîte de dialogue</li>
+            </ol>
+
+            <div class="error">
+                <strong>Attention :</strong> La suppression est définitive. Les photos et fichiers attachés seront également supprimés. Selon la configuration, seuls les administrateurs peuvent supprimer des points.
+            </div>
+
+            <h4>Suppression multiple</h4>
+            <ol>
+                <li>Dans la liste, cochez les cases des points à supprimer</li>
+                <li>Cliquez sur <span class="button-example btn-error">Supprimer la sélection</span></li>
+                <li>Confirmez</li>
+            </ol>
+
+            <h3 id="7-8">7.8 Import et export de points</h3>
+            <p>GéoClic Data permet d'importer et exporter des points en masse.</p>
+
+            <h4>Export</h4>
+            <ol>
+                <li>Filtrez les points si nécessaire</li>
+                <li>Cliquez sur <span class="button-example btn-secondary">Exporter</span></li>
+                <li>Choisissez le format : CSV, Excel, GeoJSON, Shapefile</li>
+                <li>Sélectionnez les champs à exporter</li>
+                <li>Téléchargez le fichier</li>
+            </ol>
+
+            <h4>Import</h4>
+            <ol>
+                <li>Préparez votre fichier (CSV ou Excel) avec les colonnes requises</li>
+                <li>Allez dans le module <strong>Imports</strong></li>
+                <li>Sélectionnez le fichier</li>
+                <li>Associez les colonnes du fichier aux champs GéoClic</li>
+                <li>Prévisualisez les données</li>
+                <li>Lancez l'import</li>
+            </ol>
+
+            <div class="tip">
+                <strong>Format d'import recommandé :</strong>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>latitude</th>
+                            <th>longitude</th>
+                            <th>categorie</th>
+                            <th>champ1</th>
+                            <th>champ2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>48.8566</td>
+                            <td>2.3522</td>
+                            <td>ARBRE</td>
+                            <td>Tilleul</td>
+                            <td>15</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Chapitre 8 : La Cartographie -->
+        <section id="chapitre-8">
+            <h2>Chapitre 8 : La Cartographie</h2>
+
+            <h3 id="8-1">8.1 Présentation de la carte interactive</h3>
+            <p>Le module Cartographie offre une visualisation géographique de tous vos points. La carte est basée sur la technologie Leaflet et propose plusieurs fonctionnalités avancées.</p>
+
+            <div class="highlight">
+                <strong>Fonctionnalités principales :</strong>
+                <ul>
+                    <li>Affichage de tous les points géolocalisés</li>
+                    <li>Filtrage dynamique par catégorie</li>
+                    <li>Clustering automatique (regroupement des points proches)</li>
+                    <li>Plusieurs fonds de carte disponibles</li>
+                    <li>Création de points par clic sur la carte</li>
+                    <li>Export de la vue cartographique</li>
+                </ul>
+            </div>
+
+            <h3 id="8-2">8.2 Navigation sur la carte</h3>
+
+            <h4>Contrôles de base</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Souris</th>
+                        <th>Tactile (mobile/tablette)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Se déplacer</td>
+                        <td>Cliquer-glisser</td>
+                        <td>Glisser avec un doigt</td>
+                    </tr>
+                    <tr>
+                        <td>Zoomer</td>
+                        <td>Molette vers le haut ou bouton +</td>
+                        <td>Pincer vers l'extérieur</td>
+                    </tr>
+                    <tr>
+                        <td>Dézoomer</td>
+                        <td>Molette vers le bas ou bouton -</td>
+                        <td>Pincer vers l'intérieur</td>
+                    </tr>
+                    <tr>
+                        <td>Sélectionner un point</td>
+                        <td>Clic gauche sur le marqueur</td>
+                        <td>Tap sur le marqueur</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Boutons de contrôle</h4>
+            <ul>
+                <li><strong>+ / -</strong> : Zoom avant / arrière</li>
+                <li><strong>Maison</strong> : Revenir à la vue initiale (toute la zone)</li>
+                <li><strong>Position</strong> : Centrer sur votre position GPS actuelle</li>
+                <li><strong>Calques</strong> : Changer de fond de carte</li>
+                <li><strong>Plein écran</strong> : Afficher la carte en plein écran</li>
+            </ul>
+
+            <h4>Recherche d'adresse</h4>
+            <ol>
+                <li>Cliquez sur la barre de recherche en haut de la carte</li>
+                <li>Tapez une adresse, un lieu ou des coordonnées</li>
+                <li>Sélectionnez un résultat dans la liste</li>
+                <li>La carte se centre automatiquement sur le lieu</li>
+            </ol>
+
+            <h3 id="8-3">8.3 Filtrer les points affichés</h3>
+            <p>Le panneau de filtres à gauche de la carte permet de contrôler quels points sont affichés.</p>
+
+            <h4>Filtre par catégorie</h4>
+            <ol>
+                <li>Cliquez sur l'icône de filtre ou le panneau "Catégories"</li>
+                <li>L'arborescence du lexique s'affiche avec des cases à cocher</li>
+                <li>Cochez/décochez les catégories à afficher/masquer</li>
+                <li>Les modifications s'appliquent instantanément</li>
+            </ol>
+
+            <div class="tip">
+                <strong>Astuce :</strong> Cliquez sur une catégorie parente pour afficher/masquer toutes ses sous-catégories d'un coup.
+            </div>
+
+            <h4>Filtres combinés</h4>
+            <p>Combinez plusieurs critères de filtrage :</p>
+            <ul>
+                <li>Catégorie + Date de création</li>
+                <li>Catégorie + Valeur d'un champ spécifique</li>
+                <li>Zone géographique (rectangle, cercle ou polygone)</li>
+            </ul>
+
+            <h3 id="8-4">8.4 Sélectionner un point sur la carte</h3>
+            <p>Cliquez sur un marqueur pour afficher sa fiche résumée :</p>
+            <ul>
+                <li>Une popup s'ouvre avec les informations principales</li>
+                <li>Catégorie et icône du point</li>
+                <li>Aperçu des champs clés</li>
+                <li>Bouton pour ouvrir la fiche complète</li>
+                <li>Bouton pour modifier le point</li>
+            </ul>
+
+            <h4>Clustering (regroupement)</h4>
+            <p>Quand beaucoup de points sont proches, ils sont automatiquement regroupés en "clusters" :</p>
+            <ul>
+                <li>Un cercle avec un nombre indique combien de points sont regroupés</li>
+                <li>Cliquez sur le cluster pour zoomer et voir les points individuels</li>
+                <li>La couleur du cluster indique la densité (bleu → jaune → rouge)</li>
+            </ul>
+
+            <h3 id="8-5">8.5 Créer un point depuis la carte</h3>
+            <p>La manière la plus intuitive de créer un point est directement depuis la carte :</p>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Activer le mode création</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur le bouton <span class="button-example btn-primary">+ Ajouter un point</span> dans la barre d'outils de la carte.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Cliquer sur la position</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Le curseur change de forme. Cliquez sur la carte à l'emplacement exact du point.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Compléter le formulaire</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Le formulaire de création s'ouvre avec les coordonnées pré-remplies. Sélectionnez la catégorie et remplissez les champs.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Enregistrer</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur <span class="button-example btn-success">Enregistrer</span>. Le nouveau point apparaît immédiatement sur la carte.</p>
+            </div>
+
+            <h3 id="8-6">8.6 Changer de fond de carte</h3>
+            <p>Plusieurs fonds de carte sont disponibles selon vos besoins :</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fond de carte</th>
+                        <th>Description</th>
+                        <th>Usage recommandé</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>OpenStreetMap</strong></td>
+                        <td>Carte routière collaborative</td>
+                        <td>Usage général, navigation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vue satellite</strong></td>
+                        <td>Images satellites haute résolution</td>
+                        <td>Repérage terrain, espaces verts</td>
+                    </tr>
+                    <tr>
+                        <td><strong>IGN Plan</strong></td>
+                        <td>Carte IGN officielle</td>
+                        <td>Précision cadastrale</td>
+                    </tr>
+                    <tr>
+                        <td><strong>IGN Cadastre</strong></td>
+                        <td>Parcelles cadastrales</td>
+                        <td>Limites de propriété</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hybride</strong></td>
+                        <td>Satellite + étiquettes</td>
+                        <td>Combinaison des deux vues</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>Pour changer de fond :</strong></p>
+            <ol>
+                <li>Cliquez sur l'icône des calques (coin supérieur droit)</li>
+                <li>Sélectionnez le fond souhaité</li>
+                <li>Le changement est instantané</li>
+            </ol>
+
+            <h3 id="8-7">8.7 Exporter la vue cartographique</h3>
+            <p>Vous pouvez exporter la carte actuelle pour la partager ou l'imprimer :</p>
+
+            <h4>Export en image</h4>
+            <ol>
+                <li>Positionnez la carte sur la zone souhaitée</li>
+                <li>Cliquez sur le bouton d'export (icône appareil photo)</li>
+                <li>Choisissez le format : PNG ou JPEG</li>
+                <li>L'image est téléchargée</li>
+            </ol>
+
+            <h4>Export en PDF</h4>
+            <ol>
+                <li>Cliquez sur "Exporter en PDF"</li>
+                <li>Choisissez l'orientation : Portrait ou Paysage</li>
+                <li>Sélectionnez la taille : A4, A3</li>
+                <li>Optionnellement, ajoutez un titre et une légende</li>
+                <li>Générez le PDF</li>
+            </ol>
+
+            <h4>Impression</h4>
+            <ol>
+                <li>Utilisez la fonction d'impression du navigateur (Ctrl+P)</li>
+                <li>La carte s'adapte au format d'impression</li>
+                <li>Imprimez ou enregistrez en PDF</li>
+            </ol>
+
+            <div class="tip">
+                <strong>Conseil pour l'impression :</strong> Désactivez le clustering avant d'imprimer pour voir tous les points individuellement. Zoomez suffisamment pour que tous les marqueurs soient visibles sans se chevaucher.
+            </div>
+        </section>
+
+        <!-- Navigation entre volumes -->
+        <div class="nav-volumes">
+            <a href="MANUEL_UTILISATEUR_VOL1.html">
+                ← Volume 1<br>
+                <small>Prise en main et navigation</small>
+            </a>
+            <a href="MANUEL_UTILISATEUR_VOL3.html">
+                Volume 3 →<br>
+                <small>QR Codes, Exports et Administration</small>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <p><strong>GéoClic Data</strong> - Manuel Utilisateur Volume 2</p>
+        <p>Solution de Gestion de Données Territoriales</p>
+        <p>Version 12 Pro - Documentation générée le 22 janvier 2026</p>
+    </footer>
+</body>
+</html>

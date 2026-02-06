@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manuel Utilisateur GéoClic Data - Volume 4 : GéoClic Mobile et Synchronisation</title>
+    <style>
+        :root {
+            --primary: #1976D2;
+            --primary-dark: #1565C0;
+            --secondary: #424242;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --error: #F44336;
+            --info: #2196F3;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --text: #212121;
+            --text-secondary: #757575;
+            --mobile: #00897B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--background);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--mobile), #00695C);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .volume-info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: inline-block;
+        }
+
+        nav.toc {
+            background: var(--surface);
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            color: var(--mobile);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--mobile);
+        }
+
+        nav.toc ul {
+            list-style: none;
+        }
+
+        nav.toc > ul > li {
+            margin-bottom: 15px;
+        }
+
+        nav.toc a {
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        nav.toc a:hover {
+            color: var(--mobile);
+        }
+
+        nav.toc .chapter-link {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        nav.toc ul ul {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        nav.toc ul ul li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 15px;
+        }
+
+        nav.toc ul ul li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--mobile);
+        }
+
+        section {
+            background: var(--surface);
+            padding: 40px;
+            margin: 30px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--mobile);
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--mobile);
+        }
+
+        h3 {
+            color: var(--secondary);
+            font-size: 1.4em;
+            margin: 30px 0 15px 0;
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #E0F2F1, #B2DFDB);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--mobile);
+        }
+
+        .warning {
+            background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--warning);
+        }
+
+        .success {
+            background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--success);
+        }
+
+        .error {
+            background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--error);
+        }
+
+        .tip {
+            background: linear-gradient(135deg, #F3E5F5, #E1BEE7);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #9C27B0;
+        }
+
+        .mobile-specific {
+            background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--mobile);
+        }
+
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #E0E0E0;
+        }
+
+        th {
+            background: var(--mobile);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #F5F5F5;
+        }
+
+        tr:hover {
+            background: #E0F2F1;
+        }
+
+        .step-box {
+            background: white;
+            border: 2px solid var(--mobile);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            background: var(--mobile);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: var(--mobile);
+        }
+
+        .button-example {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin: 5px;
+            cursor: default;
+        }
+
+        .btn-primary { background: var(--mobile); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-error { background: var(--error); color: white; }
+        .btn-secondary { background: #9E9E9E; color: white; }
+
+        .phone-mockup {
+            background: #1a1a1a;
+            border-radius: 30px;
+            padding: 15px;
+            max-width: 300px;
+            margin: 20px auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .phone-screen {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            min-height: 400px;
+        }
+
+        .phone-header {
+            background: var(--mobile);
+            color: white;
+            padding: 15px;
+            margin: -20px -20px 15px -20px;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .sync-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .sync-ok { background: #C8E6C9; color: #2E7D32; }
+        .sync-pending { background: #FFF3E0; color: #EF6C00; }
+        .sync-error { background: #FFCDD2; color: #C62828; }
+        .sync-offline { background: #E0E0E0; color: #616161; }
+
+        .icon-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--mobile);
+            color: white;
+            margin: 5px;
+            font-size: 1.2em;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .feature-card {
+            background: #F5F5F5;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .feature-card h4 {
+            color: var(--mobile);
+            margin-bottom: 10px;
+        }
+
+        .nav-volumes {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .nav-volumes a {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            background: var(--surface);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .nav-volumes a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            background: var(--mobile);
+            color: white;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+            border-top: 1px solid #E0E0E0;
+            margin-top: 40px;
+        }
+
+        .comparison-table {
+            margin: 20px 0;
+        }
+
+        .comparison-table td:first-child {
+            font-weight: 500;
+        }
+
+        @media print {
+            header { background: var(--mobile); -webkit-print-color-adjust: exact; }
+            section { box-shadow: none; border: 1px solid #E0E0E0; }
+            .nav-volumes { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8em; }
+            section { padding: 20px; }
+            .container { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Manuel Utilisateur GéoClic Data</h1>
+        <p>Solution de Gestion de Données Territoriales pour les Collectivités Françaises</p>
+        <div class="volume-info">
+            <strong>Volume 4 : GéoClic Mobile et Synchronisation</strong><br>
+            Application mobile, collecte terrain et synchronisation des données
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Table des matières -->
+        <nav class="toc">
+            <h2>Table des Matières - Volume 4</h2>
+            <ul>
+                <li>
+                    <a href="#chapitre-14" class="chapter-link">Chapitre 14 : Présentation de GéoClic Mobile</a>
+                    <ul>
+                        <li><a href="#14-1">14.1 Qu'est-ce que GéoClic Mobile ?</a></li>
+                        <li><a href="#14-2">14.2 Différences entre GéoClic Data et GéoClic Mobile</a></li>
+                        <li><a href="#14-3">14.3 Configuration requise</a></li>
+                        <li><a href="#14-4">14.4 Modes de fonctionnement (connecté / hors ligne)</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#chapitre-15" class="chapter-link">Chapitre 15 : Installation et Configuration</a>
+                    <ul>
+                        <li><a href="#15-1">15.1 Accéder à GéoClic Mobile (PWA)</a></li>
+                        <li><a href="#15-2">15.2 Installer l'application sur Android</a></li>
+                        <li><a href="#15-3">15.3 Installer l'application sur iPhone/iPad</a></li>
+                        <li><a href="#15-4">15.4 Première connexion</a></li>
+                        <li><a href="#15-5">15.5 Configuration des paramètres</a></li>
+                        <li><a href="#15-6">15.6 Autoriser les permissions nécessaires</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#chapitre-16" class="chapter-link">Chapitre 16 : Interface et Navigation Mobile</a>
+                    <ul>
+                        <li><a href="#16-1">16.1 Écran d'accueil</a></li>
+                        <li><a href="#16-2">16.2 Menu principal</a></li>
+                        <li><a href="#16-3">16.3 La carte mobile</a></li>
+                        <li><a href="#16-4">16.4 Liste des points</a></li>
+                        <li><a href="#16-5">16.5 Barre d'état et indicateurs</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#chapitre-17" class="chapter-link">Chapitre 17 : Collecte de Données sur le Terrain</a>
+                    <ul>
+                        <li><a href="#17-1">17.1 Créer un nouveau point</a></li>
+                        <li><a href="#17-2">17.2 Utiliser le GPS pour la localisation</a></li>
+                        <li><a href="#17-3">17.3 Sélectionner la catégorie</a></li>
+                        <li><a href="#17-4">17.4 Remplir les champs dynamiques</a></li>
+                        <li><a href="#17-5">17.5 Prendre des photos</a></li>
+                        <li><a href="#17-6">17.6 Capturer une signature</a></li>
+                        <li><a href="#17-7">17.7 Scanner un QR code</a></li>
+                        <li><a href="#17-8">17.8 Modifier un point existant</a></li>
+                        <li><a href="#17-9">17.9 Enregistrer en mode brouillon</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#chapitre-18" class="chapter-link">Chapitre 18 : Synchronisation des Données</a>
+                    <ul>
+                        <li><a href="#18-1">18.1 Comprendre la synchronisation</a></li>
+                        <li><a href="#18-2">18.2 Synchronisation automatique</a></li>
+                        <li><a href="#18-3">18.3 Synchronisation manuelle</a></li>
+                        <li><a href="#18-4">18.4 États de synchronisation</a></li>
+                        <li><a href="#18-5">18.5 Gestion des conflits</a></li>
+                        <li><a href="#18-6">18.6 Synchronisation des photos</a></li>
+                        <li><a href="#18-7">18.7 Dépannage des problèmes de synchronisation</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#chapitre-19" class="chapter-link">Chapitre 19 : Mode Hors Ligne</a>
+                    <ul>
+                        <li><a href="#19-1">19.1 Fonctionnement du mode hors ligne</a></li>
+                        <li><a href="#19-2">19.2 Préparer une mission hors ligne</a></li>
+                        <li><a href="#19-3">19.3 Télécharger les données pour le terrain</a></li>
+                        <li><a href="#19-4">19.4 Travailler sans connexion</a></li>
+                        <li><a href="#19-5">19.5 Retour de mission et synchronisation</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#chapitre-20" class="chapter-link">Chapitre 20 : Cas d'Usage et Bonnes Pratiques</a>
+                    <ul>
+                        <li><a href="#20-1">20.1 Inventaire terrain</a></li>
+                        <li><a href="#20-2">20.2 Tournée d'inspection</a></li>
+                        <li><a href="#20-3">20.3 Signalement d'anomalie</a></li>
+                        <li><a href="#20-4">20.4 Validation de travaux</a></li>
+                        <li><a href="#20-5">20.5 Conseils pour optimiser l'autonomie</a></li>
+                        <li><a href="#20-6">20.6 Dépannage courant</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Chapitre 14 : Présentation -->
+        <section id="chapitre-14">
+            <h2>Chapitre 14 : Présentation de GéoClic Mobile</h2>
+
+            <h3 id="14-1">14.1 Qu'est-ce que GéoClic Mobile ?</h3>
+            <p><strong>GéoClic Mobile</strong> est l'application compagnon de GéoClic Data, spécialement conçue pour la collecte de données sur le terrain. Elle permet aux agents d'inventorier, contrôler et mettre à jour les données directement depuis leur smartphone ou tablette.</p>
+
+            <div class="highlight">
+                <strong>Fonctionnalités principales de GéoClic Mobile :</strong>
+                <ul>
+                    <li><strong>Géolocalisation GPS</strong> : Positionnement précis des points sur le terrain</li>
+                    <li><strong>Capture photo</strong> : Prise de photos directement depuis l'appareil</li>
+                    <li><strong>Mode hors ligne</strong> : Travail sans connexion internet</li>
+                    <li><strong>Synchronisation</strong> : Échange bidirectionnel avec GéoClic Data</li>
+                    <li><strong>Scanner QR</strong> : Identification rapide des équipements</li>
+                    <li><strong>Signature tactile</strong> : Validation sur écran</li>
+                </ul>
+            </div>
+
+            <h3 id="14-2">14.2 Différences entre GéoClic Data et GéoClic Mobile</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Fonctionnalité</th>
+                        <th>GéoClic Data (Web)</th>
+                        <th>GéoClic Mobile</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Support</td>
+                        <td>Ordinateur, navigateur web</td>
+                        <td>Smartphone, tablette</td>
+                    </tr>
+                    <tr>
+                        <td>Usage principal</td>
+                        <td>Administration, analyse, exports</td>
+                        <td>Collecte terrain, inventaire</td>
+                    </tr>
+                    <tr>
+                        <td>Gestion du lexique</td>
+                        <td>Création, modification, suppression</td>
+                        <td>Consultation uniquement</td>
+                    </tr>
+                    <tr>
+                        <td>Gestion des utilisateurs</td>
+                        <td>Complète</td>
+                        <td>Non disponible</td>
+                    </tr>
+                    <tr>
+                        <td>Création de points</td>
+                        <td>Oui</td>
+                        <td>Oui (optimisé GPS)</td>
+                    </tr>
+                    <tr>
+                        <td>Modification de points</td>
+                        <td>Oui</td>
+                        <td>Oui</td>
+                    </tr>
+                    <tr>
+                        <td>Mode hors ligne</td>
+                        <td>Non</td>
+                        <td>Oui</td>
+                    </tr>
+                    <tr>
+                        <td>GPS intégré</td>
+                        <td>Limité (navigateur)</td>
+                        <td>Natif et précis</td>
+                    </tr>
+                    <tr>
+                        <td>Capture photo</td>
+                        <td>Import fichier</td>
+                        <td>Appareil photo natif</td>
+                    </tr>
+                    <tr>
+                        <td>Exports avancés</td>
+                        <td>Tous formats</td>
+                        <td>Non disponible</td>
+                    </tr>
+                    <tr>
+                        <td>Rapports et statistiques</td>
+                        <td>Complets</td>
+                        <td>Vue simplifiée</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 id="14-3">14.3 Configuration requise</h3>
+            <h4>Pour Android</h4>
+            <ul>
+                <li>Android 8.0 (Oreo) ou supérieur</li>
+                <li>GPS intégré</li>
+                <li>Appareil photo (recommandé)</li>
+                <li>Minimum 2 Go de RAM</li>
+                <li>500 Mo d'espace de stockage disponible</li>
+                <li>Connexion internet (Wi-Fi ou données mobiles) pour la synchronisation</li>
+            </ul>
+
+            <h4>Pour iOS (iPhone/iPad)</h4>
+            <ul>
+                <li>iOS 14.0 ou supérieur</li>
+                <li>iPhone 6s ou plus récent, iPad Air 2 ou plus récent</li>
+                <li>GPS intégré</li>
+                <li>500 Mo d'espace de stockage disponible</li>
+            </ul>
+
+            <h4>Navigateurs supportés (mode PWA)</h4>
+            <ul>
+                <li>Chrome 80+ (recommandé)</li>
+                <li>Firefox 75+</li>
+                <li>Safari 14+ (iOS)</li>
+                <li>Edge 80+</li>
+            </ul>
+
+            <h3 id="14-4">14.4 Modes de fonctionnement (connecté / hors ligne)</h3>
+            <p>GéoClic Mobile peut fonctionner dans deux modes :</p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>Mode Connecté</h4>
+                    <p><span class="sync-status sync-ok">En ligne</span></p>
+                    <ul style="text-align: left;">
+                        <li>Synchronisation en temps réel</li>
+                        <li>Accès à toutes les données</li>
+                        <li>Photos envoyées immédiatement</li>
+                        <li>Fond de carte en ligne</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h4>Mode Hors Ligne</h4>
+                    <p><span class="sync-status sync-offline">Hors ligne</span></p>
+                    <ul style="text-align: left;">
+                        <li>Données pré-téléchargées</li>
+                        <li>Création de points locale</li>
+                        <li>Photos stockées localement</li>
+                        <li>Sync au retour de mission</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tip">
+                <strong>Recommandation :</strong> Même si vous avez une connexion mobile, il est conseillé de préparer le mode hors ligne avant de partir sur le terrain. Cela garantit le fonctionnement même en zone de mauvaise couverture réseau.
+            </div>
+        </section>
+
+        <!-- Chapitre 15 : Installation -->
+        <section id="chapitre-15">
+            <h2>Chapitre 15 : Installation et Configuration</h2>
+
+            <h3 id="15-1">15.1 Accéder à GéoClic Mobile (PWA)</h3>
+            <p>GéoClic Mobile est une <strong>Progressive Web App (PWA)</strong>. Cela signifie que c'est une application web qui peut être installée comme une application native, sans passer par un store.</p>
+
+            <div class="highlight">
+                <strong>Avantages de la PWA :</strong>
+                <ul>
+                    <li>Pas besoin de télécharger depuis un store</li>
+                    <li>Mises à jour automatiques</li>
+                    <li>Fonctionne sur tous les appareils</li>
+                    <li>Légère et rapide</li>
+                    <li>Mode hors ligne natif</li>
+                </ul>
+            </div>
+
+            <p><strong>URL d'accès :</strong></p>
+            <p>Ouvrez votre navigateur mobile et accédez à :</p>
+            <p><code style="background: #f5f5f5; padding: 10px 20px; border-radius: 4px; display: block; text-align: center; font-size: 1.2em;">https://votre-serveur:8100</code></p>
+            <p><small>Remplacez "votre-serveur" par l'adresse fournie par votre administrateur.</small></p>
+
+            <h3 id="15-2">15.2 Installer l'application sur Android</h3>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Ouvrir Chrome</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Lancez Google Chrome sur votre appareil Android.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Accéder à l'URL</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Tapez l'adresse de GéoClic Mobile dans la barre d'adresse et validez.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Accepter l'installation</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Une bannière apparaît en bas de l'écran proposant d'<strong>"Ajouter à l'écran d'accueil"</strong>. Appuyez dessus.</p>
+                <p style="margin-top: 5px; margin-left: 50px;"><em>Si la bannière n'apparaît pas :</em> Appuyez sur le menu (3 points verticaux) → "Ajouter à l'écran d'accueil"</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Confirmer</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Appuyez sur <strong>"Ajouter"</strong> dans la boîte de dialogue. L'icône GéoClic Mobile apparaît sur votre écran d'accueil.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">5</span>
+                <span class="step-title">Lancer l'application</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Appuyez sur l'icône GéoClic Mobile. L'application s'ouvre en plein écran, comme une application native.</p>
+            </div>
+
+            <h3 id="15-3">15.3 Installer l'application sur iPhone/iPad</h3>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Ouvrir Safari</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Sur iOS, l'installation PWA fonctionne uniquement avec Safari (pas Chrome ni Firefox).</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Accéder à l'URL</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Tapez l'adresse de GéoClic Mobile et validez.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Ouvrir le menu de partage</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Appuyez sur l'icône de partage (carré avec une flèche vers le haut) en bas de l'écran.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Ajouter à l'écran d'accueil</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Faites défiler et appuyez sur <strong>"Sur l'écran d'accueil"</strong>.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">5</span>
+                <span class="step-title">Nommer et ajouter</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Vérifiez le nom (GéoClic Mobile) et appuyez sur <strong>"Ajouter"</strong>.</p>
+            </div>
+
+            <h3 id="15-4">15.4 Première connexion</h3>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Lancer l'application</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Appuyez sur l'icône GéoClic Mobile sur votre écran d'accueil.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Écran de connexion</span>
+                <p style="margin-top: 10px; margin-left: 50px;">L'écran de connexion s'affiche. Entrez vos identifiants :</p>
+                <ul style="margin-left: 50px;">
+                    <li><strong>Email</strong> : Votre adresse email (identifiant GéoClic Data)</li>
+                    <li><strong>Mot de passe</strong> : Votre mot de passe</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Se connecter</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Appuyez sur <span class="button-example btn-primary">Se connecter</span>.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Synchronisation initiale</span>
+                <p style="margin-top: 10px; margin-left: 50px;">L'application télécharge les données de base (lexique, paramètres). Cette opération peut prendre quelques instants selon la quantité de données.</p>
+            </div>
+
+            <div class="success">
+                <strong>Mémoriser la connexion :</strong> Cochez "Rester connecté" pour éviter de saisir vos identifiants à chaque ouverture. Votre session restera active pendant 30 jours.
+            </div>
+
+            <h3 id="15-5">15.5 Configuration des paramètres</h3>
+            <p>Après la première connexion, configurez les paramètres selon vos besoins :</p>
+
+            <ol>
+                <li>Appuyez sur l'icône de menu (☰) ou votre avatar</li>
+                <li>Sélectionnez <strong>"Paramètres"</strong></li>
+            </ol>
+
+            <h4>Paramètres disponibles</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Paramètre</th>
+                        <th>Description</th>
+                        <th>Recommandation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Qualité des photos</td>
+                        <td>Basse, Moyenne, Haute</td>
+                        <td>Moyenne (bon compromis)</td>
+                    </tr>
+                    <tr>
+                        <td>Sync auto photos</td>
+                        <td>Wi-Fi uniquement ou Toujours</td>
+                        <td>Wi-Fi uniquement</td>
+                    </tr>
+                    <tr>
+                        <td>Précision GPS</td>
+                        <td>Standard ou Haute précision</td>
+                        <td>Haute précision</td>
+                    </tr>
+                    <tr>
+                        <td>Thème</td>
+                        <td>Clair, Sombre, Auto</td>
+                        <td>Clair (meilleure visibilité)</td>
+                    </tr>
+                    <tr>
+                        <td>Notifications</td>
+                        <td>Activer/Désactiver</td>
+                        <td>Activer</td>
+                    </tr>
+                    <tr>
+                        <td>Stockage hors ligne</td>
+                        <td>Limite en Mo</td>
+                        <td>500 Mo minimum</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 id="15-6">15.6 Autoriser les permissions nécessaires</h3>
+            <p>GéoClic Mobile nécessite certaines permissions pour fonctionner correctement. Autorisez-les lorsque demandé :</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Permission</th>
+                        <th>Utilisation</th>
+                        <th>Obligatoire</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Localisation</strong></td>
+                        <td>Positionnement GPS des points</td>
+                        <td>Oui</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Appareil photo</strong></td>
+                        <td>Prendre des photos des équipements</td>
+                        <td>Recommandé</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stockage</strong></td>
+                        <td>Enregistrer les photos et données hors ligne</td>
+                        <td>Oui</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Notifications</strong></td>
+                        <td>Alertes de synchronisation</td>
+                        <td>Optionnel</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning">
+                <strong>Localisation "Toujours" vs "Pendant l'utilisation" :</strong>
+                <ul>
+                    <li><strong>Pendant l'utilisation</strong> : Le GPS fonctionne uniquement quand l'application est ouverte (recommandé)</li>
+                    <li><strong>Toujours</strong> : Permet le suivi GPS même en arrière-plan (plus de batterie consommée)</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Chapitre 16 : Interface Mobile -->
+        <section id="chapitre-16">
+            <h2>Chapitre 16 : Interface et Navigation Mobile</h2>
+
+            <h3 id="16-1">16.1 Écran d'accueil</h3>
+            <p>L'écran d'accueil de GéoClic Mobile affiche un tableau de bord avec les informations essentielles :</p>
+
+            <ul>
+                <li><strong>Statut de synchronisation</strong> : Indique si les données sont à jour</li>
+                <li><strong>Nombre de points en attente</strong> : Points créés/modifiés non synchronisés</li>
+                <li><strong>Dernière synchronisation</strong> : Date et heure</li>
+                <li><strong>Accès rapides</strong> : Boutons vers les fonctions principales</li>
+            </ul>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon-button">+</div>
+                    <h4>Nouveau point</h4>
+                    <p>Créer un point à la position actuelle</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-button">📍</div>
+                    <h4>Carte</h4>
+                    <p>Voir la carte des points</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-button">📋</div>
+                    <h4>Liste</h4>
+                    <p>Liste des points à proximité</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-button">📷</div>
+                    <h4>Scanner</h4>
+                    <p>Scanner un QR code</p>
+                </div>
+            </div>
+
+            <h3 id="16-2">16.2 Menu principal</h3>
+            <p>Le menu principal est accessible via l'icône hamburger (☰) en haut à gauche ou par glissement depuis le bord gauche de l'écran.</p>
+
+            <h4>Éléments du menu</h4>
+            <ul>
+                <li><strong>Accueil</strong> : Retour au tableau de bord</li>
+                <li><strong>Carte</strong> : Vue cartographique</li>
+                <li><strong>Points</strong> : Liste complète des points</li>
+                <li><strong>En attente</strong> : Points non synchronisés</li>
+                <li><strong>Brouillons</strong> : Points en cours de saisie</li>
+                <li><strong>Scanner QR</strong> : Ouvrir le scanner</li>
+                <li><strong>Synchroniser</strong> : Lancer la synchronisation</li>
+                <li><strong>Paramètres</strong> : Configuration</li>
+                <li><strong>Déconnexion</strong> : Se déconnecter</li>
+            </ul>
+
+            <h3 id="16-3">16.3 La carte mobile</h3>
+            <p>La carte mobile est optimisée pour l'utilisation tactile et la navigation terrain.</p>
+
+            <h4>Contrôles de la carte</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Geste</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Glisser avec un doigt</td>
+                        <td>Se déplacer sur la carte</td>
+                    </tr>
+                    <tr>
+                        <td>Pincer avec deux doigts</td>
+                        <td>Zoomer / Dézoomer</td>
+                    </tr>
+                    <tr>
+                        <td>Double tap</td>
+                        <td>Zoomer sur ce point</td>
+                    </tr>
+                    <tr>
+                        <td>Appui sur un marqueur</td>
+                        <td>Afficher les infos du point</td>
+                    </tr>
+                    <tr>
+                        <td>Appui long sur la carte</td>
+                        <td>Créer un point à cet endroit</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Boutons de la carte</h4>
+            <ul>
+                <li><strong>Ma position</strong> (📍) : Centre la carte sur votre position GPS</li>
+                <li><strong>Ajouter</strong> (+) : Crée un point à votre position actuelle</li>
+                <li><strong>Filtres</strong> (⚙️) : Filtrer les points affichés par catégorie</li>
+                <li><strong>Calques</strong> (🗺️) : Changer de fond de carte</li>
+            </ul>
+
+            <div class="mobile-specific">
+                <strong>Astuce mobile :</strong> Votre position est indiquée par un point bleu clignotant. Un cercle autour montre la précision du GPS. Plus le cercle est petit, plus la position est précise.
+            </div>
+
+            <h3 id="16-4">16.4 Liste des points</h3>
+            <p>La vue liste affiche les points sous forme de fiches résumées, triés par distance depuis votre position.</p>
+
+            <h4>Informations affichées</h4>
+            <ul>
+                <li>Icône de la catégorie</li>
+                <li>Nom/identifiant du point</li>
+                <li>Catégorie</li>
+                <li>Distance depuis votre position</li>
+                <li>Indicateur de synchronisation</li>
+            </ul>
+
+            <h4>Actions rapides</h4>
+            <ul>
+                <li><strong>Appui</strong> : Ouvrir la fiche du point</li>
+                <li><strong>Glissement gauche</strong> : Actions rapides (modifier, naviguer)</li>
+                <li><strong>Glissement droit</strong> : Marquer comme vérifié</li>
+            </ul>
+
+            <h3 id="16-5">16.5 Barre d'état et indicateurs</h3>
+            <p>La barre d'état en haut de l'écran affiche des informations importantes :</p>
+
+            <ul>
+                <li>
+                    <span class="sync-status sync-ok">● Synchronisé</span> : Toutes les données sont à jour
+                </li>
+                <li>
+                    <span class="sync-status sync-pending">● 3 en attente</span> : Des modifications attendent d'être envoyées
+                </li>
+                <li>
+                    <span class="sync-status sync-error">● Erreur sync</span> : Problème de synchronisation
+                </li>
+                <li>
+                    <span class="sync-status sync-offline">● Hors ligne</span> : Pas de connexion internet
+                </li>
+            </ul>
+
+            <p><strong>Indicateur GPS :</strong></p>
+            <ul>
+                <li><strong>GPS vert</strong> : Position précise (< 10m)</li>
+                <li><strong>GPS orange</strong> : Position moyenne (10-50m)</li>
+                <li><strong>GPS rouge</strong> : Position imprécise (> 50m) ou GPS désactivé</li>
+            </ul>
+        </section>
+
+        <!-- Chapitre 17 : Collecte de données -->
+        <section id="chapitre-17">
+            <h2>Chapitre 17 : Collecte de Données sur le Terrain</h2>
+
+            <h3 id="17-1">17.1 Créer un nouveau point</h3>
+            <p>La création de point est la fonction principale de GéoClic Mobile. Plusieurs méthodes sont disponibles :</p>
+
+            <h4>Méthode 1 : Depuis l'écran d'accueil</h4>
+            <ol>
+                <li>Appuyez sur le bouton <span class="button-example btn-primary">+ Nouveau point</span></li>
+                <li>Votre position GPS est automatiquement capturée</li>
+                <li>Sélectionnez la catégorie</li>
+                <li>Remplissez les champs</li>
+                <li>Enregistrez</li>
+            </ol>
+
+            <h4>Méthode 2 : Depuis la carte</h4>
+            <ol>
+                <li>Naviguez jusqu'à l'emplacement souhaité</li>
+                <li>Appuyez sur le bouton <strong>+</strong> pour utiliser votre position GPS</li>
+                <li>Ou faites un appui long sur la carte à l'endroit précis</li>
+                <li>Le formulaire de création s'ouvre</li>
+            </ol>
+
+            <h4>Méthode 3 : Par scan QR</h4>
+            <ol>
+                <li>Scannez le QR code d'un emplacement vide</li>
+                <li>Si l'emplacement n'existe pas, proposez de le créer</li>
+            </ol>
+
+            <h3 id="17-2">17.2 Utiliser le GPS pour la localisation</h3>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Attendre le fix GPS</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Au lancement de la création, patientez quelques secondes que le GPS se stabilise. L'indicateur passe au vert quand la précision est bonne.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Vérifier la précision</span>
+                <p style="margin-top: 10px; margin-left: 50px;">La précision s'affiche en mètres (ex: "± 3m"). Attendez une précision < 10m pour un bon positionnement.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Valider la position</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Appuyez sur <span class="button-example btn-success">Capturer cette position</span> quand vous êtes à l'emplacement exact.</p>
+            </div>
+
+            <div class="tip">
+                <strong>Améliorer la précision GPS :</strong>
+                <ul>
+                    <li>Sortez des bâtiments (meilleure réception satellite)</li>
+                    <li>Éloignez-vous des grands arbres</li>
+                    <li>Attendez 10-15 secondes après l'ouverture de l'app</li>
+                    <li>Activez le mode "Haute précision" dans les paramètres Android</li>
+                </ul>
+            </div>
+
+            <h4>Ajuster la position manuellement</h4>
+            <p>Si le GPS n'est pas assez précis, vous pouvez ajuster la position :</p>
+            <ol>
+                <li>Appuyez sur "Ajuster sur la carte"</li>
+                <li>Faites glisser le marqueur à la position exacte</li>
+                <li>Utilisez la vue satellite pour plus de précision</li>
+                <li>Validez</li>
+            </ol>
+
+            <h3 id="17-3">17.3 Sélectionner la catégorie</h3>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Parcourir le lexique</span>
+                <p style="margin-top: 10px; margin-left: 50px;">L'arborescence du lexique s'affiche. Appuyez sur une catégorie pour voir ses sous-catégories.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Rechercher</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Utilisez la barre de recherche en haut pour trouver rapidement une catégorie par son nom.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Sélectionner</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Appuyez sur la catégorie finale (la plus précise). Les catégories intermédiaires servent à la navigation.</p>
+            </div>
+
+            <div class="mobile-specific">
+                <strong>Favoris :</strong> Vos catégories fréquemment utilisées apparaissent en haut de la liste pour un accès rapide.
+            </div>
+
+            <h3 id="17-4">17.4 Remplir les champs dynamiques</h3>
+            <p>Après avoir sélectionné la catégorie, le formulaire de saisie s'affiche avec les champs configurés pour cette catégorie.</p>
+
+            <h4>Types de saisie sur mobile</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type de champ</th>
+                        <th>Interface mobile</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Texte</td>
+                        <td>Clavier virtuel, dictée vocale disponible</td>
+                    </tr>
+                    <tr>
+                        <td>Nombre</td>
+                        <td>Clavier numérique</td>
+                    </tr>
+                    <tr>
+                        <td>Date</td>
+                        <td>Sélecteur natif (roue ou calendrier)</td>
+                    </tr>
+                    <tr>
+                        <td>Sélection simple</td>
+                        <td>Liste déroulante tactile</td>
+                    </tr>
+                    <tr>
+                        <td>Sélection multiple</td>
+                        <td>Cases à cocher</td>
+                    </tr>
+                    <tr>
+                        <td>Slider</td>
+                        <td>Curseur tactile</td>
+                    </tr>
+                    <tr>
+                        <td>Couleur</td>
+                        <td>Palette de sélection</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="tip">
+                <strong>Dictée vocale :</strong> Sur les champs texte, appuyez sur l'icône microphone du clavier pour dicter votre texte au lieu de le taper. Très pratique sur le terrain !
+            </div>
+
+            <h3 id="17-5">17.5 Prendre des photos</h3>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Accéder au champ photo</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Dans le formulaire, appuyez sur le champ photo (icône appareil photo).</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Choisir la source</span>
+                <ul style="margin-left: 50px;">
+                    <li><strong>Prendre une photo</strong> : Ouvre l'appareil photo</li>
+                    <li><strong>Choisir dans la galerie</strong> : Sélectionner une photo existante</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Capturer</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cadrez le sujet et appuyez sur le déclencheur. La photo est automatiquement géolocalisée et horodatée.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Valider ou reprendre</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Vérifiez la photo. Appuyez sur ✓ pour valider ou ✗ pour recommencer.</p>
+            </div>
+
+            <div class="warning">
+                <strong>Conseils photo :</strong>
+                <ul>
+                    <li>Prenez la photo de jour pour une meilleure qualité</li>
+                    <li>Nettoyez l'objectif de votre téléphone</li>
+                    <li>Incluez un élément d'échelle si nécessaire</li>
+                    <li>Prenez plusieurs angles si le champ le permet</li>
+                </ul>
+            </div>
+
+            <h3 id="17-6">17.6 Capturer une signature</h3>
+            <p>Pour les champs de type signature :</p>
+            <ol>
+                <li>Appuyez sur le champ signature</li>
+                <li>Une zone de dessin s'ouvre</li>
+                <li>Signez avec votre doigt ou un stylet</li>
+                <li>Appuyez sur "Effacer" si vous voulez recommencer</li>
+                <li>Appuyez sur "Valider" pour enregistrer</li>
+            </ol>
+
+            <h3 id="17-7">17.7 Scanner un QR code</h3>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Ouvrir le scanner</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Appuyez sur le bouton Scanner QR depuis l'écran d'accueil ou le menu.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Viser le QR code</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Pointez la caméra vers le QR code. Maintenez l'appareil stable.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Lecture automatique</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Le QR code est détecté automatiquement. Un son et une vibration confirment la lecture.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Accès au point</span>
+                <p style="margin-top: 10px; margin-left: 50px;">La fiche du point s'ouvre automatiquement, prête à être consultée ou modifiée.</p>
+            </div>
+
+            <h3 id="17-8">17.8 Modifier un point existant</h3>
+            <ol>
+                <li>Trouvez le point (carte, liste ou scan QR)</li>
+                <li>Appuyez dessus pour ouvrir la fiche</li>
+                <li>Appuyez sur <span class="button-example btn-primary">Modifier</span></li>
+                <li>Effectuez vos modifications</li>
+                <li>Appuyez sur <span class="button-example btn-success">Enregistrer</span></li>
+            </ol>
+
+            <div class="mobile-specific">
+                <strong>Historique local :</strong> Vos modifications récentes sont accessibles dans "En attente" jusqu'à leur synchronisation.
+            </div>
+
+            <h3 id="17-9">17.9 Enregistrer en mode brouillon</h3>
+            <p>Si vous devez interrompre la saisie d'un point :</p>
+            <ol>
+                <li>Appuyez sur <span class="button-example btn-secondary">Enregistrer en brouillon</span></li>
+                <li>Le point est sauvegardé localement</li>
+                <li>Retrouvez-le dans le menu "Brouillons"</li>
+                <li>Complétez-le plus tard et enregistrez définitivement</li>
+            </ol>
+
+            <div class="warning">
+                <strong>Brouillons :</strong> Les brouillons ne sont PAS synchronisés avec le serveur. Ils restent uniquement sur votre appareil jusqu'à ce que vous les finalisiez.
+            </div>
+        </section>
+
+        <!-- Chapitre 18 : Synchronisation -->
+        <section id="chapitre-18">
+            <h2>Chapitre 18 : Synchronisation des Données</h2>
+
+            <h3 id="18-1">18.1 Comprendre la synchronisation</h3>
+            <p>La <strong>synchronisation</strong> est le processus d'échange de données entre GéoClic Mobile et GéoClic Data (serveur). Elle assure que :</p>
+
+            <ul>
+                <li>Les points créés sur mobile sont envoyés au serveur</li>
+                <li>Les modifications faites sur mobile sont transmises</li>
+                <li>Les nouvelles données du serveur sont récupérées</li>
+                <li>Tous les utilisateurs travaillent sur les mêmes données</li>
+            </ul>
+
+            <div class="highlight">
+                <strong>Synchronisation bidirectionnelle :</strong>
+                <ul>
+                    <li><strong>Upload</strong> : Mobile → Serveur (vos créations et modifications)</li>
+                    <li><strong>Download</strong> : Serveur → Mobile (données des autres utilisateurs, mises à jour du lexique)</li>
+                </ul>
+            </div>
+
+            <h4>Flux complet vers OneGeo Suite</h4>
+            <p>GéoClic s'intègre avec <strong>OneGeo Suite (OGS)</strong>, votre infrastructure SIG. Voici le parcours complet des données :</p>
+
+            <div style="background: #263238; color: #ECEFF1; padding: 20px; border-radius: 10px; font-family: monospace; margin: 20px 0; overflow-x: auto;">
+                <pre style="margin: 0; line-height: 1.6; font-size: 0.9em;">
+<span style="color: #FF9800;">📱 GéoClic Mobile</span>          <span style="color: #2196F3;">💻 GéoClic Data</span>           <span style="color: #4CAF50;">🗄️ OneGeo Suite</span>
+     (Terrain)                  (Admin Web)               (SIG / OGS)
+         │                           │                         │
+         │  ① Collecte GPS           │                         │
+         │     + Photos              │                         │
+         │     + Attributs           │                         │
+         ▼                           │                         │
+    ┌─────────┐                      │                         │
+    │ SQLite  │  ② Sync              │                         │
+    │ (local) │─────────────────────▶│                         │
+    └─────────┘                      │                         │
+                                     ▼                         │
+                              ┌─────────────┐                  │
+                              │  Staging    │  ③ Validation    │
+                              │  (travail)  │     par admin    │
+                              └──────┬──────┘                  │
+                                     │                         │
+                                     │  ④ Publication          │
+                                     │     "Publier vers OGS"  │
+                                     ▼                         ▼
+                              ┌─────────────────────────────────┐
+                              │      <span style="color: #4CAF50;">Tables PostGIS OGS</span>         │
+                              │  ogs_poubelles, ogs_arbres...   │
+                              │         (SRID 4326)             │
+                              └─────────────────────────────────┘
+                                            │
+                              ┌─────────────┼─────────────┐
+                              ▼             ▼             ▼
+                           <span style="color: #9E9E9E;">SIG</span>       <span style="color: #9E9E9E;">Open Data</span>      <span style="color: #9E9E9E;">QGIS</span>
+</pre>
+            </div>
+
+            <p><strong>Les 4 étapes du flux :</strong></p>
+            <ol>
+                <li><strong>Collecte</strong> : L'agent terrain saisit les données sur GéoClic Mobile (GPS, photos, attributs)</li>
+                <li><strong>Synchronisation</strong> : Les données sont envoyées vers la table de staging sur le serveur</li>
+                <li><strong>Validation</strong> : L'administrateur vérifie les données dans GéoClic Data avant publication</li>
+                <li><strong>Publication OGS</strong> : En un clic, les données validées sont publiées vers les tables OneGeo Suite</li>
+            </ol>
+
+            <div class="success">
+                <strong>Création automatique des tables :</strong> Quand vous publiez un nouveau type d'équipement (ex: "Poubelles") vers OneGeo Suite, GéoClic crée automatiquement la table PostGIS correspondante (<code>ogs_poubelles</code>) avec tous les champs configurés dans le lexique. Aucune compétence SQL requise !
+            </div>
+
+            <h3 id="18-2">18.2 Synchronisation automatique</h3>
+            <p>Par défaut, GéoClic Mobile synchronise automatiquement dans les situations suivantes :</p>
+
+            <ul>
+                <li><strong>À l'ouverture de l'application</strong> : Télécharge les dernières mises à jour</li>
+                <li><strong>Après enregistrement d'un point</strong> : Envoie immédiatement si connecté</li>
+                <li><strong>Retour de connexion</strong> : Après une période hors ligne</li>
+                <li><strong>En arrière-plan</strong> : Périodiquement si l'option est activée</li>
+            </ul>
+
+            <div class="tip">
+                <strong>Paramètres de synchronisation auto :</strong>
+                <ul>
+                    <li>Synchronisation en Wi-Fi uniquement (économie de data)</li>
+                    <li>Fréquence de vérification</li>
+                    <li>Synchroniser les photos automatiquement ou manuellement</li>
+                </ul>
+            </div>
+
+            <h3 id="18-3">18.3 Synchronisation manuelle</h3>
+            <p>Pour forcer une synchronisation à tout moment :</p>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Ouvrir le menu</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Appuyez sur le menu (☰) ou l'icône de synchronisation dans la barre d'état.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Lancer la synchronisation</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Appuyez sur <span class="button-example btn-primary">Synchroniser maintenant</span>.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Attendre la fin</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Une barre de progression s'affiche. Attendez le message de confirmation.</p>
+            </div>
+
+            <p>Vous pouvez également "tirer vers le bas" (pull-to-refresh) sur l'écran d'accueil ou la liste des points pour déclencher une synchronisation.</p>
+
+            <h3 id="18-4">18.4 États de synchronisation</h3>
+            <p>Chaque point peut avoir un état de synchronisation :</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>État</th>
+                        <th>Indicateur</th>
+                        <th>Signification</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Synchronisé</td>
+                        <td><span class="sync-status sync-ok">●</span></td>
+                        <td>Le point est identique sur le mobile et le serveur</td>
+                    </tr>
+                    <tr>
+                        <td>En attente</td>
+                        <td><span class="sync-status sync-pending">●</span></td>
+                        <td>Modifications locales non encore envoyées</td>
+                    </tr>
+                    <tr>
+                        <td>En cours</td>
+                        <td><span class="sync-status sync-pending">↻</span></td>
+                        <td>Synchronisation en cours</td>
+                    </tr>
+                    <tr>
+                        <td>Erreur</td>
+                        <td><span class="sync-status sync-error">!</span></td>
+                        <td>Échec de synchronisation</td>
+                    </tr>
+                    <tr>
+                        <td>Conflit</td>
+                        <td><span class="sync-status sync-error">⚠</span></td>
+                        <td>Modifications conflictuelles</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 id="18-5">18.5 Gestion des conflits</h3>
+            <p>Un <strong>conflit</strong> survient quand un même point a été modifié à la fois sur le mobile et sur le serveur (par un autre utilisateur).</p>
+
+            <div class="warning">
+                <strong>Exemple de conflit :</strong>
+                <ul>
+                    <li>Alice modifie l'état d'un arbre sur son mobile (hors ligne)</li>
+                    <li>Pendant ce temps, Bob modifie le même arbre depuis GéoClic Data</li>
+                    <li>Quand Alice se reconnecte, un conflit est détecté</li>
+                </ul>
+            </div>
+
+            <h4>Résolution des conflits</h4>
+            <p>Quand un conflit est détecté, l'application vous propose de choisir :</p>
+            <ol>
+                <li>Notification de conflit avec les détails</li>
+                <li>Trois options :
+                    <ul>
+                        <li><strong>Garder ma version</strong> : Vos modifications remplacent celles du serveur</li>
+                        <li><strong>Garder la version serveur</strong> : Les modifications du serveur remplacent les vôtres</li>
+                        <li><strong>Fusionner</strong> : Conserver les deux jeux de modifications (si possible)</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <div class="tip">
+                <strong>Éviter les conflits :</strong>
+                <ul>
+                    <li>Synchronisez fréquemment</li>
+                    <li>Coordonnez-vous avec vos collègues sur les zones de travail</li>
+                    <li>Évitez de modifier les mêmes points simultanément</li>
+                </ul>
+            </div>
+
+            <h3 id="18-6">18.6 Synchronisation des photos</h3>
+            <p>Les photos nécessitent un traitement particulier car elles sont volumineuses.</p>
+
+            <h4>Options de synchronisation photos</h4>
+            <ul>
+                <li><strong>Immédiate</strong> : Les photos sont envoyées dès la capture (consomme plus de data)</li>
+                <li><strong>Wi-Fi uniquement</strong> : Les photos attendent une connexion Wi-Fi</li>
+                <li><strong>Manuelle</strong> : Vous choisissez quand envoyer les photos</li>
+            </ul>
+
+            <h4>Voir les photos en attente</h4>
+            <ol>
+                <li>Allez dans Paramètres → Stockage</li>
+                <li>Consultez "Photos en attente d'envoi"</li>
+                <li>Appuyez sur "Envoyer toutes les photos"</li>
+            </ol>
+
+            <div class="warning">
+                <strong>Attention :</strong> Les photos non synchronisées occupent de l'espace sur votre appareil. Si vous avez beaucoup de photos en attente, pensez à les synchroniser régulièrement via Wi-Fi.
+            </div>
+
+            <h3 id="18-7">18.7 Dépannage des problèmes de synchronisation</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Problème</th>
+                        <th>Cause probable</th>
+                        <th>Solution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Sync en échec</td>
+                        <td>Pas de connexion internet</td>
+                        <td>Vérifiez votre connexion Wi-Fi ou data</td>
+                    </tr>
+                    <tr>
+                        <td>Sync très lente</td>
+                        <td>Beaucoup de photos à envoyer</td>
+                        <td>Utilisez le Wi-Fi, patientez</td>
+                    </tr>
+                    <tr>
+                        <td>"Session expirée"</td>
+                        <td>Token de connexion expiré</td>
+                        <td>Déconnectez-vous et reconnectez-vous</td>
+                    </tr>
+                    <tr>
+                        <td>"Erreur serveur"</td>
+                        <td>Problème côté serveur</td>
+                        <td>Réessayez plus tard, contactez l'admin</td>
+                    </tr>
+                    <tr>
+                        <td>Données manquantes</td>
+                        <td>Sync partielle</td>
+                        <td>Forcez une synchronisation complète</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Forcer une synchronisation complète</h4>
+            <ol>
+                <li>Allez dans Paramètres → Synchronisation</li>
+                <li>Appuyez sur "Synchronisation complète"</li>
+                <li>Confirmez (cette opération peut prendre du temps)</li>
+            </ol>
+        </section>
+
+        <!-- Chapitre 19 : Mode Hors Ligne -->
+        <section id="chapitre-19">
+            <h2>Chapitre 19 : Mode Hors Ligne</h2>
+
+            <h3 id="19-1">19.1 Fonctionnement du mode hors ligne</h3>
+            <p>Le mode hors ligne permet de travailler sans connexion internet. Toutes les données et actions sont stockées localement et synchronisées au retour de la connexion.</p>
+
+            <div class="highlight">
+                <strong>Ce qui fonctionne hors ligne :</strong>
+                <ul>
+                    <li>Consultation des points téléchargés</li>
+                    <li>Création de nouveaux points</li>
+                    <li>Modification de points existants</li>
+                    <li>Prise de photos</li>
+                    <li>Navigation sur la carte (avec tuiles pré-téléchargées)</li>
+                    <li>Scan de QR codes (pour les points locaux)</li>
+                </ul>
+            </div>
+
+            <div class="warning">
+                <strong>Ce qui ne fonctionne PAS hors ligne :</strong>
+                <ul>
+                    <li>Recherche d'adresse (géocodage)</li>
+                    <li>Accès aux nouvelles données du serveur</li>
+                    <li>Voir les modifications des autres utilisateurs</li>
+                    <li>Télécharger de nouvelles zones de carte</li>
+                </ul>
+            </div>
+
+            <h3 id="19-2">19.2 Préparer une mission hors ligne</h3>
+            <p>Avant de partir sur le terrain sans connexion, préparez votre mobile :</p>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Vérifier la batterie</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Chargez votre appareil à 100%. Le GPS consomme beaucoup de batterie.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Synchroniser les données</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Lancez une synchronisation complète pour avoir les données les plus récentes.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Télécharger la zone de carte</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Téléchargez les tuiles de carte pour la zone où vous allez travailler (voir section suivante).</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Vérifier l'espace disponible</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Assurez-vous d'avoir assez d'espace pour les nouvelles photos et données.</p>
+            </div>
+
+            <h3 id="19-3">19.3 Télécharger les données pour le terrain</h3>
+
+            <h4>Télécharger les points d'une zone</h4>
+            <ol>
+                <li>Allez dans Menu → Paramètres → Données hors ligne</li>
+                <li>Appuyez sur "Télécharger des points"</li>
+                <li>Sélectionnez les catégories à télécharger</li>
+                <li>Définissez la zone (cercle autour de votre position ou rectangle)</li>
+                <li>Appuyez sur "Télécharger"</li>
+            </ol>
+
+            <h4>Télécharger les tuiles de carte</h4>
+            <ol>
+                <li>Sur la carte, naviguez vers la zone souhaitée</li>
+                <li>Appuyez sur le menu de la carte (⋮)</li>
+                <li>Sélectionnez "Télécharger cette zone"</li>
+                <li>Ajustez la zone et les niveaux de zoom</li>
+                <li>Appuyez sur "Télécharger"</li>
+            </ol>
+
+            <div class="tip">
+                <strong>Taille des téléchargements :</strong>
+                <ul>
+                    <li>Points : ~1 Ko par point (sans photos)</li>
+                    <li>Carte (1 commune) : ~50-100 Mo</li>
+                    <li>Carte (1 département) : ~500 Mo - 1 Go</li>
+                </ul>
+            </div>
+
+            <h3 id="19-4">19.4 Travailler sans connexion</h3>
+            <p>Une fois sur le terrain sans réseau :</p>
+
+            <ol>
+                <li>L'indicateur <span class="sync-status sync-offline">Hors ligne</span> s'affiche</li>
+                <li>Utilisez l'application normalement</li>
+                <li>Les créations et modifications sont stockées localement</li>
+                <li>Un compteur indique le nombre d'éléments en attente</li>
+            </ol>
+
+            <h4>Indicateurs en mode hors ligne</h4>
+            <ul>
+                <li><strong>Badge numéroté</strong> : Nombre de modifications en attente</li>
+                <li><strong>Icône nuage barré</strong> : Pas de connexion</li>
+                <li><strong>Points avec ●</strong> : Points modifiés localement</li>
+            </ul>
+
+            <h3 id="19-5">19.5 Retour de mission et synchronisation</h3>
+            <p>Au retour de votre mission, quand vous retrouvez une connexion :</p>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Connexion automatique</span>
+                <p style="margin-top: 10px; margin-left: 50px;">L'application détecte le retour de la connexion et affiche une notification.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Lancer la synchronisation</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Appuyez sur la notification ou allez dans le menu pour synchroniser.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Vérifier l'envoi</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Vérifiez que tous les éléments en attente ont été synchronisés (compteur à 0).</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Envoyer les photos</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Si vous étiez en mode "photos Wi-Fi uniquement", connectez-vous au Wi-Fi pour envoyer les photos.</p>
+            </div>
+
+            <div class="success">
+                <strong>Vérification :</strong> Après synchronisation, vous pouvez vérifier dans GéoClic Data (web) que vos points apparaissent bien avec toutes leurs informations.
+            </div>
+        </section>
+
+        <!-- Chapitre 20 : Cas d'usage -->
+        <section id="chapitre-20">
+            <h2>Chapitre 20 : Cas d'Usage et Bonnes Pratiques</h2>
+
+            <h3 id="20-1">20.1 Inventaire terrain</h3>
+            <p>L'inventaire consiste à recenser tous les équipements d'une zone.</p>
+
+            <h4>Procédure recommandée</h4>
+            <ol>
+                <li><strong>Préparation</strong> : Téléchargez la zone et créez un projet "Inventaire"</li>
+                <li><strong>Sur le terrain</strong> : Parcourez la zone méthodiquement</li>
+                <li><strong>Pour chaque équipement</strong> :
+                    <ul>
+                        <li>Positionnez-vous à côté</li>
+                        <li>Créez le point avec le GPS</li>
+                        <li>Remplissez tous les champs</li>
+                        <li>Prenez une photo d'identification</li>
+                    </ul>
+                </li>
+                <li><strong>Retour</strong> : Synchronisez et vérifiez</li>
+            </ol>
+
+            <h3 id="20-2">20.2 Tournée d'inspection</h3>
+            <p>L'inspection consiste à vérifier l'état d'équipements déjà inventoriés.</p>
+
+            <h4>Procédure recommandée</h4>
+            <ol>
+                <li><strong>Préparation</strong> : Téléchargez les points de la zone à inspecter</li>
+                <li><strong>Sur le terrain</strong> : Utilisez la liste ou la carte pour localiser les points</li>
+                <li><strong>Pour chaque point</strong> :
+                    <ul>
+                        <li>Ouvrez la fiche existante</li>
+                        <li>Vérifiez et mettez à jour l'état</li>
+                        <li>Ajoutez des photos si anomalie</li>
+                        <li>Notez les observations</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <div class="tip">
+                <strong>QR codes :</strong> Si vos équipements ont des QR codes, scannez-les pour accéder directement à leur fiche sans chercher dans la liste.
+            </div>
+
+            <h3 id="20-3">20.3 Signalement d'anomalie</h3>
+            <p>Le signalement permet de remonter rapidement un problème constaté.</p>
+
+            <h4>Procédure rapide</h4>
+            <ol>
+                <li>Sur la carte ou via scan QR, trouvez le point concerné</li>
+                <li>Appuyez sur "Signaler une anomalie"</li>
+                <li>Sélectionnez le type d'anomalie</li>
+                <li>Prenez une photo du problème</li>
+                <li>Ajoutez un commentaire si nécessaire</li>
+                <li>Enregistrez - l'anomalie est envoyée immédiatement</li>
+            </ol>
+
+            <h3 id="20-4">20.4 Validation de travaux</h3>
+            <p>Après intervention, validez que les travaux ont été réalisés.</p>
+
+            <ol>
+                <li>Localisez le point concerné</li>
+                <li>Ouvrez la fiche et accédez à l'historique</li>
+                <li>Appuyez sur "Valider les travaux"</li>
+                <li>Prenez une photo "après travaux"</li>
+                <li>Mettez à jour l'état</li>
+                <li>Capturez la signature de validation si nécessaire</li>
+                <li>Enregistrez</li>
+            </ol>
+
+            <h3 id="20-5">20.5 Conseils pour optimiser l'autonomie</h3>
+
+            <div class="mobile-specific">
+                <strong>Économiser la batterie :</strong>
+                <ul>
+                    <li>Réduisez la luminosité de l'écran</li>
+                    <li>Activez le mode économie d'énergie</li>
+                    <li>Désactivez le Bluetooth et le NFC si non utilisés</li>
+                    <li>Fermez les autres applications</li>
+                    <li>Utilisez le GPS en mode standard (pas haute précision) si suffisant</li>
+                    <li>Emportez une batterie externe</li>
+                </ul>
+            </div>
+
+            <div class="tip">
+                <strong>Autonomie moyenne :</strong>
+                <ul>
+                    <li>GPS actif continu : 4-6 heures</li>
+                    <li>GPS intermittent + photos : 6-8 heures</li>
+                    <li>Avec batterie externe 10000mAh : +8-10 heures</li>
+                </ul>
+            </div>
+
+            <h3 id="20-6">20.6 Dépannage courant</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Problème</th>
+                        <th>Solution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GPS imprécis</td>
+                        <td>Sortez des bâtiments, attendez 30s, activez haute précision</td>
+                    </tr>
+                    <tr>
+                        <td>Application lente</td>
+                        <td>Fermez les autres apps, redémarrez GéoClic Mobile</td>
+                    </tr>
+                    <tr>
+                        <td>Photos floues</td>
+                        <td>Nettoyez l'objectif, stabilisez l'appareil</td>
+                    </tr>
+                    <tr>
+                        <td>Carte ne charge pas</td>
+                        <td>Vérifiez la connexion ou utilisez les tuiles hors ligne</td>
+                    </tr>
+                    <tr>
+                        <td>Connexion impossible</td>
+                        <td>Vérifiez URL et identifiants, contactez l'admin</td>
+                    </tr>
+                    <tr>
+                        <td>Espace insuffisant</td>
+                        <td>Synchronisez les photos, supprimez les anciens téléchargements</td>
+                    </tr>
+                    <tr>
+                        <td>Application figée</td>
+                        <td>Forcez la fermeture et relancez</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="error">
+                <strong>En cas de problème persistant :</strong>
+                <ol>
+                    <li>Notez le message d'erreur exact</li>
+                    <li>Faites une capture d'écran</li>
+                    <li>Contactez votre administrateur GéoClic</li>
+                    <li>En dernier recours : désinstallez et réinstallez l'application (vos données en attente seront perdues !)</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Navigation entre volumes -->
+        <div class="nav-volumes">
+            <a href="MANUEL_UTILISATEUR_VOL3.html">
+                ← Volume 3<br>
+                <small>QR Codes, Exports et Administration</small>
+            </a>
+            <a href="GUIDE_INSTALLATION.html">
+                Guide d'Installation →<br>
+                <small>Installation technique de GéoClic</small>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <p><strong>GéoClic Data</strong> - Manuel Utilisateur Volume 4</p>
+        <p>Solution de Gestion de Données Territoriales</p>
+        <p>Version 12 Pro - Documentation générée le 22 janvier 2026</p>
+    </footer>
+</body>
+</html>

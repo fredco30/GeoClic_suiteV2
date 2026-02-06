@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GéoClic V14 - Guide d'Installation Complet</title>
+    <style>
+        :root {
+            --primary: #1976D2;
+            --primary-dark: #1565C0;
+            --secondary: #424242;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --error: #F44336;
+            --background: #f5f5f5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: var(--background);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+        }
+
+        nav.toc {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        nav.toc ol {
+            padding-left: 25px;
+        }
+
+        nav.toc li {
+            margin: 10px 0;
+        }
+
+        nav.toc a {
+            color: var(--secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        nav.toc a:hover {
+            color: var(--primary);
+        }
+
+        section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        h3 {
+            color: var(--secondary);
+            margin: 25px 0 15px 0;
+        }
+
+        h4 {
+            color: #666;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .alert-info {
+            background: #E3F2FD;
+            border-left: 4px solid var(--primary);
+            color: #1565C0;
+        }
+
+        .alert-warning {
+            background: #FFF3E0;
+            border-left: 4px solid var(--warning);
+            color: #E65100;
+        }
+
+        .alert-success {
+            background: #E8F5E9;
+            border-left: 4px solid var(--success);
+            color: #2E7D32;
+        }
+
+        .alert-danger {
+            background: #FFEBEE;
+            border-left: 4px solid var(--error);
+            color: #C62828;
+        }
+
+        .code-block {
+            background: #263238;
+            color: #ECEFF1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+        }
+
+        .code-block code {
+            color: #80CBC4;
+        }
+
+        .code-inline {
+            background: #ECEFF1;
+            color: #C62828;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+        }
+
+        .step {
+            display: flex;
+            margin: 20px 0;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            flex-shrink: 0;
+            margin-right: 20px;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h4 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .screenshot {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 20px 0;
+            max-width: 100%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn-example {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin: 5px 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+
+        .checklist {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .checklist li {
+            list-style: none;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .checklist li::before {
+            content: "☐";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-size: 1.2em;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            section {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+            .code-block {
+                background: #f5f5f5;
+                color: #333;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🗺️ GéoClic V14</h1>
+        <p>Guide d'Installation Complet</p>
+        <div class="version-badge">Version 12.0 - Janvier 2026</div>
+    </header>
+
+    <div class="container">
+        <nav class="toc">
+            <h2>📋 Table des matières</h2>
+            <ol>
+                <li><a href="#introduction">Introduction, architecture et intégration OneGeo Suite</a></li>
+                <li><a href="#prerequis-materiel">Prérequis matériels</a></li>
+                <li><a href="#installation-docker">Installation de Docker Desktop</a></li>
+                <li><a href="#installation-python">Installation de Python</a></li>
+                <li><a href="#installation-nodejs">Installation de Node.js</a></li>
+                <li><a href="#telechargement">Téléchargement de GéoClic</a></li>
+                <li><a href="#base-donnees">Configuration de la base de données</a></li>
+                <li><a href="#lancement-api">Lancement de l'API</a></li>
+                <li><a href="#lancement-interface">Lancement de l'interface web</a></li>
+                <li><a href="#premier-demarrage">Premier démarrage et configuration</a></li>
+                <li><a href="#depannage">Dépannage et problèmes courants</a></li>
+                <li><a href="#desinstallation">Désinstallation</a></li>
+            </ol>
+        </nav>
+
+        <!-- SECTION 1: INTRODUCTION -->
+        <section id="introduction">
+            <h2>1. Introduction et prérequis</h2>
+
+            <h3>Qu'est-ce que GéoClic V14 ?</h3>
+            <p>GéoClic V14 est une solution professionnelle de gestion de données territoriales conçue pour les communes françaises. Elle permet de :</p>
+            <ul>
+                <li><strong>Inventorier</strong> le patrimoine communal (mobilier urbain, voirie, espaces verts, bâtiments, etc.)</li>
+                <li><strong>Localiser</strong> chaque équipement sur une carte interactive</li>
+                <li><strong>Collecter</strong> des données sur le terrain via l'application mobile</li>
+                <li><strong>Administrer</strong> les données via l'interface web GéoClic Data</li>
+                <li><strong>Exporter</strong> les données vers différents formats (CSV, GeoJSON, etc.)</li>
+                <li><strong>Générer</strong> des QR codes pour identifier les équipements</li>
+            </ul>
+
+            <h3>Composants de l'application</h3>
+            <p>GéoClic V14 est composé de trois éléments principaux :</p>
+            <table>
+                <tr>
+                    <th>Composant</th>
+                    <th>Description</th>
+                    <th>Port</th>
+                </tr>
+                <tr>
+                    <td><strong>Base de données</strong></td>
+                    <td>PostgreSQL avec PostGIS pour stocker les données géographiques</td>
+                    <td>5432</td>
+                </tr>
+                <tr>
+                    <td><strong>API</strong></td>
+                    <td>Serveur FastAPI qui gère la logique métier</td>
+                    <td>8000</td>
+                </tr>
+                <tr>
+                    <td><strong>Interface Web</strong></td>
+                    <td>GéoClic Data - Interface d'administration</td>
+                    <td>3000</td>
+                </tr>
+                <tr>
+                    <td><strong>Application Mobile</strong></td>
+                    <td>GéoClic Mobile - Collecte terrain (PWA)</td>
+                    <td>8100</td>
+                </tr>
+            </table>
+
+            <h3>Intégration OneGeo Suite</h3>
+            <p>GéoClic V14 est conçu comme une <strong>surcouche "No-Code"</strong> sur votre infrastructure <strong>OneGeo Suite (OGS)</strong>. Les données collectées sur le terrain alimentent directement vos tables PostGIS exploitables par le SIG et le portail Open Data.</p>
+
+            <h4>Schéma d'architecture complet</h4>
+            <div style="background: #263238; color: #ECEFF1; padding: 25px; border-radius: 10px; font-family: monospace; margin: 20px 0; overflow-x: auto;">
+                <pre style="margin: 0; line-height: 1.6; font-size: 0.85em;">
+┌────────────────────────────────────────────────────────────────────────────────────┐
+│                     <span style="color: #4CAF50; font-weight: bold;">ARCHITECTURE GÉOCLIC V14 + ONEGEO SUITE</span>                      │
+└────────────────────────────────────────────────────────────────────────────────────┘
+
+                        <span style="color: #FFC107;">UTILISATEURS</span>
+        ┌─────────────────────┼─────────────────────┐
+        ▼                     ▼                     ▼
+  <span style="color: #2196F3;">┌───────────┐</span>       <span style="color: #FF9800;">┌───────────┐</span>       <span style="color: #4CAF50;">┌───────────┐</span>
+  <span style="color: #2196F3;">│  GéoClic  │</span>       <span style="color: #FF9800;">│  GéoClic  │</span>       <span style="color: #4CAF50;">│  OneGeo   │</span>
+  <span style="color: #2196F3;">│   Data    │</span>       <span style="color: #FF9800;">│  Mobile   │</span>       <span style="color: #4CAF50;">│   Suite   │</span>
+  <span style="color: #2196F3;">│  :3000    │</span>       <span style="color: #FF9800;">│  :8100    │</span>       <span style="color: #4CAF50;">│   (SIG)   │</span>
+  <span style="color: #2196F3;">└─────┬─────┘</span>       <span style="color: #FF9800;">└─────┬─────┘</span>       <span style="color: #4CAF50;">└─────┬─────┘</span>
+        │                     │                     │
+        │  <span style="color: #9E9E9E;">Admin</span>              │  <span style="color: #9E9E9E;">Terrain</span>            │  <span style="color: #9E9E9E;">Exploitation</span>
+        │  <span style="color: #9E9E9E;">Config</span>             │  <span style="color: #9E9E9E;">Collecte</span>           │  <span style="color: #9E9E9E;">SIG/OpenData</span>
+        └──────────┬──────────┴──────────┬──────────┘
+                   ▼                     │
+        ┌─────────────────────┐          │
+        │   <span style="color: #E91E63; font-weight: bold;">API FastAPI</span>        │          │
+        │      :8000          │          │
+        │                     │          │
+        │ • Authentification  │          │
+        │ • Lexique/Champs    │          │
+        │ • Synchronisation   │          │
+        │ • Publication OGS   │          │
+        └──────────┬──────────┘          │
+                   │                     │
+                   ▼                     │
+        ┌─────────────────────────────────────────────┐
+        │         <span style="color: #9C27B0; font-weight: bold;">PostgreSQL / PostGIS</span>                 │
+        │                 :5432                       │
+        │                                             │
+        │  ┌─────────────────┐   ┌─────────────────┐  │
+        │  │ <span style="color: #FFC107;">geoclic_staging</span> │   │   <span style="color: #4CAF50;">Tables OGS</span>    │◄─┼──┘
+        │  │ (Zone travail)  │──▶│  ogs_poubelles  │  │
+        │  │                 │   │  ogs_arbres     │  │
+        │  │ • lexique       │   │  ogs_...        │  │
+        │  │ • points        │   │                 │  │
+        │  │ • users         │   │  <span style="color: #9E9E9E;">(auto-créées)</span>  │  │
+        │  └─────────────────┘   └─────────────────┘  │
+        └─────────────────────────────────────────────┘
+
+<span style="color: #9E9E9E;">Flux : Mobile → Staging → Validation → Publication OGS → SIG/OpenData</span>
+</pre>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>✅ Solution 100% souveraine :</strong> GéoClic utilise exclusivement des briques Open Source françaises et européennes (PostgreSQL, PostGIS, Vue.js, FastAPI). Vos données restent sous votre contrôle total.
+            </div>
+
+            <div class="alert alert-info">
+                <strong>💡 Bon à savoir :</strong> Ce guide est conçu pour une installation sur Windows 10 ou Windows 11. Pour les autres systèmes d'exploitation (Mac, Linux), les étapes sont similaires mais certaines commandes peuvent différer.
+            </div>
+        </section>
+
+        <!-- SECTION 2: PREREQUIS MATERIELS -->
+        <section id="prerequis-materiel">
+            <h2>2. Prérequis matériels</h2>
+
+            <h3>Configuration minimale requise</h3>
+            <table>
+                <tr>
+                    <th>Composant</th>
+                    <th>Minimum</th>
+                    <th>Recommandé</th>
+                </tr>
+                <tr>
+                    <td>Processeur</td>
+                    <td>Intel Core i3 / AMD Ryzen 3</td>
+                    <td>Intel Core i5 / AMD Ryzen 5 ou supérieur</td>
+                </tr>
+                <tr>
+                    <td>Mémoire RAM</td>
+                    <td>8 Go</td>
+                    <td>16 Go ou plus</td>
+                </tr>
+                <tr>
+                    <td>Espace disque</td>
+                    <td>10 Go libres</td>
+                    <td>20 Go libres ou plus</td>
+                </tr>
+                <tr>
+                    <td>Système d'exploitation</td>
+                    <td>Windows 10 (64 bits)</td>
+                    <td>Windows 11 (64 bits)</td>
+                </tr>
+                <tr>
+                    <td>Connexion Internet</td>
+                    <td>Requise pour l'installation</td>
+                    <td>Recommandée en permanence</td>
+                </tr>
+            </table>
+
+            <div class="alert alert-warning">
+                <strong>⚠️ Important :</strong> Votre ordinateur doit supporter la virtualisation (VT-x pour Intel, AMD-V pour AMD). Cette option est généralement activée par défaut, mais peut nécessiter une activation dans le BIOS de votre ordinateur.
+            </div>
+
+            <h3>Vérification de la virtualisation</h3>
+            <p>Pour vérifier si la virtualisation est activée :</p>
+            <ol>
+                <li>Appuyez sur <span class="code-inline">Ctrl + Maj + Échap</span> pour ouvrir le Gestionnaire des tâches</li>
+                <li>Cliquez sur l'onglet <strong>Performance</strong></li>
+                <li>Sélectionnez <strong>Processeur</strong></li>
+                <li>Vérifiez que "Virtualisation" indique <strong>Activé</strong></li>
+            </ol>
+        </section>
+
+        <!-- SECTION 3: DOCKER -->
+        <section id="installation-docker">
+            <h2>3. Installation de Docker Desktop</h2>
+
+            <p>Docker est un logiciel qui permet de créer des "conteneurs" - des environnements isolés contenant tout le nécessaire pour faire fonctionner une application. GéoClic utilise Docker pour la base de données PostgreSQL.</p>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Télécharger Docker Desktop</h4>
+                    <p>Rendez-vous sur le site officiel de Docker :</p>
+                    <p><a href="https://www.docker.com/products/docker-desktop/" target="_blank" class="btn-example">https://www.docker.com/products/docker-desktop/</a></p>
+                    <p>Cliquez sur le bouton <strong>"Download for Windows"</strong>.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Lancer l'installation</h4>
+                    <p>Une fois le fichier téléchargé (environ 500 Mo), double-cliquez dessus pour lancer l'installation.</p>
+                    <p>Acceptez les conditions d'utilisation et laissez les options par défaut cochées :</p>
+                    <ul>
+                        <li>✅ Use WSL 2 instead of Hyper-V (recommandé)</li>
+                        <li>✅ Add shortcut to desktop</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Attendre la fin de l'installation</h4>
+                    <p>L'installation peut prendre plusieurs minutes. Ne fermez pas la fenêtre.</p>
+                    <p>À la fin, cliquez sur <strong>"Close and restart"</strong> pour redémarrer votre ordinateur.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>Premier lancement de Docker</h4>
+                    <p>Après le redémarrage, Docker Desktop devrait se lancer automatiquement. Sinon, double-cliquez sur l'icône Docker sur votre bureau.</p>
+                    <p>Lors du premier lancement :</p>
+                    <ul>
+                        <li>Acceptez les conditions d'utilisation</li>
+                        <li>Vous pouvez ignorer la création d'un compte Docker (cliquez sur "Skip" ou "Continue without signing in")</li>
+                        <li>Attendez que l'icône Docker dans la barre des tâches devienne verte (cela peut prendre 1-2 minutes)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h4>Vérifier l'installation</h4>
+                    <p>Pour vérifier que Docker fonctionne correctement :</p>
+                    <ol>
+                        <li>Ouvrez une fenêtre de commande : appuyez sur <span class="code-inline">Win + R</span>, tapez <span class="code-inline">cmd</span> et appuyez sur Entrée</li>
+                        <li>Tapez la commande suivante et appuyez sur Entrée :</li>
+                    </ol>
+                    <div class="code-block">
+                        <code>docker --version</code>
+                    </div>
+                    <p>Vous devriez voir apparaître quelque chose comme :</p>
+                    <div class="code-block">
+                        <code>Docker version 24.0.7, build afdd53b</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>✅ Docker est installé !</strong> Vous pouvez passer à l'étape suivante.
+            </div>
+        </section>
+
+        <!-- SECTION 4: PYTHON -->
+        <section id="installation-python">
+            <h2>4. Installation de Python</h2>
+
+            <p>Python est le langage de programmation utilisé pour l'API de GéoClic. Vous devez installer Python version 3.10 ou supérieure.</p>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Télécharger Python</h4>
+                    <p>Rendez-vous sur le site officiel de Python :</p>
+                    <p><a href="https://www.python.org/downloads/" target="_blank" class="btn-example">https://www.python.org/downloads/</a></p>
+                    <p>Cliquez sur le bouton jaune <strong>"Download Python 3.x.x"</strong> (la dernière version).</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Lancer l'installation</h4>
+                    <p>Double-cliquez sur le fichier téléchargé pour lancer l'installation.</p>
+                    <div class="alert alert-danger">
+                        <strong>🚨 TRÈS IMPORTANT :</strong> Avant de cliquer sur "Install Now", cochez ABSOLUMENT la case <strong>"Add Python to PATH"</strong> en bas de la fenêtre ! Cette option est indispensable pour que Python fonctionne correctement.
+                    </div>
+                    <p>Une fois la case cochée, cliquez sur <strong>"Install Now"</strong>.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Terminer l'installation</h4>
+                    <p>Attendez la fin de l'installation, puis cliquez sur <strong>"Close"</strong>.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>Vérifier l'installation</h4>
+                    <p>Ouvrez une <strong>nouvelle</strong> fenêtre de commande (important : fermez l'ancienne si elle était ouverte) :</p>
+                    <ol>
+                        <li>Appuyez sur <span class="code-inline">Win + R</span></li>
+                        <li>Tapez <span class="code-inline">cmd</span> et appuyez sur Entrée</li>
+                        <li>Tapez la commande :</li>
+                    </ol>
+                    <div class="code-block">
+                        <code>python --version</code>
+                    </div>
+                    <p>Vous devriez voir :</p>
+                    <div class="code-block">
+                        <code>Python 3.13.1</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>✅ Python est installé !</strong> Vous pouvez passer à l'étape suivante.
+            </div>
+        </section>
+
+        <!-- SECTION 5: NODEJS -->
+        <section id="installation-nodejs">
+            <h2>5. Installation de Node.js</h2>
+
+            <p>Node.js est utilisé pour faire fonctionner l'interface web GéoClic Data.</p>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Télécharger Node.js</h4>
+                    <p>Rendez-vous sur le site officiel de Node.js :</p>
+                    <p><a href="https://nodejs.org/" target="_blank" class="btn-example">https://nodejs.org/</a></p>
+                    <p>Téléchargez la version <strong>LTS</strong> (Long Term Support) - c'est le bouton vert de gauche.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Lancer l'installation</h4>
+                    <p>Double-cliquez sur le fichier téléchargé et suivez l'assistant d'installation :</p>
+                    <ul>
+                        <li>Acceptez la licence</li>
+                        <li>Gardez le dossier d'installation par défaut</li>
+                        <li>Gardez toutes les options par défaut</li>
+                        <li>À la fin, une case vous propose d'installer des outils supplémentaires : vous pouvez la décocher</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Vérifier l'installation</h4>
+                    <p>Ouvrez une nouvelle fenêtre de commande et tapez :</p>
+                    <div class="code-block">
+                        <code>node --version</code>
+                    </div>
+                    <p>Vous devriez voir :</p>
+                    <div class="code-block">
+                        <code>v20.10.0</code>
+                    </div>
+                    <p>Vérifiez également npm (le gestionnaire de paquets) :</p>
+                    <div class="code-block">
+                        <code>npm --version</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>✅ Node.js est installé !</strong> Tous les prérequis sont maintenant installés.
+            </div>
+        </section>
+
+        <!-- SECTION 6: TELECHARGEMENT -->
+        <section id="telechargement">
+            <h2>6. Téléchargement de GéoClic</h2>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Récupérer les fichiers GéoClic</h4>
+                    <p>Vous avez reçu les fichiers GéoClic sous forme d'une archive ZIP ou d'un dossier. Placez ce dossier à un emplacement facile d'accès, par exemple :</p>
+                    <div class="code-block">
+                        <code>C:\Users\VotreNom\Documents\GéoClic</code>
+                    </div>
+                    <p>ou</p>
+                    <div class="code-block">
+                        <code>C:\GéoClic</code>
+                    </div>
+                    <div class="alert alert-warning">
+                        <strong>⚠️ Attention :</strong> Évitez les chemins avec des espaces ou des caractères spéciaux (accents, etc.). Préférez un chemin simple comme <code>C:\GéoClic</code>.
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Structure du dossier</h4>
+                    <p>Votre dossier GéoClic devrait contenir les éléments suivants :</p>
+                    <div class="code-block">
+GéoClic/
+├── api/                    ← Le serveur API
+├── geoclic_data/           ← L'interface web d'administration
+├── geoclic_mobile_v12/     ← L'application mobile (optionnel)
+├── database/               ← Scripts de base de données
+├── docker-compose.yml      ← Configuration Docker
+├── launch_api.bat          ← Lanceur de l'API
+├── launch_geoclic_data.bat ← Lanceur complet
+└── PROJET_GEOCLIC_V12_PRO.md ← Documentation technique
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7: BASE DE DONNEES -->
+        <section id="base-donnees">
+            <h2>7. Configuration de la base de données</h2>
+
+            <p>La base de données PostgreSQL va stocker toutes vos données : points, catégories, utilisateurs, etc.</p>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Ouvrir une fenêtre de commande dans le dossier GéoClic</h4>
+                    <p>Méthode simple :</p>
+                    <ol>
+                        <li>Ouvrez le dossier GéoClic dans l'Explorateur de fichiers</li>
+                        <li>Cliquez dans la barre d'adresse en haut (là où il y a écrit le chemin du dossier)</li>
+                        <li>Tapez <span class="code-inline">cmd</span> et appuyez sur Entrée</li>
+                    </ol>
+                    <p>Une fenêtre de commande s'ouvre directement dans le bon dossier.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Démarrer la base de données</h4>
+                    <p>Dans la fenêtre de commande, tapez :</p>
+                    <div class="code-block">
+                        <code>docker-compose up -d</code>
+                    </div>
+                    <p>Cette commande va :</p>
+                    <ul>
+                        <li>Télécharger l'image PostgreSQL/PostGIS (environ 500 Mo, seulement la première fois)</li>
+                        <li>Créer et démarrer le conteneur de base de données</li>
+                    </ul>
+                    <p>Attendez que la commande se termine. Vous verrez :</p>
+                    <div class="code-block">
+                        <code>Creating geoclic_server_v14 ... done</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Initialiser la base de données</h4>
+                    <p>La première fois, vous devez créer les tables dans la base de données. Tapez :</p>
+                    <div class="code-block">
+                        <code>docker exec -i geoclic_server_v14 psql -U admin_geoclic -d geoclic_v12 &lt; database\init_v12_pro.sql</code>
+                    </div>
+                    <p>Vous verrez défiler des messages de création de tables. C'est normal.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>Vérifier que la base fonctionne</h4>
+                    <p>Pour vérifier que tout est en ordre :</p>
+                    <div class="code-block">
+                        <code>docker ps</code>
+                    </div>
+                    <p>Vous devriez voir une ligne avec <code>geoclic_server_v14</code> et le statut "Up".</p>
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>✅ La base de données est configurée !</strong>
+            </div>
+        </section>
+
+        <!-- SECTION 8: API -->
+        <section id="lancement-api">
+            <h2>8. Lancement de l'API</h2>
+
+            <h3>Méthode simple (recommandée)</h3>
+            <p>Double-cliquez sur le fichier <span class="code-inline">launch_api.bat</span> dans le dossier GéoClic.</p>
+            <p>Ce script va automatiquement :</p>
+            <ul>
+                <li>Vérifier que Python est installé</li>
+                <li>Installer les dépendances nécessaires</li>
+                <li>Démarrer le serveur API</li>
+            </ul>
+
+            <h3>Méthode manuelle</h3>
+            <p>Si le script ne fonctionne pas, vous pouvez démarrer l'API manuellement :</p>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Ouvrir une fenêtre de commande dans le dossier api</h4>
+                    <div class="code-block">
+                        <code>cd C:\GéoClic\api</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Installer les dépendances</h4>
+                    <div class="code-block">
+                        <code>pip install -r requirements.txt</code>
+                    </div>
+                    <p>Cette commande télécharge toutes les bibliothèques nécessaires. Cela peut prendre quelques minutes.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Démarrer le serveur</h4>
+                    <div class="code-block">
+                        <code>python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload</code>
+                    </div>
+                </div>
+            </div>
+
+            <p>Quand l'API est démarrée, vous verrez :</p>
+            <div class="code-block">
+INFO:     Uvicorn running on http://0.0.0.0:8000
+INFO:     Application startup complete.
+🚀 GéoClic V14 API - Démarrage...
+✅ Base de données connectée
+            </div>
+
+            <div class="alert alert-info">
+                <strong>💡 Documentation API :</strong> Vous pouvez accéder à la documentation interactive de l'API à l'adresse : <a href="http://localhost:8000/docs" target="_blank">http://localhost:8000/docs</a>
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>⚠️ Ne fermez pas cette fenêtre !</strong> L'API doit rester en cours d'exécution pour que GéoClic fonctionne. Vous pouvez la réduire, mais ne la fermez pas.
+            </div>
+        </section>
+
+        <!-- SECTION 9: INTERFACE WEB -->
+        <section id="lancement-interface">
+            <h2>9. Lancement de l'interface web</h2>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Ouvrir une nouvelle fenêtre de commande</h4>
+                    <p>Laissez la fenêtre de l'API ouverte et ouvrez une nouvelle fenêtre de commande.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Aller dans le dossier geoclic_data</h4>
+                    <div class="code-block">
+                        <code>cd C:\GéoClic\geoclic_data</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Installer les dépendances (première fois uniquement)</h4>
+                    <div class="code-block">
+                        <code>npm install</code>
+                    </div>
+                    <p>Cette commande télécharge toutes les bibliothèques nécessaires. Cela peut prendre 2-3 minutes.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>Démarrer l'interface</h4>
+                    <div class="code-block">
+                        <code>npm run dev</code>
+                    </div>
+                </div>
+            </div>
+
+            <p>Quand l'interface est démarrée, vous verrez :</p>
+            <div class="code-block">
+VITE v5.x.x  ready in xxx ms
+
+➜  Local:   http://localhost:3000/
+➜  Network: http://192.168.x.x:3000/
+            </div>
+
+            <div class="step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h4>Ouvrir l'interface dans votre navigateur</h4>
+                    <p>Ouvrez votre navigateur web (Chrome, Firefox, Edge...) et allez à l'adresse :</p>
+                    <p><a href="http://localhost:3000" target="_blank" class="btn-example">http://localhost:3000</a></p>
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>🎉 Félicitations !</strong> GéoClic Data est maintenant accessible !
+            </div>
+        </section>
+
+        <!-- SECTION 10: PREMIER DEMARRAGE -->
+        <section id="premier-demarrage">
+            <h2>10. Premier démarrage et configuration</h2>
+
+            <h3>Connexion à GéoClic Data</h3>
+            <p>À l'ouverture, vous arrivez sur la page de connexion. Utilisez les identifiants par défaut :</p>
+            <table>
+                <tr>
+                    <th>Champ</th>
+                    <th>Valeur</th>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td><code>admin@geoclic.local</code> ou <code>admin@geoclic.fr</code></td>
+                </tr>
+                <tr>
+                    <td>Mot de passe</td>
+                    <td><code>admin123</code></td>
+                </tr>
+            </table>
+
+            <div class="alert alert-danger">
+                <strong>🔐 SÉCURITÉ :</strong> Changez immédiatement ce mot de passe après la première connexion ! Allez dans <strong>Profil</strong> > <strong>Changer le mot de passe</strong>.
+            </div>
+
+            <h3>Création d'un nouvel utilisateur admin</h3>
+            <p>Si les identifiants par défaut ne fonctionnent pas, vous pouvez créer un utilisateur manuellement :</p>
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Générer un mot de passe hashé</h4>
+                    <p>Dans une fenêtre de commande :</p>
+                    <div class="code-block">
+                        <code>python -c "import bcrypt; print(bcrypt.hashpw(b'votre_mot_de_passe', bcrypt.gensalt()).decode())"</code>
+                    </div>
+                    <p>Remplacez <code>votre_mot_de_passe</code> par le mot de passe souhaité. Copiez le résultat (commence par $2b$12$...).</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Insérer l'utilisateur dans la base</h4>
+                    <div class="code-block">
+docker exec -it geoclic_server_v14 psql -U admin_geoclic -d geoclic_v12 -c "INSERT INTO users (id, email, password_hash, name, role, is_active, created_at) VALUES (gen_random_uuid(), 'votre@email.fr', 'HASH_COPIÉ_ICI', 'Votre Nom', 'admin', true, NOW());"
+                    </div>
+                </div>
+            </div>
+
+            <h3>Arrêter GéoClic</h3>
+            <p>Pour arrêter proprement GéoClic :</p>
+            <ol>
+                <li>Dans la fenêtre de l'interface web, appuyez sur <span class="code-inline">Ctrl + C</span></li>
+                <li>Dans la fenêtre de l'API, appuyez sur <span class="code-inline">Ctrl + C</span></li>
+                <li>Pour arrêter la base de données : <code>docker stop geoclic_server_v14</code></li>
+            </ol>
+
+            <h3>Relancer GéoClic</h3>
+            <p>Pour relancer GéoClic après l'avoir arrêté :</p>
+            <ol>
+                <li>Démarrez Docker Desktop</li>
+                <li>Démarrez la base : <code>docker start geoclic_server_v14</code></li>
+                <li>Double-cliquez sur <span class="code-inline">launch_api.bat</span></li>
+                <li>Dans le dossier geoclic_data : <code>npm run dev</code></li>
+            </ol>
+        </section>
+
+        <!-- SECTION 11: DEPANNAGE -->
+        <section id="depannage">
+            <h2>11. Dépannage et problèmes courants</h2>
+
+            <h3>❌ "Docker n'est pas lancé"</h3>
+            <p><strong>Solution :</strong> Lancez Docker Desktop depuis le menu Démarrer ou le bureau. Attendez que l'icône dans la barre des tâches devienne verte.</p>
+
+            <h3>❌ "'python' n'est pas reconnu"</h3>
+            <p><strong>Cause :</strong> Python n'est pas dans le PATH.</p>
+            <p><strong>Solution :</strong> Réinstallez Python en cochant "Add Python to PATH", ou ajoutez manuellement Python au PATH système.</p>
+
+            <h3>❌ "'npm' n'est pas reconnu"</h3>
+            <p><strong>Solution :</strong> Réinstallez Node.js et redémarrez votre ordinateur.</p>
+
+            <h3>❌ "Connection refused" sur localhost:8000</h3>
+            <p><strong>Cause :</strong> L'API n'est pas démarrée.</p>
+            <p><strong>Solution :</strong> Vérifiez que la fenêtre de l'API est ouverte et qu'il n'y a pas d'erreur.</p>
+
+            <h3>❌ "Connection refused" sur localhost:3000</h3>
+            <p><strong>Cause :</strong> L'interface web n'est pas démarrée.</p>
+            <p><strong>Solution :</strong> Lancez <code>npm run dev</code> dans le dossier geoclic_data.</p>
+
+            <h3>❌ "Module not found" ou erreur d'import</h3>
+            <p><strong>Cause :</strong> Dépendances non installées.</p>
+            <p><strong>Solution :</strong> Lancez <code>pip install -r requirements.txt</code> dans le dossier api, et <code>npm install</code> dans geoclic_data.</p>
+
+            <h3>❌ Erreur de connexion à la base de données</h3>
+            <p><strong>Vérifications :</strong></p>
+            <ol>
+                <li>Docker est-il lancé ? (icône verte dans la barre des tâches)</li>
+                <li>Le conteneur est-il démarré ? (<code>docker ps</code> doit montrer geoclic_server_v14)</li>
+                <li>Si non : <code>docker start geoclic_server_v14</code></li>
+            </ol>
+
+            <h3>❌ Page blanche dans le navigateur</h3>
+            <p><strong>Solution :</strong></p>
+            <ol>
+                <li>Ouvrez les outils de développement (F12)</li>
+                <li>Allez dans l'onglet "Console"</li>
+                <li>Notez les erreurs affichées et contactez le support</li>
+            </ol>
+
+            <h3>❌ "Erreur de connexion" lors du login</h3>
+            <p><strong>Vérifications :</strong></p>
+            <ol>
+                <li>L'API est-elle démarrée ?</li>
+                <li>L'utilisateur existe-t-il dans la base ?</li>
+                <li>Le mot de passe est-il correct ?</li>
+            </ol>
+        </section>
+
+        <!-- SECTION 12: DESINSTALLATION -->
+        <section id="desinstallation">
+            <h2>12. Désinstallation</h2>
+
+            <p>Si vous souhaitez désinstaller GéoClic :</p>
+
+            <h3>Supprimer les données et le conteneur Docker</h3>
+            <div class="code-block">
+docker stop geoclic_server_v14
+docker rm geoclic_server_v14
+docker volume rm geoclic_dataV1_postgres_data
+            </div>
+
+            <h3>Supprimer le dossier GéoClic</h3>
+            <p>Supprimez simplement le dossier GéoClic de votre ordinateur.</p>
+
+            <h3>Désinstaller les logiciels (optionnel)</h3>
+            <p>Si vous n'avez plus besoin de Docker, Python ou Node.js pour d'autres projets, vous pouvez les désinstaller via les "Paramètres Windows" > "Applications".</p>
+        </section>
+
+        <section>
+            <h2>Récapitulatif - Checklist d'installation</h2>
+            <div class="checklist">
+                <ul>
+                    <li>Docker Desktop installé et fonctionnel</li>
+                    <li>Python 3.10+ installé avec PATH configuré</li>
+                    <li>Node.js LTS installé</li>
+                    <li>Dossier GéoClic placé dans un emplacement accessible</li>
+                    <li>Base de données démarrée (docker-compose up -d)</li>
+                    <li>Base de données initialisée (script SQL exécuté)</li>
+                    <li>API démarrée (launch_api.bat ou python -m uvicorn)</li>
+                    <li>Interface web démarrée (npm run dev)</li>
+                    <li>Connexion réussie sur http://localhost:3000</li>
+                    <li>Mot de passe administrateur changé</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer>
+            <p>📘 GéoClic V14 - Guide d'Installation</p>
+            <p>Version 1.0 - Janvier 2026</p>
+            <p>Pour toute question, contactez le support technique.</p>
+        </footer>
+    </div>
+</body>
+</html>

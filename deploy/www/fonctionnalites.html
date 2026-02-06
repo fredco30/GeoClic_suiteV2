@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fonctionnalités - GéoClic Suite</title>
+    <meta name="description" content="Découvrez les fonctionnalités de GéoClic Suite : SIG Web, gestion de patrimoine, application mobile, portail citoyen.">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Grid Fonctionnalités */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            padding: 20px 60px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            object-position: top;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-content {
+            padding: 15px;
+        }
+
+        .card h3 {
+            color: var(--primary);
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .card .subtitle {
+            color: var(--text-light);
+            font-size: 0.85em;
+            margin-bottom: 10px;
+        }
+
+        .card ul {
+            list-style: none;
+            font-size: 0.8em;
+        }
+
+        .card li {
+            padding: 3px 0;
+            color: var(--text);
+        }
+
+        .card li::before {
+            content: "✓ ";
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* Row 2 - Cartes horizontales portrait */
+        .cards-row-portrait {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            padding: 0 60px 20px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .card-horizontal {
+            background: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: stretch;
+            width: 45%;
+            max-width: 500px;
+        }
+
+        .card-horizontal img {
+            width: 140px;
+            height: auto;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .card-horizontal .card-content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card-horizontal h3 {
+            color: var(--primary);
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .card-horizontal .subtitle {
+            color: var(--text-light);
+            font-size: 0.85em;
+            margin-bottom: 10px;
+        }
+
+        .card-horizontal ul {
+            list-style: none;
+            font-size: 0.8em;
+        }
+
+        .card-horizontal li {
+            padding: 2px 0;
+            color: var(--text);
+        }
+
+        .card-horizontal li::before {
+            content: "✓ ";
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        @media (max-width: 900px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            .cards-row-portrait {
+                flex-direction: column;
+                align-items: center;
+            }
+            .card-horizontal {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="logo">
+            <img src="assets/logo.png" alt="GéoClic">
+            <span>GéoClic</span> Suite
+        </a>
+        <div class="nav-links">
+            <a href="fonctionnalites.html" style="color: var(--primary);">Fonctionnalités</a>
+            <a href="tarifs.html">Tarifs</a>
+            <a href="mailto:contact@geoclic.fr">Contact</a>
+            <a href="mailto:contact@geoclic.fr?subject=Demande de démonstration" class="btn-demo">Demander une démo</a>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <h1>Fonctionnalités</h1>
+        <p>5 applications intégrées pour gérer votre patrimoine territorial</p>
+    </header>
+
+    <!-- Ligne 1 : Cartes verticales (paysage) -->
+    <div class="cards-grid">
+        <div class="card">
+            <img src="screenshots/sig-web.png" alt="SIG Web">
+            <div class="card-content">
+                <h3>SIG Web</h3>
+                <p class="subtitle">Cartographie professionnelle accessible à tous</p>
+                <ul>
+                    <li>Fonds IGN : Plan, Ortho, Cadastre, Historique</li>
+                    <li>Outils de mesure distance et surface</li>
+                    <li>Création de points, lignes, polygones</li>
+                    <li>Import/Export GeoJSON glisser-déposer</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="screenshots/geoclic-data.png" alt="GéoClic Data">
+            <div class="card-content">
+                <h3>GéoClic Data</h3>
+                <p class="subtitle">Centre de contrôle du patrimoine</p>
+                <ul>
+                    <li>Tableau de bord et statistiques</li>
+                    <li>Lexique hiérarchique sur 6 niveaux</li>
+                    <li>Import CSV, GeoJSON, Shapefile</li>
+                    <li>Génération de QR Codes</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <img src="screenshots/demandes.png" alt="Gestion Demandes">
+            <div class="card-content">
+                <h3>Gestion des Demandes</h3>
+                <p class="subtitle">Back-office signalements citoyens</p>
+                <ul>
+                    <li>Workflow complet de traitement</li>
+                    <li>Notifications email automatiques</li>
+                    <li>Affectation aux agents</li>
+                    <li>Statistiques et délais moyens</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ligne 2 : Cartes horizontales (portrait) -->
+    <div class="cards-row-portrait">
+        <div class="card-horizontal">
+            <img src="screenshots/mobile-pwa.png" alt="Mobile PWA">
+            <div class="card-content">
+                <h3>Mobile PWA</h3>
+                <p class="subtitle">Relevés terrain smartphone/tablette</p>
+                <ul>
+                    <li>Géolocalisation GPS haute précision</li>
+                    <li>Photos compressées automatiquement</li>
+                    <li>Mode hors-ligne avec synchronisation</li>
+                    <li>Installation sans App Store</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card-horizontal">
+            <img src="screenshots/portail.png" alt="Portail Citoyen">
+            <div class="card-content">
+                <h3>Portail Citoyen</h3>
+                <p class="subtitle">Interface de signalement public</p>
+                <ul>
+                    <li>Signalement géolocalisé avec photos</li>
+                    <li>Scan QR Code sur équipements</li>
+                    <li>Suivi par token sans compte</li>
+                    <li>Interface simple et accessible</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="trust">
+            <span>✓ Hébergement France</span>
+            <span>✓ Conforme RGPD</span>
+            <span>✓ Fonds IGN gratuits</span>
+            <span>✓ Utilisateurs illimités</span>
+        </div>
+    </footer>
+</body>
+</html>

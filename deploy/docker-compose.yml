@@ -1,0 +1,267 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Docker Compose - GéoClic Suite V14 - Phase 3
+# Déploiement complet de l'écosystème GéoClic
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# Services:
+#   - db: PostgreSQL 15 + PostGIS 3.3
+#   - api: FastAPI backend
+#   - admin: Vue.js admin interface (GéoClic Data)
+#   - portail: Portail citoyen (signalements)
+#   - demandes: Back-office gestion des demandes citoyens
+#   - mobile: PWA relevé terrain (GéoClic Mobile)
+#   - sig: Application cartographique SIG (GéoClic SIG Web)
+#   - nginx: Reverse proxy + SSL
+#
+# Usage:
+#   docker-compose up -d
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+version: "3.9"
+
+services:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # BASE DE DONNÉES PostgreSQL + PostGIS
+  # ═══════════════════════════════════════════════════════════════════════════
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: geoclic_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-geoclic}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-geoclic_secure_password}
+      POSTGRES_DB: ${DB_NAME:-geoclic_db}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../database/init_v12_pro.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ../database/migrations:/docker-entrypoint-initdb.d/migrations:ro
+    # SÉCURITÉ: Port DB non exposé par défaut (accessible uniquement via le réseau Docker interne)
+    # Décommenter la ligne ci-dessous uniquement pour le debug local
+    # ports:
+    #   - "${DB_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-geoclic} -d ${DB_NAME:-geoclic_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - geoclic_network
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # API FASTAPI
+  # ═══════════════════════════════════════════════════════════════════════════
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api
+    container_name: geoclic_api
+    restart: unless-stopped
+    environment:
+      # Base de données
+      DATABASE_URL: postgresql+asyncpg://${DB_USER:-geoclic}:${DB_PASSWORD:-geoclic_secure_password}@db:5432/${DB_NAME:-geoclic_db}
+      # JWT - OBLIGATOIRE: Définir dans .env (voir deploy/.env.example)
+      JWT_SECRET_KEY: "${JWT_SECRET_KEY:-change_this_secret_key_in_production}"
+      JWT_ALGORITHM: HS256
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: ${JWT_EXPIRE_MINUTES:-60}
+      # Application
+      APP_ENV: ${APP_ENV:-production}
+      DEBUG: ${DEBUG:-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      # Photos
+      PHOTO_STORAGE_PATH: /app/photos
+      PHOTO_MAX_SIZE_MB: ${PHOTO_MAX_SIZE:-10}
+    volumes:
+      - photos_data:/app/photos
+      - ./logs:/app/logs
+    ports:
+      - "${API_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - geoclic_network
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # INTERFACE ADMIN (GéoClic Data)
+  # ═══════════════════════════════════════════════════════════════════════════
+  admin:
+    build:
+      context: ../geoclic_data
+      dockerfile: Dockerfile
+    container_name: geoclic_admin
+    restart: unless-stopped
+    environment:
+      # VITE_API_URL non défini = détection automatique (localhost:8000 en dev, /api en prod)
+      VITE_APP_TITLE: GéoClic Data
+    ports:
+      - "${ADMIN_PORT:-3000}:80"
+    depends_on:
+      - api
+    networks:
+      - geoclic_network
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # PORTAIL CITOYEN (Signalements publics)
+  # ═══════════════════════════════════════════════════════════════════════════
+  portail:
+    build:
+      context: ../portail_citoyen
+      dockerfile: Dockerfile
+    container_name: geoclic_portail
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: ${API_PUBLIC_URL:-http://localhost:8000}
+      VITE_APP_TITLE: Portail Citoyen
+    ports:
+      - "${PORTAIL_PORT:-5174}:80"
+    depends_on:
+      - api
+    networks:
+      - geoclic_network
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # BACK-OFFICE DEMANDES CITOYENS
+  # ═══════════════════════════════════════════════════════════════════════════
+  demandes:
+    build:
+      context: ../geoclic_demandes
+      dockerfile: Dockerfile
+    container_name: geoclic_demandes
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: ${API_PUBLIC_URL:-http://localhost:8000}
+      VITE_APP_TITLE: Gestion Demandes
+    ports:
+      - "${DEMANDES_PORT:-5175}:80"
+    depends_on:
+      - api
+    networks:
+      - geoclic_network
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # MOBILE PWA (Relevé terrain)
+  # ═══════════════════════════════════════════════════════════════════════════
+  mobile:
+    build:
+      context: ../geoclic_mobile_pwa
+      dockerfile: Dockerfile
+    container_name: geoclic_mobile
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: ${API_PUBLIC_URL:-http://localhost:8000}
+      VITE_APP_TITLE: GéoClic Mobile
+    ports:
+      - "${MOBILE_PORT:-5176}:80"
+    depends_on:
+      - api
+    networks:
+      - geoclic_network
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # SIG WEB (Application cartographique)
+  # ═══════════════════════════════════════════════════════════════════════════
+  sig:
+    build:
+      context: ../geoclic_sig_web
+      dockerfile: Dockerfile
+    container_name: geoclic_sig
+    restart: unless-stopped
+    environment:
+      # VITE_API_URL non défini = détection automatique (URLs relatives /api)
+      VITE_APP_TITLE: GéoClic SIG
+    ports:
+      - "${SIG_PORT:-5177}:80"
+    depends_on:
+      - api
+    networks:
+      - geoclic_network
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # GEOCLIC SERVICES (Services terrain)
+  # ═══════════════════════════════════════════════════════════════════════════
+  services:
+    build:
+      context: ../geoclic_services
+      dockerfile: Dockerfile
+    container_name: geoclic_services
+    restart: unless-stopped
+    environment:
+      VITE_APP_TITLE: GeoClic Services
+    ports:
+      - "${SERVICES_PORT:-5178}:80"
+    depends_on:
+      - api
+    networks:
+      - geoclic_network
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # GEOCLIC SERVICES PWA (Application terrain mobile)
+  # ═══════════════════════════════════════════════════════════════════════════
+  terrain:
+    build:
+      context: ../geoclic_services_pwa
+      dockerfile: Dockerfile
+    container_name: geoclic_terrain
+    restart: unless-stopped
+    environment:
+      VITE_APP_TITLE: GeoClic Terrain
+    ports:
+      - "${TERRAIN_PORT:-5180}:80"
+    depends_on:
+      - api
+    networks:
+      - geoclic_network
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # NGINX REVERSE PROXY
+  # ═══════════════════════════════════════════════════════════════════════════
+  nginx:
+    image: nginx:alpine
+    container_name: geoclic_nginx
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+      - ./www:/var/www:ro
+      - photos_data:/app/photos:ro
+    depends_on:
+      - api
+      - admin
+      - portail
+      - demandes
+      - mobile
+      - sig
+      - services
+      - terrain
+    networks:
+      - geoclic_network
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# VOLUMES PERSISTANTS
+# ═══════════════════════════════════════════════════════════════════════════════
+volumes:
+  postgres_data:
+    name: geoclic_postgres_data
+  photos_data:
+    name: geoclic_photos_data
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# RÉSEAU
+# ═══════════════════════════════════════════════════════════════════════════════
+networks:
+  geoclic_network:
+    name: geoclic_network
+    driver: bridge

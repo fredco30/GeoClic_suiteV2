@@ -1,0 +1,232 @@
+/* GéoClic Suite - Styles communs */
+:root {
+    --primary: #1565C0;
+    --primary-dark: #0D47A1;
+    --accent: #FF6F00;
+    --text: #333;
+    --text-light: #666;
+    --bg: #f8f9fa;
+    --white: #fff;
+    --border: #e0e0e0;
+    --success: #2E7D32;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.5;
+}
+
+/* Navigation */
+nav {
+    background: var(--white);
+    padding: 12px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--text);
+}
+.logo img { height: 32px; }
+.logo span { color: var(--primary); }
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.nav-links a {
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 500;
+    font-size: 0.95em;
+}
+.nav-links a:hover { color: var(--primary); }
+
+.btn-demo, .btn-primary {
+    background: var(--accent);
+    color: var(--white) !important;
+    padding: 8px 16px;
+    border-radius: 5px;
+    font-weight: 600;
+}
+.btn-demo:hover, .btn-primary:hover { background: #e65100; }
+
+.btn-secondary {
+    background: transparent;
+    color: var(--primary) !important;
+    padding: 8px 16px;
+    border: 2px solid var(--primary);
+    border-radius: 5px;
+    font-weight: 600;
+}
+.btn-secondary:hover {
+    background: var(--primary);
+    color: var(--white) !important;
+}
+
+/* Hero - Index */
+.hero {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    padding: 30px 40px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+}
+.hero-content { flex: 1; }
+.hero-content h1 { font-size: 2em; margin-bottom: 10px; }
+.hero-content p { font-size: 1em; opacity: 0.95; margin-bottom: 15px; }
+.hero-buttons { display: flex; gap: 10px; }
+.hero-image { flex: 1; max-width: 450px; }
+.hero-image img {
+    width: 100%;
+    border-radius: 6px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* Modules grid - Index */
+.modules {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 20px 30px;
+    background: var(--white);
+}
+.module {
+    text-align: center;
+    padding: 15px 20px;
+    background: var(--bg);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    min-width: 120px;
+}
+.module:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.module-icon { font-size: 1.5em; margin-bottom: 5px; }
+.module h3 { font-size: 0.9em; color: var(--primary); margin-bottom: 2px; }
+.module p { font-size: 0.75em; color: var(--text-light); }
+
+/* Footer */
+footer {
+    background: var(--primary-dark);
+    color: var(--white);
+    padding: 12px 30px;
+    text-align: center;
+}
+.trust {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+    font-size: 0.85em;
+}
+.trust span { opacity: 0.9; }
+
+/* Page Header */
+.page-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    padding: 12px 40px;
+    text-align: center;
+}
+.page-header h1 { font-size: 1.3em; margin-bottom: 3px; }
+.page-header p { font-size: 0.85em; opacity: 0.9; }
+
+/* Feature blocks - Fonctionnalités */
+.features { padding: 20px 40px; }
+.feature {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+}
+.feature:last-child { border-bottom: none; }
+.feature.reverse { flex-direction: row-reverse; }
+.feature-info { flex: 1; }
+.feature-info h2 { font-size: 1.3em; color: var(--primary); margin-bottom: 8px; }
+.feature-info p { color: var(--text-light); margin-bottom: 10px; font-size: 0.9em; }
+.feature-info ul { list-style: none; }
+.feature-info li {
+    padding: 4px 0;
+    font-size: 0.85em;
+}
+.feature-info li::before {
+    content: "✓ ";
+    color: var(--success);
+    font-weight: bold;
+}
+.feature-image { flex: 0 0 350px; }
+.feature-image img {
+    width: 100%;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.feature-image.portrait { flex: 0 0 180px; }
+
+/* Pricing table - Tarifs */
+.pricing { padding: 20px 40px; max-width: 900px; margin: 0 auto; }
+.pricing-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+.pricing-table th,
+.pricing-table td {
+    padding: 12px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+.pricing-table th {
+    background: var(--primary-dark);
+    color: var(--white);
+    font-weight: 600;
+}
+.pricing-table th:not(:first-child) { text-align: center; }
+.pricing-table td:not(:first-child) { text-align: center; }
+.pricing-table tr:last-child td { border-bottom: none; }
+.pricing-table .check { color: var(--success); font-size: 1.1em; }
+.pricing-table .highlight { color: var(--primary); font-weight: 500; }
+
+.pricing-cta {
+    text-align: center;
+    padding: 25px;
+    background: var(--bg);
+    margin-top: 20px;
+    border-radius: 8px;
+}
+.pricing-cta h3 { font-size: 1.1em; margin-bottom: 10px; }
+.pricing-cta p { font-size: 0.9em; color: var(--text-light); margin-bottom: 15px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    nav { padding: 10px 15px; }
+    .nav-links a:not(.btn-demo) { display: none; }
+    .hero { flex-direction: column; padding: 20px; }
+    .hero-image { max-width: 100%; }
+    .modules { flex-wrap: wrap; }
+    .feature { flex-direction: column !important; }
+    .feature-image, .feature-image.portrait { flex: none; width: 100%; max-width: 300px; }
+}

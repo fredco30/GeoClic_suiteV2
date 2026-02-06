@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manuel Utilisateur GéoClic Data - Volume 3 : QR Codes, Exports et Administration</title>
+    <style>
+        :root {
+            --primary: #1976D2;
+            --primary-dark: #1565C0;
+            --secondary: #424242;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --error: #F44336;
+            --info: #2196F3;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --text: #212121;
+            --text-secondary: #757575;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--background);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .volume-info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: inline-block;
+        }
+
+        nav.toc {
+            background: var(--surface);
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        nav.toc ul {
+            list-style: none;
+        }
+
+        nav.toc > ul > li {
+            margin-bottom: 15px;
+        }
+
+        nav.toc a {
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        nav.toc a:hover {
+            color: var(--primary);
+        }
+
+        nav.toc .chapter-link {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        nav.toc ul ul {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+
+        nav.toc ul ul li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 15px;
+        }
+
+        nav.toc ul ul li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+        }
+
+        section {
+            background: var(--surface);
+            padding: 40px;
+            margin: 30px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        h3 {
+            color: var(--secondary);
+            font-size: 1.4em;
+            margin: 30px 0 15px 0;
+        }
+
+        h4 {
+            color: var(--text);
+            font-size: 1.15em;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .warning {
+            background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--warning);
+        }
+
+        .success {
+            background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--success);
+        }
+
+        .error {
+            background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--error);
+        }
+
+        .tip {
+            background: linear-gradient(135deg, #F3E5F5, #E1BEE7);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #9C27B0;
+        }
+
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #E0E0E0;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #F5F5F5;
+        }
+
+        tr:hover {
+            background: #E3F2FD;
+        }
+
+        .step-box {
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: var(--primary);
+        }
+
+        .button-example {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin: 5px;
+            cursor: default;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-error { background: var(--error); color: white; }
+        .btn-secondary { background: #9E9E9E; color: white; }
+
+        .qr-example {
+            display: inline-block;
+            width: 150px;
+            height: 150px;
+            background: white;
+            border: 2px solid #333;
+            margin: 10px;
+            text-align: center;
+            padding-top: 50px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin: 2px;
+        }
+
+        .role-admin { background: #FFCDD2; color: #C62828; }
+        .role-manager { background: #C8E6C9; color: #2E7D32; }
+        .role-user { background: #BBDEFB; color: #1565C0; }
+        .role-reader { background: #E0E0E0; color: #424242; }
+
+        .permission-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .permission-card {
+            background: #F5F5F5;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .permission-card h5 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .nav-volumes {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .nav-volumes a {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            background: var(--surface);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .nav-volumes a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            background: var(--primary);
+            color: white;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+            border-top: 1px solid #E0E0E0;
+            margin-top: 40px;
+        }
+
+        @media print {
+            header { background: var(--primary); -webkit-print-color-adjust: exact; }
+            section { box-shadow: none; border: 1px solid #E0E0E0; }
+            .nav-volumes { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8em; }
+            section { padding: 20px; }
+            .container { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Manuel Utilisateur GéoClic Data</h1>
+        <p>Solution de Gestion de Données Territoriales pour les Collectivités Françaises</p>
+        <div class="volume-info">
+            <strong>Volume 3 : QR Codes, Exports et Administration</strong><br>
+            Génération de QR codes, exports de données et gestion des utilisateurs
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Table des matières -->
+        <nav class="toc">
+            <h2>Table des Matières - Volume 3</h2>
+            <ul>
+                <li>
+                    <a href="#chapitre-9" class="chapter-link">Chapitre 9 : Génération de QR Codes</a>
+                    <ul>
+                        <li><a href="#9-1">9.1 Principe et utilité des QR codes</a></li>
+                        <li><a href="#9-2">9.2 Générer un QR code pour un point</a></li>
+                        <li><a href="#9-3">9.3 Générer des QR codes en masse</a></li>
+                        <li><a href="#9-4">9.4 Personnaliser les QR codes</a></li>
+                        <li><a href="#9-5">9.5 Imprimer les QR codes</a></li>
+                        <li><a href="#9-6">9.6 Scanner un QR code</a></li>
+                        <li><a href="#9-7">9.7 Page publique de point</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#chapitre-10" class="chapter-link">Chapitre 10 : Exports de Données</a>
+                    <ul>
+                        <li><a href="#10-1">10.1 Vue d'ensemble des exports</a></li>
+                        <li><a href="#10-2">10.2 Export au format CSV</a></li>
+                        <li><a href="#10-3">10.3 Export au format Excel</a></li>
+                        <li><a href="#10-4">10.4 Export au format GeoJSON</a></li>
+                        <li><a href="#10-5">10.5 Export au format Shapefile</a></li>
+                        <li><a href="#10-6">10.6 Export PDF et rapports</a></li>
+                        <li><a href="#10-7">10.7 Planifier des exports automatiques</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#chapitre-11" class="chapter-link">Chapitre 11 : Imports de Données</a>
+                    <ul>
+                        <li><a href="#11-1">11.1 Formats de fichiers acceptés</a></li>
+                        <li><a href="#11-2">11.2 Préparer son fichier d'import</a></li>
+                        <li><a href="#11-3">11.3 Procédure d'import pas à pas</a></li>
+                        <li><a href="#11-4">11.4 Mapping des colonnes</a></li>
+                        <li><a href="#11-5">11.5 Gestion des erreurs d'import</a></li>
+                        <li><a href="#11-6">11.6 Import de mise à jour</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#chapitre-12" class="chapter-link">Chapitre 12 : Gestion des Projets</a>
+                    <ul>
+                        <li><a href="#12-1">12.1 Concept de projet</a></li>
+                        <li><a href="#12-2">12.2 Créer un nouveau projet</a></li>
+                        <li><a href="#12-3">12.3 Affecter des points à un projet</a></li>
+                        <li><a href="#12-4">12.4 Suivre l'avancement</a></li>
+                        <li><a href="#12-5">12.5 Exporter un projet</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#chapitre-13" class="chapter-link">Chapitre 13 : Administration</a>
+                    <ul>
+                        <li><a href="#13-1">13.1 Accéder aux fonctions d'administration</a></li>
+                        <li><a href="#13-2">13.2 Gestion des utilisateurs</a></li>
+                        <li><a href="#13-3">13.3 Rôles et permissions</a></li>
+                        <li><a href="#13-4">13.4 Paramètres généraux</a></li>
+                        <li><a href="#13-5">13.5 Sauvegarde et restauration</a></li>
+                        <li><a href="#13-6">13.6 Journaux d'activité</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Chapitre 9 : QR Codes -->
+        <section id="chapitre-9">
+            <h2>Chapitre 9 : Génération de QR Codes</h2>
+
+            <h3 id="9-1">9.1 Principe et utilité des QR codes</h3>
+            <p>Les <strong>QR codes</strong> (Quick Response codes) sont des codes-barres 2D qui permettent d'accéder instantanément à l'information d'un point en le scannant avec un smartphone.</p>
+
+            <div class="highlight">
+                <strong>Cas d'usage des QR codes dans GéoClic Data :</strong>
+                <ul>
+                    <li><strong>Identification sur le terrain</strong> : Coller un QR code sur un équipement pour l'identifier rapidement</li>
+                    <li><strong>Signalement citoyen</strong> : Permettre aux habitants de signaler un problème sur un équipement précis</li>
+                    <li><strong>Maintenance</strong> : Les agents scannent le QR code pour accéder à l'historique de l'équipement</li>
+                    <li><strong>Inventaire</strong> : Vérification rapide des équipements lors des tournées</li>
+                    <li><strong>Information publique</strong> : Afficher des informations sur les arbres remarquables, monuments, etc.</li>
+                </ul>
+            </div>
+
+            <h3 id="9-2">9.2 Générer un QR code pour un point</h3>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Ouvrir la fiche du point</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Dans le module Points ou sur la carte, cliquez sur le point pour ouvrir sa fiche détaillée.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Accéder à l'onglet QR Code</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Dans la fiche du point, cliquez sur l'onglet <strong>"QR Code"</strong>.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Générer le QR code</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur <span class="button-example btn-primary">Générer QR Code</span>. Le code s'affiche instantanément.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Télécharger ou imprimer</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Utilisez les boutons pour :</p>
+                <ul style="margin-left: 50px;">
+                    <li><span class="button-example btn-secondary">Télécharger PNG</span> - Image haute résolution</li>
+                    <li><span class="button-example btn-secondary">Télécharger PDF</span> - Format imprimable</li>
+                    <li><span class="button-example btn-secondary">Imprimer</span> - Impression directe</li>
+                </ul>
+            </div>
+
+            <h3 id="9-3">9.3 Générer des QR codes en masse</h3>
+            <p>Pour générer plusieurs QR codes à la fois :</p>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Accéder au module QR Codes</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Dans le menu latéral, cliquez sur <strong>"QR Codes"</strong>.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Sélectionner les points</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Plusieurs méthodes de sélection :</p>
+                <ul style="margin-left: 50px;">
+                    <li><strong>Par catégorie</strong> : Sélectionnez une ou plusieurs catégories</li>
+                    <li><strong>Par filtre</strong> : Appliquez des critères de filtrage</li>
+                    <li><strong>Par sélection manuelle</strong> : Cochez les points dans la liste</li>
+                    <li><strong>Tout sélectionner</strong> : Génère pour tous les points visibles</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Configurer la génération</span>
+                <ul style="margin-left: 50px;">
+                    <li><strong>Taille</strong> : Petite (2cm), Moyenne (4cm), Grande (6cm), Personnalisée</li>
+                    <li><strong>Format de sortie</strong> : PDF (recommandé pour impression) ou ZIP d'images</li>
+                    <li><strong>Mise en page</strong> : Nombre de QR codes par page</li>
+                    <li><strong>Inclure le libellé</strong> : Ajouter le nom du point sous le QR code</li>
+                    <li><strong>Inclure l'ID</strong> : Ajouter l'identifiant unique</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Générer et télécharger</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur <span class="button-example btn-success">Générer X QR Codes</span>. Le fichier est téléchargé.</p>
+            </div>
+
+            <div class="tip">
+                <strong>Astuce impression :</strong> Pour les étiquettes adhésives, choisissez le format PDF et configurez la mise en page selon votre papier d'étiquettes (A4 avec 24, 48 ou 65 étiquettes).
+            </div>
+
+            <h3 id="9-4">9.4 Personnaliser les QR codes</h3>
+            <p>GéoClic Data permet de personnaliser l'apparence des QR codes :</p>
+
+            <h4>Options de personnalisation</h4>
+            <ul>
+                <li><strong>Couleur du QR code</strong> : Noir par défaut, mais peut être changé (attention à la lisibilité)</li>
+                <li><strong>Couleur de fond</strong> : Blanc par défaut</li>
+                <li><strong>Logo central</strong> : Ajouter le logo de votre collectivité au centre</li>
+                <li><strong>Bordure</strong> : Ajouter un cadre autour du QR code</li>
+                <li><strong>Niveau de correction</strong> : L, M, Q ou H (plus le niveau est élevé, plus le QR code résiste aux dégradations)</li>
+            </ul>
+
+            <div class="warning">
+                <strong>Attention à la lisibilité :</strong>
+                <ul>
+                    <li>Gardez un contraste élevé entre le QR code et le fond</li>
+                    <li>Le logo central ne doit pas dépasser 30% de la surface</li>
+                    <li>Testez toujours la lecture du QR code avant impression en masse</li>
+                </ul>
+            </div>
+
+            <h3 id="9-5">9.5 Imprimer les QR codes</h3>
+
+            <h4>Supports d'impression recommandés</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Support</th>
+                        <th>Durabilité</th>
+                        <th>Usage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Étiquettes papier</td>
+                        <td>1-2 ans (intérieur)</td>
+                        <td>Mobilier de bureau, archives</td>
+                    </tr>
+                    <tr>
+                        <td>Étiquettes plastifiées</td>
+                        <td>3-5 ans</td>
+                        <td>Équipements intérieurs</td>
+                    </tr>
+                    <tr>
+                        <td>Plaques aluminium</td>
+                        <td>10+ ans</td>
+                        <td>Mobilier urbain, extérieur</td>
+                    </tr>
+                    <tr>
+                        <td>Gravure laser</td>
+                        <td>Permanent</td>
+                        <td>Équipements métalliques</td>
+                    </tr>
+                    <tr>
+                        <td>Médaillons céramique</td>
+                        <td>Permanent</td>
+                        <td>Arbres, patrimoine</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Conseils d'impression</h4>
+            <ul>
+                <li><strong>Résolution minimale</strong> : 300 dpi pour une bonne qualité</li>
+                <li><strong>Taille minimale</strong> : 2cm x 2cm pour une lecture fiable</li>
+                <li><strong>Taille recommandée</strong> : 4cm x 4cm pour un confort de lecture</li>
+                <li><strong>Marges</strong> : Prévoir une zone blanche autour du QR code</li>
+            </ul>
+
+            <h3 id="9-6">9.6 Scanner un QR code</h3>
+            <p>Le scan d'un QR code GéoClic peut se faire de plusieurs manières :</p>
+
+            <h4>Avec l'application GéoClic Mobile</h4>
+            <ol>
+                <li>Ouvrez l'application GéoClic Mobile</li>
+                <li>Appuyez sur l'icône de scan QR code</li>
+                <li>Pointez la caméra vers le QR code</li>
+                <li>La fiche du point s'ouvre automatiquement</li>
+            </ol>
+
+            <h4>Avec l'appareil photo du smartphone</h4>
+            <ol>
+                <li>Ouvrez l'appareil photo de votre smartphone</li>
+                <li>Pointez vers le QR code (sans prendre de photo)</li>
+                <li>Un lien apparaît - appuyez dessus</li>
+                <li>La page du point s'ouvre dans le navigateur</li>
+            </ol>
+
+            <h4>Avec une application de scan tierce</h4>
+            <p>Vous pouvez utiliser n'importe quelle application de scan QR code. Le lien redirigera vers la page publique du point.</p>
+
+            <h3 id="9-7">9.7 Page publique de point</h3>
+            <p>Chaque point possède une <strong>page publique</strong> accessible via son QR code. Cette page affiche :</p>
+
+            <ul>
+                <li>Le nom et la catégorie du point</li>
+                <li>Sa localisation sur une carte</li>
+                <li>Les informations publiques configurées</li>
+                <li>Les photos (si configuré)</li>
+                <li>Un formulaire de signalement (optionnel)</li>
+            </ul>
+
+            <div class="highlight">
+                <strong>Configuration de la page publique :</strong>
+                <p>Dans les paramètres de chaque catégorie, vous pouvez définir quels champs sont visibles sur la page publique. Cela permet de partager certaines informations tout en gardant d'autres confidentielles.</p>
+            </div>
+
+            <p><strong>URL de la page publique :</strong></p>
+            <p>Format : <code>https://votre-domaine.fr/point/{id}</code></p>
+            <p>Exemple : <code>https://geoclic.maville.fr/point/ARBRE-001</code></p>
+        </section>
+
+        <!-- Chapitre 10 : Exports -->
+        <section id="chapitre-10">
+            <h2>Chapitre 10 : Exports de Données</h2>
+
+            <h3 id="10-1">10.1 Vue d'ensemble des exports</h3>
+            <p>GéoClic Data permet d'exporter vos données dans différents formats pour les utiliser dans d'autres logiciels ou pour l'archivage.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Format</th>
+                        <th>Extension</th>
+                        <th>Usage principal</th>
+                        <th>Logiciels compatibles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CSV</strong></td>
+                        <td>.csv</td>
+                        <td>Tableur, base de données</td>
+                        <td>Excel, LibreOffice, Access</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Excel</strong></td>
+                        <td>.xlsx</td>
+                        <td>Tableur avec mise en forme</td>
+                        <td>Microsoft Excel, LibreOffice</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GeoJSON</strong></td>
+                        <td>.geojson</td>
+                        <td>Données géographiques web</td>
+                        <td>QGIS, Leaflet, Mapbox</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Shapefile</strong></td>
+                        <td>.shp</td>
+                        <td>SIG professionnel</td>
+                        <td>ArcGIS, QGIS, MapInfo</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PDF</strong></td>
+                        <td>.pdf</td>
+                        <td>Rapport imprimable</td>
+                        <td>Tout lecteur PDF</td>
+                    </tr>
+                    <tr>
+                        <td><strong>KML/KMZ</strong></td>
+                        <td>.kml/.kmz</td>
+                        <td>Visualisation carte</td>
+                        <td>Google Earth, Maps</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 id="10-2">10.2 Export au format CSV</h3>
+            <p>Le format CSV (Comma-Separated Values) est le plus universel et compatible avec la plupart des logiciels.</p>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Accéder au module Exports</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Dans le menu latéral, cliquez sur <strong>"Exports"</strong>.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Sélectionner les données</span>
+                <ul style="margin-left: 50px;">
+                    <li>Choisissez les catégories à exporter</li>
+                    <li>Appliquez des filtres si nécessaire (date, zone, etc.)</li>
+                    <li>Prévisualisez le nombre de points concernés</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Configurer l'export CSV</span>
+                <ul style="margin-left: 50px;">
+                    <li><strong>Séparateur</strong> : Virgule (,) ou Point-virgule (;) - utilisez ; pour Excel français</li>
+                    <li><strong>Encodage</strong> : UTF-8 (recommandé) ou Windows-1252</li>
+                    <li><strong>Champs à exporter</strong> : Sélectionnez les colonnes souhaitées</li>
+                    <li><strong>En-têtes</strong> : Inclure la ligne de titres</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Télécharger</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur <span class="button-example btn-success">Exporter en CSV</span>. Le fichier est téléchargé.</p>
+            </div>
+
+            <div class="tip">
+                <strong>Pour Excel en français :</strong> Utilisez le séparateur point-virgule (;) et l'encodage Windows-1252 pour une ouverture directe sans problème d'accents.
+            </div>
+
+            <h3 id="10-3">10.3 Export au format Excel</h3>
+            <p>L'export Excel produit un fichier .xlsx avec mise en forme automatique.</p>
+
+            <p><strong>Avantages du format Excel :</strong></p>
+            <ul>
+                <li>Mise en forme automatique (en-têtes en gras, colonnes ajustées)</li>
+                <li>Plusieurs onglets possibles (un par catégorie)</li>
+                <li>Filtres Excel pré-configurés</li>
+                <li>Formules de synthèse optionnelles</li>
+            </ul>
+
+            <p><strong>Options spécifiques :</strong></p>
+            <ul>
+                <li><strong>Un onglet par catégorie</strong> : Sépare les données par type</li>
+                <li><strong>Inclure les photos</strong> : Intègre les miniatures dans les cellules</li>
+                <li><strong>Ajouter un onglet statistiques</strong> : Synthèse avec graphiques</li>
+            </ul>
+
+            <h3 id="10-4">10.4 Export au format GeoJSON</h3>
+            <p>Le GeoJSON est le format standard pour les données géographiques sur le web.</p>
+
+            <p><strong>Caractéristiques :</strong></p>
+            <ul>
+                <li>Format texte lisible (JSON)</li>
+                <li>Inclut la géométrie (point, ligne, polygone)</li>
+                <li>Compatible avec tous les outils web de cartographie</li>
+                <li>Système de coordonnées WGS84 (EPSG:4326)</li>
+            </ul>
+
+            <p><strong>Options :</strong></p>
+            <ul>
+                <li><strong>Précision des coordonnées</strong> : Nombre de décimales (6 recommandé)</li>
+                <li><strong>Propriétés à inclure</strong> : Sélectionnez les champs</li>
+                <li><strong>Fichier unique ou par catégorie</strong></li>
+            </ul>
+
+            <h3 id="10-5">10.5 Export au format Shapefile</h3>
+            <p>Le Shapefile est le format standard des logiciels SIG professionnels (QGIS, ArcGIS).</p>
+
+            <div class="warning">
+                <strong>Particularités du Shapefile :</strong>
+                <ul>
+                    <li>Composé de plusieurs fichiers (.shp, .shx, .dbf, .prj)</li>
+                    <li>Les noms de champs sont limités à 10 caractères</li>
+                    <li>Ne supporte pas les caractères spéciaux dans les noms de colonnes</li>
+                    <li>Export en fichier ZIP contenant tous les fichiers</li>
+                </ul>
+            </div>
+
+            <p><strong>Options :</strong></p>
+            <ul>
+                <li><strong>Système de projection</strong> : WGS84 (GPS) ou Lambert 93 (France)</li>
+                <li><strong>Encodage des caractères</strong> : UTF-8 ou Windows-1252</li>
+            </ul>
+
+            <h3 id="10-6">10.6 Export PDF et rapports</h3>
+            <p>L'export PDF génère un document formaté prêt à imprimer.</p>
+
+            <h4>Types de rapports PDF</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Usage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Fiche individuelle</strong></td>
+                        <td>Une page par point avec toutes les infos</td>
+                        <td>Dossier technique, archive</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Liste tabulaire</strong></td>
+                        <td>Tableau récapitulatif des points</td>
+                        <td>Inventaire, contrôle</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rapport avec carte</strong></td>
+                        <td>Carte + liste des points</td>
+                        <td>Présentation, réunion</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Atlas cartographique</strong></td>
+                        <td>Une carte par zone/quartier</td>
+                        <td>Navigation terrain</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rapport statistique</strong></td>
+                        <td>Graphiques et synthèse</td>
+                        <td>Tableau de bord, bilan</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Personnalisation du PDF</h4>
+            <ul>
+                <li><strong>En-tête/Pied de page</strong> : Logo, titre, date, numérotation</li>
+                <li><strong>Orientation</strong> : Portrait ou Paysage</li>
+                <li><strong>Format</strong> : A4, A3, Letter</li>
+                <li><strong>Inclure les photos</strong> : Miniatures ou taille réelle</li>
+            </ul>
+
+            <h3 id="10-7">10.7 Planifier des exports automatiques</h3>
+            <p>GéoClic Data permet de planifier des exports récurrents pour automatiser les sauvegardes ou les envois de données.</p>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Créer une tâche planifiée</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Dans le module Exports, cliquez sur <span class="button-example btn-primary">Planifier un export</span>.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Configurer la tâche</span>
+                <ul style="margin-left: 50px;">
+                    <li><strong>Nom</strong> : Identifiant de la tâche</li>
+                    <li><strong>Données</strong> : Catégories et filtres</li>
+                    <li><strong>Format</strong> : CSV, Excel, GeoJSON...</li>
+                    <li><strong>Fréquence</strong> : Quotidien, Hebdomadaire, Mensuel</li>
+                    <li><strong>Heure d'exécution</strong> : Moment de la journée</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Définir la destination</span>
+                <ul style="margin-left: 50px;">
+                    <li><strong>Email</strong> : Envoi en pièce jointe à une liste de destinataires</li>
+                    <li><strong>Stockage</strong> : Sauvegarde sur le serveur (historique)</li>
+                    <li><strong>FTP/SFTP</strong> : Dépôt sur un serveur distant</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Activer la planification</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Activez la tâche. Elle s'exécutera automatiquement selon la planification définie.</p>
+            </div>
+
+            <div class="success">
+                <strong>Exemple :</strong> Export automatique hebdomadaire
+                <ul>
+                    <li>Nom : "Backup hebdo patrimoine arboré"</li>
+                    <li>Données : Catégorie "Arbres" - Tous</li>
+                    <li>Format : Excel</li>
+                    <li>Fréquence : Tous les lundis à 6h00</li>
+                    <li>Destination : Email à service.espaces-verts@maville.fr</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Chapitre 11 : Imports -->
+        <section id="chapitre-11">
+            <h2>Chapitre 11 : Imports de Données</h2>
+
+            <h3 id="11-1">11.1 Formats de fichiers acceptés</h3>
+            <p>GéoClic Data accepte plusieurs formats de fichiers pour l'import de données :</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Format</th>
+                        <th>Extension</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CSV</strong></td>
+                        <td>.csv</td>
+                        <td>Séparateur virgule ou point-virgule</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Excel</strong></td>
+                        <td>.xlsx, .xls</td>
+                        <td>Premier onglet utilisé par défaut</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GeoJSON</strong></td>
+                        <td>.geojson, .json</td>
+                        <td>Coordonnées automatiquement extraites</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Shapefile</strong></td>
+                        <td>.zip (contenant .shp)</td>
+                        <td>Archive ZIP obligatoire</td>
+                    </tr>
+                    <tr>
+                        <td><strong>KML/KMZ</strong></td>
+                        <td>.kml, .kmz</td>
+                        <td>Export Google Earth/Maps</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 id="11-2">11.2 Préparer son fichier d'import</h3>
+            <p>Une bonne préparation du fichier garantit un import sans erreur.</p>
+
+            <h4>Structure recommandée (CSV/Excel)</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Colonne</th>
+                        <th>Obligatoire</th>
+                        <th>Format</th>
+                        <th>Exemple</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>latitude</td>
+                        <td>Oui</td>
+                        <td>Nombre décimal</td>
+                        <td>48.856600</td>
+                    </tr>
+                    <tr>
+                        <td>longitude</td>
+                        <td>Oui</td>
+                        <td>Nombre décimal</td>
+                        <td>2.352200</td>
+                    </tr>
+                    <tr>
+                        <td>categorie</td>
+                        <td>Oui</td>
+                        <td>Code lexique</td>
+                        <td>ARBRE</td>
+                    </tr>
+                    <tr>
+                        <td>identifiant</td>
+                        <td>Non*</td>
+                        <td>Texte unique</td>
+                        <td>ARB-001</td>
+                    </tr>
+                    <tr>
+                        <td>[champs dynamiques]</td>
+                        <td>Non</td>
+                        <td>Selon le type</td>
+                        <td>Tilleul, 15, 2020-05-15</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p><small>* Si non fourni, un identifiant sera généré automatiquement</small></p>
+
+            <h4>Règles de préparation</h4>
+            <ul>
+                <li><strong>Première ligne</strong> : Noms des colonnes (en-têtes)</li>
+                <li><strong>Coordonnées</strong> : Format décimal, point comme séparateur décimal</li>
+                <li><strong>Dates</strong> : Format AAAA-MM-JJ (ISO) ou JJ/MM/AAAA</li>
+                <li><strong>Valeurs vides</strong> : Laisser la cellule vide, pas de "NULL" ou "N/A"</li>
+                <li><strong>Catégorie</strong> : Utiliser le CODE du lexique (pas le libellé)</li>
+            </ul>
+
+            <div class="warning">
+                <strong>Erreurs courantes à éviter :</strong>
+                <ul>
+                    <li>Coordonnées inversées (longitude/latitude)</li>
+                    <li>Virgule comme séparateur décimal dans les coordonnées</li>
+                    <li>Code de catégorie inexistant ou mal orthographié</li>
+                    <li>Fichier Excel avec des formules au lieu de valeurs</li>
+                    <li>Lignes vides au milieu du fichier</li>
+                </ul>
+            </div>
+
+            <h3 id="11-3">11.3 Procédure d'import pas à pas</h3>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Accéder au module Imports</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Dans le menu latéral, cliquez sur <strong>"Imports"</strong>.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Charger le fichier</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur <span class="button-example btn-primary">Sélectionner un fichier</span> ou glissez-déposez votre fichier dans la zone.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Analyser le fichier</span>
+                <p style="margin-top: 10px; margin-left: 50px;">GéoClic analyse automatiquement le fichier et détecte :</p>
+                <ul style="margin-left: 50px;">
+                    <li>Le nombre de lignes</li>
+                    <li>Les colonnes présentes</li>
+                    <li>Le format des données</li>
+                    <li>Les erreurs éventuelles</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Mapper les colonnes</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Associez chaque colonne du fichier à un champ GéoClic (voir section suivante).</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">5</span>
+                <span class="step-title">Prévisualiser</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Vérifiez les premières lignes. Corrigez les erreurs si nécessaire.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">6</span>
+                <span class="step-title">Lancer l'import</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur <span class="button-example btn-success">Importer X points</span>.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">7</span>
+                <span class="step-title">Vérifier le résultat</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Un rapport d'import s'affiche avec le nombre de points créés, mis à jour, et les éventuelles erreurs.</p>
+            </div>
+
+            <h3 id="11-4">11.4 Mapping des colonnes</h3>
+            <p>Le mapping (ou mappage) permet d'associer les colonnes de votre fichier aux champs de GéoClic Data.</p>
+
+            <h4>Mapping automatique</h4>
+            <p>GéoClic tente de détecter automatiquement les correspondances basées sur :</p>
+            <ul>
+                <li>Le nom de la colonne (latitude, long, cat, etc.)</li>
+                <li>Le format des données</li>
+                <li>Les imports précédents</li>
+            </ul>
+
+            <h4>Mapping manuel</h4>
+            <p>Pour chaque colonne non reconnue :</p>
+            <ol>
+                <li>Cliquez sur le menu déroulant à côté du nom de colonne</li>
+                <li>Sélectionnez le champ GéoClic correspondant</li>
+                <li>Options disponibles :</li>
+                <ul>
+                    <li><strong>Latitude / Longitude</strong> : Coordonnées GPS</li>
+                    <li><strong>Catégorie</strong> : Code du lexique</li>
+                    <li><strong>Identifiant</strong> : ID unique du point</li>
+                    <li><strong>[Nom du champ]</strong> : Champs dynamiques</li>
+                    <li><strong>Ignorer</strong> : Ne pas importer cette colonne</li>
+                </ul>
+            </ol>
+
+            <div class="tip">
+                <strong>Sauvegarder le mapping :</strong> Vous pouvez enregistrer votre configuration de mapping pour la réutiliser lors de prochains imports similaires.
+            </div>
+
+            <h3 id="11-5">11.5 Gestion des erreurs d'import</h3>
+            <p>Lors de l'analyse et de l'import, des erreurs peuvent survenir :</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Erreur</th>
+                        <th>Cause</th>
+                        <th>Solution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Coordonnées invalides</td>
+                        <td>Format incorrect ou hors limites</td>
+                        <td>Vérifier le format décimal et les valeurs</td>
+                    </tr>
+                    <tr>
+                        <td>Catégorie inconnue</td>
+                        <td>Code inexistant dans le lexique</td>
+                        <td>Créer la catégorie ou corriger le code</td>
+                    </tr>
+                    <tr>
+                        <td>Champ obligatoire vide</td>
+                        <td>Valeur manquante</td>
+                        <td>Compléter le fichier</td>
+                    </tr>
+                    <tr>
+                        <td>Type de donnée incorrect</td>
+                        <td>Texte au lieu de nombre, etc.</td>
+                        <td>Corriger le format des valeurs</td>
+                    </tr>
+                    <tr>
+                        <td>Doublon d'identifiant</td>
+                        <td>ID déjà existant</td>
+                        <td>Modifier l'ID ou faire une mise à jour</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Mode de gestion des erreurs</h4>
+            <ul>
+                <li><strong>Ignorer les erreurs</strong> : Importe les lignes valides, ignore les autres</li>
+                <li><strong>Arrêter à la première erreur</strong> : Stoppe l'import pour correction</li>
+                <li><strong>Rapport détaillé</strong> : Génère un fichier des lignes en erreur</li>
+            </ul>
+
+            <h3 id="11-6">11.6 Import de mise à jour</h3>
+            <p>Pour mettre à jour des points existants plutôt que d'en créer de nouveaux :</p>
+
+            <ol>
+                <li>Incluez la colonne "identifiant" avec les ID existants</li>
+                <li>Dans les options d'import, choisissez <strong>"Mettre à jour si existant"</strong></li>
+                <li>Sélectionnez les champs à mettre à jour</li>
+            </ol>
+
+            <div class="success">
+                <strong>Modes de mise à jour :</strong>
+                <ul>
+                    <li><strong>Remplacer</strong> : Écrase toutes les valeurs avec celles du fichier</li>
+                    <li><strong>Compléter</strong> : Met à jour uniquement les champs non vides du fichier</li>
+                    <li><strong>Fusionner</strong> : Complète les champs vides du point avec le fichier</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Chapitre 12 : Projets -->
+        <section id="chapitre-12">
+            <h2>Chapitre 12 : Gestion des Projets</h2>
+
+            <h3 id="12-1">12.1 Concept de projet</h3>
+            <p>Les <strong>projets</strong> permettent de regrouper des points pour une opération spécifique, indépendamment de leur catégorie.</p>
+
+            <div class="highlight">
+                <strong>Exemples de projets :</strong>
+                <ul>
+                    <li><strong>Campagne d'élagage 2026</strong> : Regroupe les arbres à élaguer cette année</li>
+                    <li><strong>Renouvellement éclairage LED</strong> : Liste des lampadaires à remplacer</li>
+                    <li><strong>Inventaire patrimoine</strong> : Points à vérifier lors de l'inventaire</li>
+                    <li><strong>Travaux rue de la Liberté</strong> : Tous les équipements impactés par les travaux</li>
+                </ul>
+            </div>
+
+            <h3 id="12-2">12.2 Créer un nouveau projet</h3>
+
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Accéder au module Projets</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Dans le menu latéral, cliquez sur <strong>"Projets"</strong>.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Créer un projet</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur <span class="button-example btn-primary">+ Nouveau projet</span>.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Remplir les informations</span>
+                <ul style="margin-left: 50px;">
+                    <li><strong>Nom</strong> : Intitulé du projet</li>
+                    <li><strong>Description</strong> : Détails sur l'objectif</li>
+                    <li><strong>Date de début</strong> : Début prévu</li>
+                    <li><strong>Date de fin</strong> : Échéance</li>
+                    <li><strong>Responsable</strong> : Utilisateur en charge</li>
+                    <li><strong>Statut</strong> : Planifié, En cours, Terminé, Annulé</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Enregistrer</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur <span class="button-example btn-success">Créer le projet</span>.</p>
+            </div>
+
+            <h3 id="12-3">12.3 Affecter des points à un projet</h3>
+            <p>Plusieurs méthodes pour ajouter des points à un projet :</p>
+
+            <h4>Méthode 1 : Depuis la fiche point</h4>
+            <ol>
+                <li>Ouvrez la fiche d'un point</li>
+                <li>Cliquez sur l'onglet "Projets"</li>
+                <li>Cliquez sur "Ajouter à un projet"</li>
+                <li>Sélectionnez le projet</li>
+            </ol>
+
+            <h4>Méthode 2 : Depuis la liste de points</h4>
+            <ol>
+                <li>Dans le module Points, cochez les points souhaités</li>
+                <li>Cliquez sur "Actions" → "Ajouter au projet"</li>
+                <li>Sélectionnez le projet</li>
+            </ol>
+
+            <h4>Méthode 3 : Depuis le projet</h4>
+            <ol>
+                <li>Ouvrez le projet</li>
+                <li>Cliquez sur "Ajouter des points"</li>
+                <li>Recherchez et sélectionnez les points</li>
+                <li>Ou utilisez les filtres pour ajouter en masse</li>
+            </ol>
+
+            <h3 id="12-4">12.4 Suivre l'avancement</h3>
+            <p>Pour chaque point d'un projet, vous pouvez définir un statut d'avancement :</p>
+
+            <ul>
+                <li><strong>À faire</strong> : Pas encore traité</li>
+                <li><strong>En cours</strong> : Traitement en cours</li>
+                <li><strong>Terminé</strong> : Action réalisée</li>
+                <li><strong>Annulé</strong> : Non pertinent finalement</li>
+            </ul>
+
+            <p>Le tableau de bord du projet affiche :</p>
+            <ul>
+                <li>Nombre total de points</li>
+                <li>Répartition par statut (graphique)</li>
+                <li>Pourcentage d'avancement</li>
+                <li>Points en retard (selon planning)</li>
+            </ul>
+
+            <h3 id="12-5">12.5 Exporter un projet</h3>
+            <p>Depuis la page du projet :</p>
+            <ol>
+                <li>Cliquez sur <span class="button-example btn-secondary">Exporter</span></li>
+                <li>Choisissez le format (Excel, PDF, CSV)</li>
+                <li>Sélectionnez les informations à inclure</li>
+                <li>Téléchargez le fichier</li>
+            </ol>
+
+            <p>L'export inclut :</p>
+            <ul>
+                <li>Liste des points avec leurs attributs</li>
+                <li>Statut d'avancement de chaque point</li>
+                <li>Statistiques globales du projet</li>
+                <li>Carte des points (format PDF)</li>
+            </ul>
+        </section>
+
+        <!-- Chapitre 13 : Administration -->
+        <section id="chapitre-13">
+            <h2>Chapitre 13 : Administration</h2>
+
+            <div class="warning">
+                <strong>Accès réservé :</strong> Les fonctions d'administration sont réservées aux utilisateurs ayant le rôle <span class="role-badge role-admin">Administrateur</span>. Si vous n'avez pas accès à ces fonctions, contactez votre administrateur système.
+            </div>
+
+            <h3 id="13-1">13.1 Accéder aux fonctions d'administration</h3>
+            <p>Les fonctions d'administration sont accessibles via le menu latéral :</p>
+            <ul>
+                <li><strong>Utilisateurs</strong> : Gestion des comptes utilisateurs</li>
+                <li><strong>Paramètres</strong> : Configuration générale de l'application</li>
+            </ul>
+
+            <h3 id="13-2">13.2 Gestion des utilisateurs</h3>
+
+            <h4>Créer un nouvel utilisateur</h4>
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <span class="step-title">Accéder au module Utilisateurs</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Dans le menu latéral, cliquez sur <strong>"Utilisateurs"</strong>.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <span class="step-title">Ajouter un utilisateur</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur <span class="button-example btn-primary">+ Nouvel utilisateur</span>.</p>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <span class="step-title">Remplir les informations</span>
+                <ul style="margin-left: 50px;">
+                    <li><strong>Nom</strong> : Nom complet de l'utilisateur</li>
+                    <li><strong>Email</strong> : Adresse email (servira d'identifiant)</li>
+                    <li><strong>Mot de passe</strong> : Mot de passe initial (l'utilisateur pourra le changer)</li>
+                    <li><strong>Rôle</strong> : Niveau de permissions (voir section suivante)</li>
+                    <li><strong>Service</strong> : Département ou équipe (optionnel)</li>
+                    <li><strong>Actif</strong> : Cochez pour activer le compte</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <span class="step-number">4</span>
+                <span class="step-title">Enregistrer</span>
+                <p style="margin-top: 10px; margin-left: 50px;">Cliquez sur <span class="button-example btn-success">Créer l'utilisateur</span>.</p>
+            </div>
+
+            <h4>Modifier un utilisateur</h4>
+            <ol>
+                <li>Cliquez sur l'utilisateur dans la liste</li>
+                <li>Modifiez les informations souhaitées</li>
+                <li>Enregistrez les modifications</li>
+            </ol>
+
+            <h4>Désactiver un compte</h4>
+            <p>Plutôt que de supprimer un utilisateur (ce qui peut poser des problèmes de traçabilité), désactivez le compte :</p>
+            <ol>
+                <li>Ouvrez la fiche de l'utilisateur</li>
+                <li>Décochez "Actif"</li>
+                <li>Enregistrez</li>
+            </ol>
+            <p>L'utilisateur ne pourra plus se connecter, mais son historique d'actions reste visible.</p>
+
+            <h4>Réinitialiser un mot de passe</h4>
+            <ol>
+                <li>Ouvrez la fiche de l'utilisateur</li>
+                <li>Cliquez sur "Réinitialiser le mot de passe"</li>
+                <li>Un mot de passe temporaire est généré</li>
+                <li>Communiquez-le à l'utilisateur</li>
+                <li>L'utilisateur devra le changer à sa prochaine connexion</li>
+            </ol>
+
+            <h3 id="13-3">13.3 Rôles et permissions</h3>
+            <p>GéoClic Data propose 4 rôles prédéfinis :</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rôle</th>
+                        <th>Description</th>
+                        <th>Permissions principales</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="role-badge role-admin">Administrateur</span></td>
+                        <td>Accès complet</td>
+                        <td>Toutes les fonctions + gestion utilisateurs</td>
+                    </tr>
+                    <tr>
+                        <td><span class="role-badge role-manager">Gestionnaire</span></td>
+                        <td>Gestion des données</td>
+                        <td>CRUD complet + exports + projets</td>
+                    </tr>
+                    <tr>
+                        <td><span class="role-badge role-user">Utilisateur</span></td>
+                        <td>Saisie de données</td>
+                        <td>Créer/modifier ses points + consultation</td>
+                    </tr>
+                    <tr>
+                        <td><span class="role-badge role-reader">Lecteur</span></td>
+                        <td>Consultation seule</td>
+                        <td>Voir les données + exports limités</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Détail des permissions</h4>
+            <div class="permission-grid">
+                <div class="permission-card">
+                    <h5>Points</h5>
+                    <ul>
+                        <li>Admin/Gestionnaire : CRUD tous</li>
+                        <li>Utilisateur : CRUD ses points</li>
+                        <li>Lecteur : Lecture seule</li>
+                    </ul>
+                </div>
+                <div class="permission-card">
+                    <h5>Lexique</h5>
+                    <ul>
+                        <li>Admin : CRUD complet</li>
+                        <li>Gestionnaire : Lecture + suggestion</li>
+                        <li>Autres : Lecture seule</li>
+                    </ul>
+                </div>
+                <div class="permission-card">
+                    <h5>Exports</h5>
+                    <ul>
+                        <li>Admin/Gestionnaire : Tous formats</li>
+                        <li>Utilisateur : CSV/Excel limité</li>
+                        <li>Lecteur : PDF rapport seul</li>
+                    </ul>
+                </div>
+                <div class="permission-card">
+                    <h5>Projets</h5>
+                    <ul>
+                        <li>Admin/Gestionnaire : CRUD projets</li>
+                        <li>Utilisateur : Voir + mettre à jour statut</li>
+                        <li>Lecteur : Lecture seule</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 id="13-4">13.4 Paramètres généraux</h3>
+            <p>Le module Paramètres permet de configurer le comportement global de l'application.</p>
+
+            <h4>Paramètres de l'organisation</h4>
+            <ul>
+                <li><strong>Nom de l'organisation</strong> : Affiché dans l'interface et les exports</li>
+                <li><strong>Logo</strong> : Utilisé dans les PDF et QR codes</li>
+                <li><strong>Coordonnées de contact</strong></li>
+                <li><strong>Zone géographique par défaut</strong> : Centre de la carte au démarrage</li>
+            </ul>
+
+            <h4>Paramètres de la carte</h4>
+            <ul>
+                <li><strong>Fond de carte par défaut</strong></li>
+                <li><strong>Niveau de zoom initial</strong></li>
+                <li><strong>Limites de la zone (bounding box)</strong></li>
+                <li><strong>Clustering activé/désactivé</strong></li>
+            </ul>
+
+            <h4>Paramètres de sécurité</h4>
+            <ul>
+                <li><strong>Durée de session</strong> : Délai avant déconnexion automatique</li>
+                <li><strong>Politique de mot de passe</strong> : Longueur minimale, complexité</li>
+                <li><strong>Double authentification</strong> : Activer/désactiver 2FA</li>
+            </ul>
+
+            <h3 id="13-5">13.5 Sauvegarde et restauration</h3>
+
+            <h4>Sauvegarde manuelle</h4>
+            <ol>
+                <li>Allez dans Paramètres → Sauvegarde</li>
+                <li>Cliquez sur "Créer une sauvegarde"</li>
+                <li>Attendez la génération</li>
+                <li>Téléchargez le fichier de sauvegarde</li>
+            </ol>
+
+            <p>La sauvegarde inclut :</p>
+            <ul>
+                <li>Toutes les données (points, lexique, utilisateurs)</li>
+                <li>Les fichiers attachés (photos, documents)</li>
+                <li>Les paramètres de configuration</li>
+            </ul>
+
+            <h4>Sauvegarde automatique</h4>
+            <p>Configurez des sauvegardes automatiques :</p>
+            <ul>
+                <li><strong>Fréquence</strong> : Quotidienne, Hebdomadaire</li>
+                <li><strong>Heure</strong> : Moment de la sauvegarde (nuit recommandée)</li>
+                <li><strong>Rétention</strong> : Nombre de sauvegardes conservées</li>
+                <li><strong>Destination</strong> : Locale ou distante (FTP/S3)</li>
+            </ul>
+
+            <h4>Restauration</h4>
+            <div class="error">
+                <strong>Attention :</strong> La restauration remplace TOUTES les données actuelles par celles de la sauvegarde. Cette action est irréversible. Faites une sauvegarde avant de restaurer.
+            </div>
+
+            <ol>
+                <li>Allez dans Paramètres → Sauvegarde</li>
+                <li>Cliquez sur "Restaurer une sauvegarde"</li>
+                <li>Sélectionnez le fichier de sauvegarde</li>
+                <li>Confirmez la restauration</li>
+                <li>Attendez la fin du processus</li>
+            </ol>
+
+            <h3 id="13-6">13.6 Journaux d'activité</h3>
+            <p>GéoClic Data enregistre toutes les actions importantes pour la traçabilité.</p>
+
+            <h4>Types d'événements enregistrés</h4>
+            <ul>
+                <li>Connexions et déconnexions</li>
+                <li>Création, modification, suppression de points</li>
+                <li>Modifications du lexique</li>
+                <li>Exports de données</li>
+                <li>Imports de données</li>
+                <li>Actions d'administration</li>
+            </ul>
+
+            <h4>Consulter les journaux</h4>
+            <ol>
+                <li>Allez dans Paramètres → Journaux</li>
+                <li>Utilisez les filtres :</li>
+                <ul>
+                    <li>Par période (date de début/fin)</li>
+                    <li>Par utilisateur</li>
+                    <li>Par type d'action</li>
+                    <li>Par élément concerné</li>
+                </ul>
+                <li>Consultez la liste des événements</li>
+            </ol>
+
+            <h4>Exporter les journaux</h4>
+            <p>Pour l'audit ou l'archivage, exportez les journaux en CSV ou PDF.</p>
+
+            <div class="tip">
+                <strong>Conservation des journaux :</strong> Les journaux sont conservés selon la politique de rétention configurée (par défaut 1 an). Pour des raisons légales ou de conformité, vous pouvez ajuster cette durée dans les paramètres.
+            </div>
+        </section>
+
+        <!-- Navigation entre volumes -->
+        <div class="nav-volumes">
+            <a href="MANUEL_UTILISATEUR_VOL2.html">
+                ← Volume 2<br>
+                <small>Lexique, Points et Cartographie</small>
+            </a>
+            <a href="MANUEL_UTILISATEUR_VOL4.html">
+                Volume 4 →<br>
+                <small>GéoClic Mobile et Synchronisation</small>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <p><strong>GéoClic Data</strong> - Manuel Utilisateur Volume 3</p>
+        <p>Solution de Gestion de Données Territoriales</p>
+        <p>Version 12 Pro - Documentation générée le 22 janvier 2026</p>
+    </footer>
+</body>
+</html>

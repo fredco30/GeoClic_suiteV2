@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GéoClic V14 - Manuel Utilisateur - Volume 1</title>
+    <style>
+        :root {
+            --primary: #1976D2;
+            --primary-dark: #1565C0;
+            --secondary: #424242;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --error: #F44336;
+            --background: #f5f5f5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: var(--background);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .volume-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 1.1em;
+        }
+
+        nav.toc {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        nav.toc ol {
+            padding-left: 25px;
+        }
+
+        nav.toc li {
+            margin: 10px 0;
+        }
+
+        nav.toc a {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            color: var(--primary);
+        }
+
+        section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        h3 {
+            color: var(--secondary);
+            margin: 25px 0 15px 0;
+        }
+
+        h4 {
+            color: #666;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .alert-info {
+            background: #E3F2FD;
+            border-left: 4px solid var(--primary);
+        }
+
+        .alert-warning {
+            background: #FFF3E0;
+            border-left: 4px solid var(--warning);
+        }
+
+        .alert-success {
+            background: #E8F5E9;
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-danger {
+            background: #FFEBEE;
+            border-left: 4px solid var(--error);
+        }
+
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+        }
+
+        .example-box {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .example-box h4 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+
+        .icon-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .step-by-step {
+            counter-reset: step;
+        }
+
+        .step-item {
+            position: relative;
+            padding-left: 60px;
+            margin: 25px 0;
+        }
+
+        .step-item::before {
+            counter-increment: step;
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 10px 0;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .menu-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+
+        .screenshot-placeholder {
+            background: linear-gradient(135deg, #e0e0e0, #f5f5f5);
+            border: 2px dashed #bdbdbd;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            color: #757575;
+            margin: 20px 0;
+        }
+
+        .keyboard-key {
+            display: inline-block;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: monospace;
+            font-size: 0.9em;
+            box-shadow: 0 2px 0 #ddd;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+
+        .nav-volumes {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .nav-volumes a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .nav-volumes a:hover {
+            background: var(--primary-dark);
+        }
+
+        .nav-volumes a.current {
+            background: var(--secondary);
+        }
+
+        @media print {
+            body { background: white; }
+            section { box-shadow: none; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🗺️ GéoClic Suite V14</h1>
+        <p>Manuel Utilisateur Complet</p>
+        <div class="volume-badge">Volume 1 : Prise en main et navigation</div>
+    </header>
+
+    <div class="container">
+        <div class="nav-volumes">
+            <a href="MANUEL_UTILISATEUR_VOL1.html" class="current">Volume 1</a>
+            <a href="MANUEL_UTILISATEUR_VOL2.html">Volume 2</a>
+            <a href="MANUEL_UTILISATEUR_VOL3.html">Volume 3</a>
+            <a href="MANUEL_UTILISATEUR_VOL4.html">Volume 4</a>
+        </div>
+
+        <nav class="toc">
+            <h2>📋 Table des matières - Volume 1</h2>
+            <ol>
+                <li><a href="#introduction">Introduction à GéoClic Data</a></li>
+                <li><a href="#ecosysteme">L'écosystème GéoClic + OneGeo Suite</a></li>
+                <li><a href="#connexion">Connexion et déconnexion</a></li>
+                <li><a href="#interface">Découverte de l'interface</a></li>
+                <li><a href="#dashboard">Le tableau de bord</a></li>
+                <li><a href="#navigation">Navigation dans l'application</a></li>
+                <li><a href="#profil">Gestion de votre profil</a></li>
+            </ol>
+        </nav>
+
+        <!-- SECTION 1: INTRODUCTION -->
+        <section id="introduction">
+            <h2>1. Introduction à GéoClic Data</h2>
+
+            <h3>Qu'est-ce que GéoClic Data ?</h3>
+            <p>GéoClic Data est l'interface d'administration de GéoClic V14. C'est une application web qui vous permet de :</p>
+
+            <ul>
+                <li><strong>Visualiser</strong> tous les équipements et points de votre commune sur une carte interactive</li>
+                <li><strong>Gérer</strong> les catégories (lexique) qui organisent vos données</li>
+                <li><strong>Créer</strong> et modifier des points d'intérêt avec leurs attributs</li>
+                <li><strong>Administrer</strong> les utilisateurs et leurs permissions</li>
+                <li><strong>Exporter</strong> vos données vers différents formats</li>
+                <li><strong>Générer</strong> des QR codes pour identifier physiquement vos équipements</li>
+            </ul>
+
+            <h3>À qui s'adresse ce manuel ?</h3>
+            <p>Ce manuel est destiné à tous les utilisateurs de GéoClic Data, qu'ils soient :</p>
+            <ul>
+                <li><strong>Administrateurs</strong> : Responsables de la configuration et de la gestion globale</li>
+                <li><strong>Modérateurs</strong> : Personnes validant les données saisies</li>
+                <li><strong>Contributeurs</strong> : Agents de terrain saisissant les données</li>
+                <li><strong>Lecteurs</strong> : Personnes consultant les données sans modification</li>
+            </ul>
+
+            <h3>Navigateurs recommandés</h3>
+            <p>GéoClic Data fonctionne avec tous les navigateurs modernes :</p>
+            <ul>
+                <li>Google Chrome (recommandé)</li>
+                <li>Mozilla Firefox</li>
+                <li>Microsoft Edge</li>
+                <li>Safari (Mac)</li>
+            </ul>
+
+            <div class="alert alert-warning">
+                <strong>⚠️ Important :</strong> Internet Explorer n'est pas supporté. Si vous utilisez encore Internet Explorer, veuillez installer un navigateur moderne.
+            </div>
+        </section>
+
+        <!-- SECTION 2: ÉCOSYSTÈME GEOCLIC + ONEGEO SUITE -->
+        <section id="ecosysteme">
+            <h2>2. L'écosystème GéoClic + OneGeo Suite</h2>
+
+            <h3>GéoClic : la surcouche "No-Code" pour OneGeo Suite</h3>
+            <p>GéoClic V14 est conçu comme une <strong>surcouche agile et intuitive</strong> sur votre infrastructure OneGeo Suite (OGS). Son objectif principal est de permettre aux collectivités de :</p>
+            <ul>
+                <li><strong>Collecter des données terrain</strong> sans développement informatique</li>
+                <li><strong>Créer de nouveaux types d'équipements</strong> (poubelles, arbres, lampadaires...) en quelques clics</li>
+                <li><strong>Définir des champs personnalisés</strong> pour chaque type d'équipement</li>
+                <li><strong>Alimenter automatiquement</strong> la base PostGIS de OneGeo Suite</li>
+            </ul>
+
+            <div class="alert alert-info">
+                <strong>💡 Solution 100% française et souveraine :</strong> GéoClic utilise exclusivement des briques Open Source (PostgreSQL, PostGIS, Vue.js) et s'intègre nativement avec OneGeo Suite, garantissant la maîtrise totale de vos données territoriales.
+            </div>
+
+            <h3>Architecture du système</h3>
+            <p>Voici comment les différents composants interagissent :</p>
+
+            <div style="background: #263238; color: #ECEFF1; padding: 25px; border-radius: 10px; font-family: monospace; margin: 20px 0; overflow-x: auto;">
+                <pre style="margin: 0; line-height: 1.8;">
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        <span style="color: #4CAF50; font-weight: bold;">ÉCOSYSTÈME GÉOCLIC + ONEGEO SUITE</span>                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  <span style="color: #2196F3;">┌─────────────────┐</span>         <span style="color: #FF9800;">┌─────────────────┐</span>         <span style="color: #4CAF50;">┌─────────────────┐</span>
+  <span style="color: #2196F3;">│  GéoClic Data   │</span>         <span style="color: #FF9800;">│ GéoClic Mobile  │</span>         <span style="color: #4CAF50;">│  OneGeo Suite   │</span>
+  <span style="color: #2196F3;">│  (Admin Web)    │</span>         <span style="color: #FF9800;">│  (Terrain)      │</span>         <span style="color: #4CAF50;">│  (SIG / OGS)    │</span>
+  <span style="color: #2196F3;">└────────┬────────┘</span>         <span style="color: #FF9800;">└────────┬────────┘</span>         <span style="color: #4CAF50;">└────────┬────────┘</span>
+           │                          │                          │
+           │  <span style="color: #9E9E9E;">Configuration</span>          │  <span style="color: #9E9E9E;">Collecte</span>               │
+           │  <span style="color: #9E9E9E;">Lexique, Champs</span>        │  <span style="color: #9E9E9E;">GPS, Photos</span>            │
+           ▼                          ▼                          │
+  ┌────────────────────────────────────────────────┐             │
+  │           <span style="color: #FFC107; font-weight: bold;">API GéoClic (FastAPI)</span>                 │             │
+  │                                                │             │
+  │  • Authentification JWT                        │             │
+  │  • Gestion du lexique                          │             │
+  │  • Synchronisation mobile                      │             │
+  │  • Validation des données                      │             │
+  └────────────────────┬───────────────────────────┘             │
+                       │                                          │
+                       ▼                                          │
+  ┌────────────────────────────────────────────────┐             │
+  │           <span style="color: #E91E63; font-weight: bold;">PostgreSQL / PostGIS</span>                  │             │
+  │                                                │             │
+  │  ┌──────────────────┐  ┌──────────────────┐   │             │
+  │  │ geoclic_staging  │  │   Tables OGS     │◄──┼─────────────┘
+  │  │ (Zone travail)   │─▶│   ogs_poubelles  │   │  <span style="color: #9E9E9E;">Exploitation</span>
+  │  │                  │  │   ogs_arbres     │   │  <span style="color: #9E9E9E;">SIG, Open Data</span>
+  │  └──────────────────┘  │   ogs_...        │   │
+  │                        └──────────────────┘   │
+  │         <span style="color: #9E9E9E;">▲ Sync</span>            <span style="color: #9E9E9E;">▲ Publication</span>         │
+  └────────────────────────────────────────────────┘
+</pre>
+            </div>
+
+            <h3>Le flux de données</h3>
+            <p>Les données suivent un parcours structuré en 4 étapes :</p>
+
+            <div class="step-by-step">
+                <div class="step-item">
+                    <h4>Configuration dans GéoClic Data</h4>
+                    <p>L'administrateur crée le <strong>lexique</strong> (types d'équipements : Poubelles, Arbres, Lampadaires...) et définit les <strong>champs dynamiques</strong> pour chaque type (matériau, hauteur, date d'installation...).</p>
+                </div>
+
+                <div class="step-item">
+                    <h4>Collecte sur GéoClic Mobile</h4>
+                    <p>Les agents terrain utilisent l'application mobile pour <strong>géolocaliser et documenter</strong> chaque équipement. Photos, coordonnées GPS et attributs sont saisis directement sur place.</p>
+                </div>
+
+                <div class="step-item">
+                    <h4>Synchronisation et validation</h4>
+                    <p>Les données sont <strong>synchronisées</strong> vers la table de staging. L'administrateur peut les <strong>vérifier et valider</strong> avant publication.</p>
+                </div>
+
+                <div class="step-item">
+                    <h4>Publication vers OneGeo Suite</h4>
+                    <p>En un clic, les données validées sont <strong>publiées vers les tables PostGIS</strong> exploitables par OneGeo Suite. Les tables sont créées automatiquement selon le lexique configuré.</p>
+                </div>
+            </div>
+
+            <h3>Intégration avec OneGeo Suite</h3>
+            <p>GéoClic alimente directement votre infrastructure OneGeo Suite :</p>
+
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <thead>
+                    <tr style="background: var(--primary); color: white;">
+                        <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Fonctionnalité OGS</th>
+                        <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Données fournies par GéoClic</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="background: #f5f5f5;">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>SIG (Système d'Information Géographique)</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Tables PostGIS avec géométries (POINT, LINESTRING, POLYGON) en SRID 4326</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Portail Open Data</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Données structurées prêtes pour publication citoyenne</td>
+                    </tr>
+                    <tr style="background: #f5f5f5;">
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Cartographie web</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Exports GeoJSON, Shapefile, KML pour QGIS, ArcGIS, MapInfo</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #ddd;"><strong>Reporting</strong></td>
+                        <td style="padding: 12px; border: 1px solid #ddd;">Exports CSV/Excel avec tous les attributs métier</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Cas d'usage typiques</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin: 20px 0;">
+                <div style="background: #E3F2FD; padding: 20px; border-radius: 10px; border-left: 4px solid #1976D2;">
+                    <h4 style="color: #1976D2; margin-bottom: 10px;">🗑️ Inventaire des poubelles</h4>
+                    <p style="margin: 0; font-size: 0.95em;">Créer le type "Poubelle" avec champs : type (enterrée, corbeille), capacité, matériau, état. Les agents géolocalisent chaque poubelle. Les données alimentent le SIG pour optimiser les tournées de collecte.</p>
+                </div>
+                <div style="background: #E8F5E9; padding: 20px; border-radius: 10px; border-left: 4px solid #4CAF50;">
+                    <h4 style="color: #388E3C; margin-bottom: 10px;">🌳 Patrimoine arboré</h4>
+                    <p style="margin: 0; font-size: 0.95em;">Référencer les arbres avec : essence, hauteur, diamètre, état sanitaire, date de plantation. Suivi phytosanitaire et planification des élagages via OneGeo Suite.</p>
+                </div>
+                <div style="background: #FFF3E0; padding: 20px; border-radius: 10px; border-left: 4px solid #FF9800;">
+                    <h4 style="color: #EF6C00; margin-bottom: 10px;">💡 Éclairage public</h4>
+                    <p style="margin: 0; font-size: 0.95em;">Inventorier les lampadaires : type de lampe, puissance, hauteur, n° circuit. Données exploitables pour la maintenance préventive et le remplacement LED.</p>
+                </div>
+                <div style="background: #F3E5F5; padding: 20px; border-radius: 10px; border-left: 4px solid #9C27B0;">
+                    <h4 style="color: #7B1FA2; margin-bottom: 10px;">🪧 Signalisation</h4>
+                    <p style="margin: 0; font-size: 0.95em;">Recenser les panneaux : code réglementaire, dimensions, support, état. Publication open data pour information citoyenne.</p>
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>✅ Avantage clé :</strong> Vous n'avez besoin d'aucune compétence technique pour créer un nouveau type d'équipement. GéoClic crée automatiquement les tables PostGIS structurées et optimisées pour OneGeo Suite.
+            </div>
+        </section>
+
+        <!-- SECTION 3: CONNEXION -->
+        <section id="connexion">
+            <h2>3. Connexion et déconnexion</h2>
+
+            <h3>Se connecter à GéoClic Data</h3>
+
+            <div class="step-by-step">
+                <div class="step-item">
+                    <h4>Ouvrir votre navigateur</h4>
+                    <p>Double-cliquez sur l'icône de votre navigateur (Chrome, Firefox, Edge...) sur votre bureau ou dans la barre des tâches.</p>
+                </div>
+
+                <div class="step-item">
+                    <h4>Saisir l'adresse de GéoClic</h4>
+                    <p>Dans la barre d'adresse en haut du navigateur, tapez l'adresse fournie par votre administrateur. Par exemple :</p>
+                    <ul>
+                        <li>En local : <code>http://localhost:3000</code></li>
+                        <li>En réseau : <code>http://192.168.1.100:3000</code></li>
+                        <li>En ligne : <code>https://geoclic.votre-commune.fr</code></li>
+                    </ul>
+                    <p>Appuyez sur <span class="keyboard-key">Entrée</span> pour valider.</p>
+                </div>
+
+                <div class="step-item">
+                    <h4>Saisir vos identifiants</h4>
+                    <p>Sur la page de connexion, vous voyez deux champs :</p>
+                    <ul>
+                        <li><strong>Email :</strong> Entrez votre adresse email professionnelle</li>
+                        <li><strong>Mot de passe :</strong> Entrez votre mot de passe</li>
+                    </ul>
+                    <p>Cliquez sur l'icône "œil" à droite du champ mot de passe pour voir ce que vous tapez (utile en cas d'erreur).</p>
+                </div>
+
+                <div class="step-item">
+                    <h4>Cliquer sur "Se connecter"</h4>
+                    <p>Cliquez sur le bouton bleu <strong>"SE CONNECTER"</strong>.</p>
+                    <p>Si vos identifiants sont corrects, vous serez redirigé vers le tableau de bord.</p>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <h4>💡 Exemple pratique</h4>
+                <p>Marie, agent des services techniques, se connecte chaque matin à GéoClic Data :</p>
+                <ol>
+                    <li>Elle ouvre Chrome</li>
+                    <li>Elle tape : <code>http://localhost:3000</code></li>
+                    <li>Elle entre son email : <code>marie.dupont@mairie-exemple.fr</code></li>
+                    <li>Elle entre son mot de passe</li>
+                    <li>Elle clique sur "Se connecter"</li>
+                </ol>
+            </div>
+
+            <h3>En cas d'erreur de connexion</h3>
+            <p>Si le message "Erreur de connexion" apparaît :</p>
+            <ul>
+                <li>Vérifiez que vous avez bien saisi votre email (attention aux majuscules)</li>
+                <li>Vérifiez votre mot de passe (attention au verrouillage majuscules - <span class="keyboard-key">Caps Lock</span>)</li>
+                <li>Contactez votre administrateur si le problème persiste</li>
+            </ul>
+
+            <h3>Se déconnecter</h3>
+            <p>Pour vous déconnecter de GéoClic Data :</p>
+            <div class="step-by-step">
+                <div class="step-item">
+                    <h4>Cliquer sur votre nom</h4>
+                    <p>En haut à droite de l'écran, cliquez sur votre nom ou vos initiales.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Cliquer sur "Déconnexion"</h4>
+                    <p>Dans le menu qui s'ouvre, cliquez sur <strong>"Déconnexion"</strong>.</p>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>💡 Bon à savoir :</strong> Vous êtes automatiquement déconnecté après 24 heures d'inactivité pour des raisons de sécurité.
+            </div>
+        </section>
+
+        <!-- SECTION 3: INTERFACE -->
+        <section id="interface">
+            <h2>3. Découverte de l'interface</h2>
+
+            <h3>Vue d'ensemble</h3>
+            <p>L'interface de GéoClic Data est composée de trois zones principales :</p>
+
+            <div class="screenshot-placeholder">
+                [Capture d'écran : Vue d'ensemble de l'interface]<br>
+                1. Barre supérieure (en-tête)<br>
+                2. Menu latéral (à gauche)<br>
+                3. Zone de contenu principale (au centre)
+            </div>
+
+            <h3>1. La barre supérieure (en-tête)</h3>
+            <p>La barre bleue en haut de l'écran contient :</p>
+
+            <table>
+                <tr>
+                    <th>Élément</th>
+                    <th>Description</th>
+                    <th>Utilisation</th>
+                </tr>
+                <tr>
+                    <td>☰ (Hamburger)</td>
+                    <td>Bouton menu</td>
+                    <td>Cliquez pour réduire/agrandir le menu latéral</td>
+                </tr>
+                <tr>
+                    <td>GéoClic Data</td>
+                    <td>Logo et nom</td>
+                    <td>Cliquez pour revenir au tableau de bord</td>
+                </tr>
+                <tr>
+                    <td>🔍 Rechercher...</td>
+                    <td>Barre de recherche</td>
+                    <td>Tapez pour rechercher un point ou équipement</td>
+                </tr>
+                <tr>
+                    <td>🔔 (Cloche)</td>
+                    <td>Notifications</td>
+                    <td>Affiche les notifications (validations en attente, etc.)</td>
+                </tr>
+                <tr>
+                    <td>☀️/🌙 (Soleil/Lune)</td>
+                    <td>Thème</td>
+                    <td>Cliquez pour basculer entre mode clair et mode sombre</td>
+                </tr>
+                <tr>
+                    <td>Votre nom</td>
+                    <td>Menu utilisateur</td>
+                    <td>Accès au profil, paramètres et déconnexion</td>
+                </tr>
+            </table>
+
+            <h3>2. Le menu latéral (navigation)</h3>
+            <p>Le menu à gauche de l'écran permet d'accéder à toutes les fonctionnalités :</p>
+
+            <div class="menu-item">
+                <div class="menu-icon">📊</div>
+                <div>
+                    <strong>Tableau de bord</strong><br>
+                    <small>Vue d'ensemble de vos données et statistiques</small>
+                </div>
+            </div>
+
+            <h4>Section DONNÉES</h4>
+
+            <div class="menu-item">
+                <div class="menu-icon">📍</div>
+                <div>
+                    <strong>Points</strong><br>
+                    <small>Liste et gestion de tous vos points/équipements</small>
+                </div>
+            </div>
+
+            <div class="menu-item">
+                <div class="menu-icon">🗺️</div>
+                <div>
+                    <strong>Cartographie</strong><br>
+                    <small>Visualisation des points sur une carte interactive</small>
+                </div>
+            </div>
+
+            <h4>Section CONFIGURATION</h4>
+
+            <div class="menu-item">
+                <div class="menu-icon">🗂️</div>
+                <div>
+                    <strong>Lexique</strong><br>
+                    <small>Gestion des catégories et sous-catégories</small>
+                </div>
+            </div>
+
+            <div class="menu-item">
+                <div class="menu-icon">📝</div>
+                <div>
+                    <strong>Champs dynamiques</strong><br>
+                    <small>Configuration des formulaires de saisie</small>
+                </div>
+            </div>
+
+            <div class="menu-item">
+                <div class="menu-icon">📁</div>
+                <div>
+                    <strong>Projets</strong><br>
+                    <small>Organisation des données par projet/chantier</small>
+                </div>
+            </div>
+
+            <h4>Section ADMINISTRATION</h4>
+
+            <div class="menu-item">
+                <div class="menu-icon">👥</div>
+                <div>
+                    <strong>Utilisateurs</strong><br>
+                    <small>Gestion des comptes et permissions (admin uniquement)</small>
+                </div>
+            </div>
+
+            <div class="menu-item">
+                <div class="menu-icon">📱</div>
+                <div>
+                    <strong>QR Codes</strong><br>
+                    <small>Génération de QR codes pour vos équipements</small>
+                </div>
+            </div>
+
+            <div class="menu-item">
+                <div class="menu-icon">📤</div>
+                <div>
+                    <strong>Exports</strong><br>
+                    <small>Téléchargement des données en différents formats</small>
+                </div>
+            </div>
+
+            <h3>3. La zone de contenu</h3>
+            <p>C'est la partie centrale de l'écran où s'affiche le contenu de la page sélectionnée. Cette zone change selon le menu choisi.</p>
+
+            <h3>Réduire le menu latéral</h3>
+            <p>Pour gagner de l'espace à l'écran :</p>
+            <ul>
+                <li>Cliquez sur la flèche <strong>&lt;</strong> en bas du menu</li>
+                <li>Le menu se réduit en icônes seulement</li>
+                <li>Cliquez sur <strong>&gt;</strong> pour le ré-agrandir</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 4: DASHBOARD -->
+        <section id="dashboard">
+            <h2>4. Le tableau de bord</h2>
+
+            <p>Le tableau de bord est la page d'accueil de GéoClic Data. Il vous donne une vue d'ensemble rapide de l'état de vos données.</p>
+
+            <h3>Les indicateurs principaux</h3>
+            <p>En haut du tableau de bord, vous voyez quatre cartes d'indicateurs :</p>
+
+            <table>
+                <tr>
+                    <th>Indicateur</th>
+                    <th>Signification</th>
+                </tr>
+                <tr>
+                    <td>📍 Points au total</td>
+                    <td>Nombre total de points/équipements enregistrés dans la base de données</td>
+                </tr>
+                <tr>
+                    <td>✅ Ce mois-ci</td>
+                    <td>Nombre de nouveaux points créés depuis le début du mois</td>
+                </tr>
+                <tr>
+                    <td>👥 Utilisateurs actifs</td>
+                    <td>Nombre d'utilisateurs ayant accès à l'application</td>
+                </tr>
+                <tr>
+                    <td>📁 Projets</td>
+                    <td>Nombre de projets/chantiers en cours</td>
+                </tr>
+            </table>
+
+            <h3>Répartition par catégorie</h3>
+            <p>Le graphique "Répartition par catégorie" montre visuellement comment vos points sont répartis entre les différentes catégories du lexique.</p>
+
+            <div class="example-box">
+                <h4>💡 Exemple de lecture</h4>
+                <p>Si le graphique montre :</p>
+                <ul>
+                    <li>Éclairage public : 45%</li>
+                    <li>Mobilier urbain : 30%</li>
+                    <li>Espaces verts : 25%</li>
+                </ul>
+                <p>Cela signifie que presque la moitié de vos équipements inventoriés sont des éléments d'éclairage public.</p>
+            </div>
+
+            <h3>Activité des 30 derniers jours</h3>
+            <p>Ce graphique en courbe montre l'évolution du nombre de points créés ou modifiés chaque jour pendant le dernier mois.</p>
+            <p>Cela permet de :</p>
+            <ul>
+                <li>Voir les périodes d'activité intense (relevés terrain)</li>
+                <li>Identifier les jours sans activité</li>
+                <li>Suivre la progression d'un inventaire</li>
+            </ul>
+
+            <h3>Derniers points créés</h3>
+            <p>Cette liste affiche les 5 derniers points ajoutés à la base de données, avec :</p>
+            <ul>
+                <li>Le nom du point</li>
+                <li>Sa catégorie</li>
+                <li>La date de création</li>
+            </ul>
+            <p>Cliquez sur <strong>"VOIR TOUT"</strong> pour accéder à la liste complète des points.</p>
+
+            <h3>Actions rapides</h3>
+            <p>À droite, vous trouvez des raccourcis vers les actions les plus courantes :</p>
+
+            <ul>
+                <li><strong>Nouveau point</strong> : Créer manuellement un nouveau point</li>
+                <li><strong>Importer des données</strong> : Charger un fichier CSV, GeoJSON ou Shapefile</li>
+                <li><strong>Exporter les données</strong> : Télécharger vos données</li>
+                <li><strong>Générer des QR codes</strong> : Créer des QR codes pour vos équipements</li>
+            </ul>
+
+            <h3>Bouton Actualiser</h3>
+            <p>Le bouton bleu <strong>"ACTUALISER"</strong> en haut à droite permet de rafraîchir les statistiques du tableau de bord pour avoir les dernières données.</p>
+        </section>
+
+        <!-- SECTION 5: NAVIGATION -->
+        <section id="navigation">
+            <h2>5. Navigation dans l'application</h2>
+
+            <h3>Naviguer avec le menu</h3>
+            <p>Pour accéder à une fonctionnalité :</p>
+            <ol>
+                <li>Repérez l'icône correspondante dans le menu latéral</li>
+                <li>Cliquez dessus</li>
+                <li>La page correspondante s'affiche dans la zone centrale</li>
+            </ol>
+
+            <h3>Utiliser la recherche globale</h3>
+            <p>La barre de recherche en haut de l'écran permet de trouver rapidement un point :</p>
+
+            <div class="step-by-step">
+                <div class="step-item">
+                    <h4>Cliquer dans la barre de recherche</h4>
+                    <p>Cliquez sur le champ "Rechercher..." dans la barre supérieure.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Taper votre recherche</h4>
+                    <p>Entrez un mot-clé : nom d'équipement, adresse, numéro...</p>
+                </div>
+                <div class="step-item">
+                    <h4>Appuyer sur Entrée</h4>
+                    <p>Vous êtes redirigé vers la liste des points filtrée avec votre recherche.</p>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <h4>💡 Exemples de recherche</h4>
+                <ul>
+                    <li><code>lampadaire</code> → Trouve tous les lampadaires</li>
+                    <li><code>rue victor hugo</code> → Trouve les équipements de cette rue</li>
+                    <li><code>LED</code> → Trouve les luminaires LED</li>
+                    <li><code>mauvais état</code> → Trouve les équipements en mauvais état</li>
+                </ul>
+            </div>
+
+            <h3>Revenir en arrière</h3>
+            <p>Plusieurs façons de revenir à la page précédente :</p>
+            <ul>
+                <li>Utilisez le bouton <strong>←</strong> de votre navigateur</li>
+                <li>Cliquez sur un élément du menu latéral</li>
+                <li>Cliquez sur "GéoClic Data" pour revenir au tableau de bord</li>
+            </ul>
+
+            <h3>Raccourcis clavier utiles</h3>
+            <table>
+                <tr>
+                    <th>Raccourci</th>
+                    <th>Action</th>
+                </tr>
+                <tr>
+                    <td><span class="keyboard-key">F5</span></td>
+                    <td>Rafraîchir la page</td>
+                </tr>
+                <tr>
+                    <td><span class="keyboard-key">Ctrl</span> + <span class="keyboard-key">F</span></td>
+                    <td>Rechercher dans la page</td>
+                </tr>
+                <tr>
+                    <td><span class="keyboard-key">Alt</span> + <span class="keyboard-key">←</span></td>
+                    <td>Page précédente</td>
+                </tr>
+                <tr>
+                    <td><span class="keyboard-key">Échap</span></td>
+                    <td>Fermer une fenêtre popup</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- SECTION 6: PROFIL -->
+        <section id="profil">
+            <h2>6. Gestion de votre profil</h2>
+
+            <h3>Accéder à votre profil</h3>
+            <ol>
+                <li>Cliquez sur votre nom en haut à droite de l'écran</li>
+                <li>Dans le menu qui s'ouvre, cliquez sur <strong>"Mon profil"</strong></li>
+            </ol>
+
+            <h3>Informations de votre profil</h3>
+            <p>Sur la page profil, vous pouvez voir :</p>
+            <ul>
+                <li>Votre nom complet</li>
+                <li>Votre adresse email</li>
+                <li>Votre rôle dans l'application (admin, modérateur, contributeur...)</li>
+                <li>La date de création de votre compte</li>
+                <li>Votre dernière connexion</li>
+            </ul>
+
+            <h3>Changer votre mot de passe</h3>
+            <div class="step-by-step">
+                <div class="step-item">
+                    <h4>Aller dans Paramètres</h4>
+                    <p>Cliquez sur votre nom > "Paramètres" ou allez dans le menu "Paramètres".</p>
+                </div>
+                <div class="step-item">
+                    <h4>Trouver la section "Sécurité"</h4>
+                    <p>Cherchez la section permettant de changer le mot de passe.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Saisir l'ancien mot de passe</h4>
+                    <p>Entrez votre mot de passe actuel pour confirmer votre identité.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Saisir le nouveau mot de passe</h4>
+                    <p>Entrez votre nouveau mot de passe deux fois pour confirmation.</p>
+                </div>
+                <div class="step-item">
+                    <h4>Enregistrer</h4>
+                    <p>Cliquez sur "Enregistrer" ou "Modifier".</p>
+                </div>
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>⚠️ Conseils pour un bon mot de passe :</strong>
+                <ul>
+                    <li>Au moins 8 caractères</li>
+                    <li>Mélangez majuscules, minuscules, chiffres et symboles</li>
+                    <li>N'utilisez pas votre nom, date de naissance ou "123456"</li>
+                    <li>Utilisez un mot de passe différent pour chaque service</li>
+                </ul>
+            </div>
+
+            <h3>Les différents rôles</h3>
+            <p>Selon votre rôle, vous avez accès à différentes fonctionnalités :</p>
+
+            <table>
+                <tr>
+                    <th>Rôle</th>
+                    <th>Peut faire</th>
+                </tr>
+                <tr>
+                    <td><strong>Lecteur (viewer)</strong></td>
+                    <td>Consulter les données, la carte, exporter</td>
+                </tr>
+                <tr>
+                    <td><strong>Contributeur (contributor)</strong></td>
+                    <td>+ Créer et modifier des points</td>
+                </tr>
+                <tr>
+                    <td><strong>Modérateur (moderator)</strong></td>
+                    <td>+ Valider/rejeter les points, modérer les données</td>
+                </tr>
+                <tr>
+                    <td><strong>Administrateur (admin)</strong></td>
+                    <td>+ Gérer les utilisateurs, le lexique, les paramètres système</td>
+                </tr>
+            </table>
+        </section>
+
+        <div class="nav-volumes">
+            <a href="MANUEL_UTILISATEUR_VOL1.html" class="current">Volume 1</a>
+            <a href="MANUEL_UTILISATEUR_VOL2.html">Volume 2 →</a>
+        </div>
+
+        <footer>
+            <p>📘 GéoClic V14 - Manuel Utilisateur - Volume 1</p>
+            <p>Prise en main et navigation</p>
+            <p>Version 1.0 - Janvier 2026</p>
+        </footer>
+    </div>
+</body>
+</html>

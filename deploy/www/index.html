@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GéoClic Suite - Gestion de patrimoine territorial</title>
+    <meta name="description" content="Solution française de gestion de patrimoine territorial pour les collectivités.">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Hero réduit */
+        .hero {
+            padding: 20px 40px !important;
+        }
+        .hero-content h1 { font-size: 1.8em !important; margin-bottom: 8px !important; }
+        .hero-content p { font-size: 0.95em !important; margin-bottom: 12px !important; }
+        .hero-image { max-width: 380px !important; }
+
+        /* Bouton blanc */
+        .btn-white {
+            background: transparent;
+            color: white !important;
+            padding: 8px 16px;
+            border: 2px solid white;
+            border-radius: 5px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .btn-white:hover {
+            background: white;
+            color: var(--primary) !important;
+        }
+
+        /* Modules plus compacts */
+        .modules {
+            padding: 12px 30px !important;
+        }
+        .module {
+            padding: 10px 15px !important;
+            min-width: 100px !important;
+        }
+
+        /* Section Écosystème */
+        .ecosystem {
+            display: flex;
+            gap: 40px;
+            padding: 20px 50px;
+            background: var(--bg);
+            justify-content: center;
+        }
+
+        .eco-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            flex: 1;
+            max-width: 480px;
+        }
+
+        .eco-box h3 {
+            color: var(--primary);
+            font-size: 1em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Workflow */
+        .workflow {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8em;
+            color: var(--text);
+        }
+
+        .workflow-step .icon {
+            font-size: 1.2em;
+        }
+
+        .workflow-arrow {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .eco-box .description {
+            font-size: 0.8em;
+            color: var(--text-light);
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* Cibles */
+        .targets {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .target {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .target .icon {
+            font-size: 1.2em;
+        }
+
+        .target-info h4 {
+            font-size: 0.85em;
+            color: var(--text);
+            margin: 0;
+        }
+
+        .target-info p {
+            font-size: 0.75em;
+            color: var(--text-light);
+            margin: 2px 0 0 0;
+        }
+
+        @media (max-width: 900px) {
+            .ecosystem {
+                flex-direction: column;
+                align-items: center;
+            }
+            .eco-box {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="logo">
+            <img src="assets/logo.png" alt="GéoClic">
+            <span>GéoClic</span> Suite
+        </a>
+        <div class="nav-links">
+            <a href="fonctionnalites.html">Fonctionnalités</a>
+            <a href="tarifs.html">Tarifs</a>
+            <a href="mailto:contact@geoclic.fr">Contact</a>
+            <a href="mailto:contact@geoclic.fr?subject=Demande de démonstration" class="btn-demo">Demander une démo</a>
+        </div>
+    </nav>
+
+    <main class="hero">
+        <div class="hero-content">
+            <h1>Gérez votre patrimoine territorial simplement</h1>
+            <p>Solution française tout-en-un pour les collectivités : cartographie IGN, application mobile terrain, portail citoyen. Utilisateurs illimités.</p>
+            <div class="hero-buttons">
+                <a href="mailto:contact@geoclic.fr?subject=Demande de démonstration" class="btn-primary">Demander une démonstration</a>
+                <a href="fonctionnalites.html" class="btn-white">Voir les fonctionnalités</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="screenshots/sig-web.png" alt="GéoClic SIG Web">
+        </div>
+    </main>
+
+    <section class="modules">
+        <div class="module" onclick="location.href='fonctionnalites.html#sig'">
+            <div class="module-icon">🗺️</div>
+            <h3>SIG Web</h3>
+            <p>Cartographie IGN</p>
+        </div>
+        <div class="module" onclick="location.href='fonctionnalites.html#data'">
+            <div class="module-icon">📊</div>
+            <h3>GéoClic Data</h3>
+            <p>Administration</p>
+        </div>
+        <div class="module" onclick="location.href='fonctionnalites.html#mobile'">
+            <div class="module-icon">📱</div>
+            <h3>Mobile PWA</h3>
+            <p>Relevés terrain</p>
+        </div>
+        <div class="module" onclick="location.href='fonctionnalites.html#portail'">
+            <div class="module-icon">🏛️</div>
+            <h3>Portail Citoyen</h3>
+            <p>Signalements</p>
+        </div>
+        <div class="module" onclick="location.href='fonctionnalites.html#demandes'">
+            <div class="module-icon">📋</div>
+            <h3>Demandes</h3>
+            <p>Back-office</p>
+        </div>
+    </section>
+
+    <section class="ecosystem">
+        <div class="eco-box">
+            <h3>Comment ça marche ?</h3>
+            <div class="workflow">
+                <div class="workflow-step"><span class="icon">📱</span> Terrain</div>
+                <span class="workflow-arrow">→</span>
+                <div class="workflow-step"><span class="icon">📊</span> Admin</div>
+                <span class="workflow-arrow">→</span>
+                <div class="workflow-step"><span class="icon">🗺️</span> Carto</div>
+                <span class="workflow-arrow">→</span>
+                <div class="workflow-step"><span class="icon">🏛️</span> Citoyen</div>
+                <span class="workflow-arrow">→</span>
+                <div class="workflow-step"><span class="icon">📋</span> Traitement</div>
+            </div>
+            <p class="description">Vos données circulent automatiquement entre les applications. De l'inventaire terrain au suivi des demandes citoyennes.</p>
+        </div>
+
+        <div class="eco-box">
+            <h3>Pour qui ?</h3>
+            <div class="targets">
+                <div class="target">
+                    <span class="icon">🏛️</span>
+                    <div class="target-info">
+                        <h4>Communes</h4>
+                        <p>Petites et moyennes collectivités</p>
+                    </div>
+                </div>
+                <div class="target">
+                    <span class="icon">🏢</span>
+                    <div class="target-info">
+                        <h4>Intercommunalités</h4>
+                        <p>EPCI, syndicats, communautés</p>
+                    </div>
+                </div>
+                <div class="target">
+                    <span class="icon">🔧</span>
+                    <div class="target-info">
+                        <h4>Services techniques</h4>
+                        <p>Voirie, espaces verts, éclairage, bâtiments</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="trust">
+            <span>✓ Hébergement France</span>
+            <span>✓ Conforme RGPD</span>
+            <span>✓ Fonds IGN gratuits</span>
+            <span>✓ Utilisateurs illimités</span>
+        </div>
+    </footer>
+</body>
+</html>

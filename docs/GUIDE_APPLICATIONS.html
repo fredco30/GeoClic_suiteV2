@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GéoClic Suite V14 - Guide des Applications</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #dbeafe;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --purple: #8b5cf6;
+            --purple-light: #ede9fe;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 50px 20px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 25px;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        /* Applications Grid */
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .app-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .app-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .app-card.web { border-color: var(--primary); }
+        .app-card.mobile { border-color: var(--success); }
+        .app-card.desktop { border-color: var(--purple); }
+
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .app-card.web .app-icon { background: var(--primary-light); }
+        .app-card.mobile .app-icon { background: var(--success-light); }
+        .app-card.desktop .app-icon { background: var(--purple-light); }
+
+        .app-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            color: var(--gray-900);
+        }
+
+        .app-card p {
+            color: var(--gray-600);
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        .app-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .app-card.web .app-type { background: var(--primary-light); color: var(--primary-dark); }
+        .app-card.mobile .app-type { background: var(--success-light); color: var(--success); }
+        .app-card.desktop .app-type { background: var(--purple-light); color: var(--purple); }
+
+        /* Section */
+        section {
+            background: white;
+            border-radius: 16px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        section h2 {
+            font-size: 1.6em;
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary-light);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        section h2 .icon {
+            font-size: 1.2em;
+        }
+
+        h3 {
+            font-size: 1.2em;
+            color: var(--gray-800);
+            margin: 30px 0 15px 0;
+        }
+
+        h4 {
+            font-size: 1.05em;
+            color: var(--gray-700);
+            margin: 20px 0 10px 0;
+        }
+
+        /* Alert boxes */
+        .alert {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .alert-icon {
+            font-size: 1.5em;
+            flex-shrink: 0;
+        }
+
+        .alert-info { background: var(--primary-light); border-left: 5px solid var(--primary); }
+        .alert-success { background: var(--success-light); border-left: 5px solid var(--success); }
+        .alert-warning { background: var(--warning-light); border-left: 5px solid var(--warning); }
+        .alert-danger { background: var(--danger-light); border-left: 5px solid var(--danger); }
+
+        .alert-content h4 {
+            margin: 0 0 5px 0;
+            font-size: 1em;
+        }
+
+        .alert-content p {
+            margin: 0;
+            font-size: 0.95em;
+        }
+
+        /* URL Box */
+        .url-box {
+            background: var(--gray-900);
+            color: #4ade80;
+            padding: 20px 25px;
+            border-radius: 10px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 1.1em;
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .url-box a {
+            color: #4ade80;
+            text-decoration: none;
+        }
+
+        .url-box a:hover {
+            text-decoration: underline;
+        }
+
+        .copy-hint {
+            color: var(--gray-600);
+            font-size: 0.8em;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* Steps */
+        .step {
+            display: flex;
+            margin: 25px 0;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            flex-shrink: 0;
+            margin-right: 20px;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h4 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: var(--gray-50);
+        }
+
+        /* Config box */
+        .config-box {
+            background: #f0f9ff;
+            border: 2px dashed var(--primary);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .config-box h4 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--primary-light);
+        }
+
+        .config-item:last-child {
+            border-bottom: none;
+        }
+
+        .config-label {
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .config-value {
+            font-family: monospace;
+            color: var(--primary-dark);
+            font-size: 1.05em;
+        }
+
+        /* Screenshot placeholder */
+        .screenshot-placeholder {
+            background: var(--gray-100);
+            border: 2px dashed var(--gray-300);
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            color: var(--gray-500);
+            margin: 20px 0;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray-600);
+            border-top: 1px solid var(--gray-200);
+            margin-top: 40px;
+        }
+
+        /* Print styles */
+        @media print {
+            body { background: white; }
+            section { box-shadow: none; border: 1px solid #ddd; }
+            .app-card { box-shadow: none; border: 1px solid #ddd; }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8em; }
+            .apps-grid { grid-template-columns: 1fr; }
+            section { padding: 20px; }
+            .step { flex-direction: column; }
+            .step-number { margin-bottom: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>GéoClic Suite V14</h1>
+        <p>Guide des Applications - Pour tous les utilisateurs</p>
+        <div class="version-badge">Version 14.3 - 2026</div>
+    </header>
+
+    <div class="container">
+        <!-- Introduction -->
+        <section>
+            <h2><span class="icon">👋</span> Bienvenue !</h2>
+            <p>Ce guide vous explique <strong>simplement</strong> comment utiliser les différentes applications GéoClic. Pas besoin d'être un expert en informatique !</p>
+
+            <div class="alert alert-info">
+                <div class="alert-icon">💡</div>
+                <div class="alert-content">
+                    <h4>Qu'est-ce que GéoClic ?</h4>
+                    <p>GéoClic est un ensemble d'applications pour gérer le patrimoine de votre commune : mobilier urbain, voirie, espaces verts, bâtiments, etc. Vous pouvez créer des fiches, les localiser sur une carte, prendre des photos, et bien plus !</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Applications Overview -->
+        <section>
+            <h2><span class="icon">📱</span> Les applications disponibles</h2>
+            <p>GéoClic est composé de plusieurs applications. Chacune a un rôle précis :</p>
+
+            <div class="apps-grid">
+                <!-- Portail Citoyen -->
+                <div class="app-card web">
+                    <div class="app-icon">🏛️</div>
+                    <span class="app-type">Application Web</span>
+                    <h3>Portail Citoyen</h3>
+                    <p>Permet aux habitants de signaler des problèmes (nid de poule, lampadaire cassé, etc.) directement depuis leur navigateur.</p>
+                </div>
+
+                <!-- GéoClic Data -->
+                <div class="app-card web">
+                    <div class="app-icon">📊</div>
+                    <span class="app-type">Application Web</span>
+                    <h3>GéoClic Data (Admin)</h3>
+                    <p>Interface d'administration pour gérer le patrimoine : créer des fiches, organiser les catégories, gérer les utilisateurs.</p>
+                </div>
+
+                <!-- Gestion Demandes -->
+                <div class="app-card web">
+                    <div class="app-icon">📋</div>
+                    <span class="app-type">Application Web</span>
+                    <h3>Gestion Demandes</h3>
+                    <p>Back-office pour traiter les signalements des citoyens : attribuer aux agents, suivre l'avancement, clôturer.</p>
+                </div>
+
+                <!-- Mobile PWA -->
+                <div class="app-card mobile">
+                    <div class="app-icon">📲</div>
+                    <span class="app-type">Application Mobile PWA</span>
+                    <h3>GéoClic Mobile PWA</h3>
+                    <p>Application de relevé terrain accessible depuis le navigateur du téléphone. Fonctionne même sans connexion internet !</p>
+                </div>
+
+                <!-- Mobile APK -->
+                <div class="app-card mobile">
+                    <div class="app-icon">🤖</div>
+                    <span class="app-type">Application Android</span>
+                    <h3>GéoClic Mobile (APK)</h3>
+                    <p>Application Android native à installer sur votre téléphone. Idéale pour le travail de terrain avec GPS et photos.</p>
+                </div>
+
+                <!-- SIG Web -->
+                <div class="app-card web">
+                    <div class="app-icon">🗺️</div>
+                    <span class="app-type">Application Web</span>
+                    <h3>SIG Web (Cartographie)</h3>
+                    <p>Application cartographique avec fonds IGN (Plan, Ortho, Cadastre, Historique), outils de mesure, création d'entités et import GeoJSON.</p>
+                </div>
+
+                <!-- Desktop SIG -->
+                <div class="app-card desktop">
+                    <div class="app-icon">🖥️</div>
+                    <span class="app-type">Logiciel Bureau (Legacy)</span>
+                    <h3>GéoClic SIG Desktop</h3>
+                    <p>Logiciel Flutter pour Windows/Linux. Version legacy - préférer SIG Web pour les nouveaux utilisateurs.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- URLs d'accès -->
+        <section id="urls">
+            <h2><span class="icon">🌐</span> Comment accéder aux applications web ?</h2>
+
+            <p>Les applications web sont accessibles depuis n'importe quel navigateur (Chrome, Firefox, Edge, Safari). Voici les adresses à utiliser :</p>
+
+            <div class="alert alert-warning">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                    <h4>Remplacez par votre adresse</h4>
+                    <p>Dans les exemples ci-dessous, remplacez <code>geoclic.fr</code> par l'adresse de votre serveur (exemple : <code>geoclic.maville.fr</code>)</p>
+                </div>
+            </div>
+
+            <h3>🏛️ Portail Citoyen (page d'accueil)</h3>
+            <p>C'est la page principale accessible par tous les habitants :</p>
+            <div class="url-box">
+                <a href="https://geoclic.fr" target="_blank">https://geoclic.fr</a>
+                <span class="copy-hint">Cliquez pour ouvrir</span>
+            </div>
+
+            <h3>📊 GéoClic Data (Administration)</h3>
+            <p>Interface pour les administrateurs et agents (nécessite un compte) :</p>
+            <div class="url-box">
+                <a href="https://geoclic.fr/admin" target="_blank">https://geoclic.fr/admin</a>
+            </div>
+
+            <h3>📋 Gestion des Demandes</h3>
+            <p>Back-office pour traiter les signalements citoyens :</p>
+            <div class="url-box">
+                <a href="https://geoclic.fr/demandes" target="_blank">https://geoclic.fr/demandes</a>
+            </div>
+
+            <h3>📲 GéoClic Mobile PWA</h3>
+            <p>Application de relevé terrain (sur téléphone ou tablette) :</p>
+            <div class="url-box">
+                <a href="https://geoclic.fr/mobile" target="_blank">https://geoclic.fr/mobile</a>
+            </div>
+
+            <h3>🗺️ SIG Web (Cartographie)</h3>
+            <p>Application cartographique complète avec fonds de carte IGN :</p>
+            <div class="url-box">
+                <a href="https://geoclic.fr/sig" target="_blank">https://geoclic.fr/sig</a>
+            </div>
+
+            <h3>📚 Documentation API</h3>
+            <p>Pour les développeurs uniquement :</p>
+            <div class="url-box">
+                <a href="https://geoclic.fr/api/docs" target="_blank">https://geoclic.fr/api/docs</a>
+            </div>
+        </section>
+
+        <!-- Connexion -->
+        <section id="connexion">
+            <h2><span class="icon">🔑</span> Comment se connecter ?</h2>
+
+            <p>Pour accéder à GéoClic Data, Gestion Demandes ou Mobile PWA, vous avez besoin d'un compte utilisateur.</p>
+
+            <h3>Identifiants par défaut</h3>
+            <table>
+                <tr>
+                    <th>Champ</th>
+                    <th>Valeur</th>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td><code>admin@geoclic.local</code></td>
+                </tr>
+                <tr>
+                    <td>Mot de passe</td>
+                    <td><code>admin123</code></td>
+                </tr>
+            </table>
+
+            <div class="alert alert-danger">
+                <div class="alert-icon">🔐</div>
+                <div class="alert-content">
+                    <h4>IMPORTANT : Changez le mot de passe !</h4>
+                    <p>Dès votre première connexion, changez ce mot de passe par défaut. Allez dans <strong>Profil</strong> puis <strong>Changer le mot de passe</strong>.</p>
+                </div>
+            </div>
+
+            <h3>Étapes de connexion</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Ouvrez l'application</h4>
+                    <p>Allez sur l'adresse de l'application (ex: <code>https://geoclic.fr/admin</code>)</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Entrez vos identifiants</h4>
+                    <p>Saisissez votre adresse email et votre mot de passe dans les champs prévus.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Cliquez sur "Connexion"</h4>
+                    <p>Vous serez redirigé vers l'interface principale de l'application.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mobile PWA -->
+        <section id="mobile-pwa">
+            <h2><span class="icon">📲</span> GéoClic Mobile PWA - Guide d'utilisation</h2>
+
+            <p>La PWA (Progressive Web App) est une application qui fonctionne <strong>directement dans votre navigateur</strong>, sans rien installer ! Elle est parfaite pour le travail de terrain.</p>
+
+            <h3>Comment y accéder ?</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Ouvrez le navigateur de votre téléphone</h4>
+                    <p>Utilisez Chrome sur Android ou Safari sur iPhone.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Allez sur l'adresse Mobile</h4>
+                    <div class="url-box">https://geoclic.fr/mobile</div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Connectez-vous</h4>
+                    <p>Utilisez vos identifiants GéoClic (email + mot de passe).</p>
+                </div>
+            </div>
+
+            <h3>Ajouter un raccourci sur l'écran d'accueil</h3>
+            <p>Pour un accès plus rapide, vous pouvez ajouter l'application à votre écran d'accueil :</p>
+
+            <div class="config-box">
+                <h4>Sur Android (Chrome)</h4>
+                <ol>
+                    <li>Ouvrez <code>https://geoclic.fr/mobile</code> dans Chrome</li>
+                    <li>Appuyez sur les <strong>3 points</strong> en haut à droite</li>
+                    <li>Choisissez <strong>"Ajouter à l'écran d'accueil"</strong></li>
+                    <li>Donnez un nom (ex: "GéoClic") et appuyez sur <strong>Ajouter</strong></li>
+                </ol>
+            </div>
+
+            <div class="config-box">
+                <h4>Sur iPhone (Safari)</h4>
+                <ol>
+                    <li>Ouvrez <code>https://geoclic.fr/mobile</code> dans Safari</li>
+                    <li>Appuyez sur le bouton <strong>Partager</strong> (carré avec flèche)</li>
+                    <li>Faites défiler et choisissez <strong>"Sur l'écran d'accueil"</strong></li>
+                    <li>Appuyez sur <strong>Ajouter</strong></li>
+                </ol>
+            </div>
+
+            <div class="alert alert-success">
+                <div class="alert-icon">✅</div>
+                <div class="alert-content">
+                    <h4>Mode hors-ligne</h4>
+                    <p>Une fois connecté, l'application garde les données en mémoire. Vous pouvez continuer à travailler même sans connexion internet, et synchroniser plus tard !</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mobile APK -->
+        <section id="mobile-apk">
+            <h2><span class="icon">🤖</span> GéoClic Mobile (APK Android)</h2>
+
+            <p>Cette application est à <strong>installer</strong> sur votre téléphone Android. Elle offre une meilleure intégration avec le GPS et l'appareil photo.</p>
+
+            <h3>Installation de l'APK</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Récupérez le fichier APK</h4>
+                    <p>Demandez le fichier <code>geoclic_mobile.apk</code> à votre administrateur, ou téléchargez-le depuis le serveur.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Autorisez les sources inconnues</h4>
+                    <p>Sur votre téléphone, allez dans <strong>Paramètres</strong> → <strong>Sécurité</strong> → Activez <strong>"Sources inconnues"</strong> ou <strong>"Installer des applications inconnues"</strong>.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Installez l'application</h4>
+                    <p>Ouvrez le fichier APK et suivez les instructions d'installation.</p>
+                </div>
+            </div>
+
+            <h3>Configuration de la connexion</h3>
+            <p>Au premier lancement, l'application vous demande l'adresse du serveur :</p>
+
+            <div class="config-box">
+                <h4>Paramètres de connexion</h4>
+                <div class="config-item">
+                    <span class="config-label">URL de l'API :</span>
+                    <span class="config-value">https://geoclic.fr/api</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Email :</span>
+                    <span class="config-value">votre.email@exemple.fr</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Mot de passe :</span>
+                    <span class="config-value">votre mot de passe</span>
+                </div>
+            </div>
+
+            <div class="alert alert-warning">
+                <div class="alert-icon">📍</div>
+                <div class="alert-content">
+                    <h4>Autorisez la localisation</h4>
+                    <p>L'application va vous demander d'autoriser l'accès au GPS. Acceptez pour que vos relevés soient automatiquement géolocalisés !</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SIG Web -->
+        <section id="sig-web">
+            <h2><span class="icon">🗺️</span> SIG Web - Application Cartographique</h2>
+
+            <p>Le SIG Web est l'application cartographique principale de GéoClic. Elle permet de visualiser, créer et éditer des données géographiques directement dans votre navigateur.</p>
+
+            <h3>Accès</h3>
+            <div class="url-box">
+                <a href="https://geoclic.fr/sig" target="_blank">https://geoclic.fr/sig</a>
+            </div>
+
+            <h3>Fonds de carte IGN</h3>
+            <p>L'application utilise les fonds de carte gratuits de l'IGN Géoplateforme :</p>
+            <table>
+                <tr>
+                    <th>Fond</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><strong>Plan IGN</strong></td>
+                    <td>Carte routière et administrative</td>
+                </tr>
+                <tr>
+                    <td><strong>Ortho</strong></td>
+                    <td>Photographie aérienne haute résolution</td>
+                </tr>
+                <tr>
+                    <td><strong>Cadastre</strong></td>
+                    <td>Parcelles cadastrales</td>
+                </tr>
+                <tr>
+                    <td><strong>Carte</strong></td>
+                    <td>Carte topographique</td>
+                </tr>
+                <tr>
+                    <td><strong>Historique</strong></td>
+                    <td>Photos aériennes anciennes</td>
+                </tr>
+            </table>
+
+            <h3>Outils disponibles</h3>
+            <ul>
+                <li>🖱️ <strong>Navigation</strong> : Déplacer et zoomer sur la carte</li>
+                <li>📍 <strong>Création de points</strong> : Cliquez pour placer un point</li>
+                <li>📏 <strong>Mesure de distance</strong> : Tracez une ligne pour mesurer</li>
+                <li>📐 <strong>Mesure de surface</strong> : Dessinez un polygone pour calculer l'aire</li>
+                <li>✏️ <strong>Création de lignes</strong> : Tracez des polylignes</li>
+                <li>🔷 <strong>Création de polygones</strong> : Dessinez des zones</li>
+                <li>📂 <strong>Import GeoJSON</strong> : Glissez-déposez un fichier</li>
+            </ul>
+
+            <h3>Raccourcis clavier</h3>
+            <table>
+                <tr>
+                    <th>Touche</th>
+                    <th>Action</th>
+                </tr>
+                <tr><td><code>N</code></td><td>Mode navigation</td></tr>
+                <tr><td><code>P</code></td><td>Outil point</td></tr>
+                <tr><td><code>L</code></td><td>Outil ligne</td></tr>
+                <tr><td><code>D</code></td><td>Mesure distance</td></tr>
+                <tr><td><code>A</code></td><td>Mesure surface</td></tr>
+                <tr><td><code>Échap</code></td><td>Terminer le dessin</td></tr>
+            </table>
+
+            <div class="alert alert-info">
+                <div class="alert-icon">💡</div>
+                <div class="alert-content">
+                    <h4>Astuce</h4>
+                    <p>Appuyez sur <strong>?</strong> ou <strong>H</strong> dans l'application pour afficher l'aide complète avec tous les raccourcis.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Desktop SIG -->
+        <section id="desktop-sig">
+            <h2><span class="icon">🖥️</span> GéoClic SIG Desktop (Legacy)</h2>
+
+            <p>GéoClic SIG Desktop est un logiciel Flutter pour Windows et Linux. <strong>Note :</strong> Cette version est maintenue pour compatibilité. Pour les nouveaux utilisateurs, nous recommandons d'utiliser le SIG Web ci-dessus.</p>
+
+            <h3>Installation</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Téléchargez le logiciel</h4>
+                    <p>Récupérez le fichier d'installation auprès de votre administrateur :</p>
+                    <ul>
+                        <li><strong>Windows</strong> : <code>GeoClic_SIG_Setup.exe</code></li>
+                        <li><strong>Linux</strong> : <code>geoclic-sig-linux.sh</code></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Lancez l'installation</h4>
+                    <p>Double-cliquez sur le fichier et suivez les instructions à l'écran.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Configurez la connexion</h4>
+                    <p>Au premier lancement, un assistant vous guide pour configurer la connexion au serveur.</p>
+                </div>
+            </div>
+
+            <h3>Configuration de la connexion</h3>
+            <div class="config-box">
+                <h4>Paramètres à saisir</h4>
+                <div class="config-item">
+                    <span class="config-label">URL de l'API :</span>
+                    <span class="config-value">https://geoclic.fr/api</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Email :</span>
+                    <span class="config-value">votre.email@exemple.fr</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Mot de passe :</span>
+                    <span class="config-value">votre mot de passe</span>
+                </div>
+            </div>
+
+            <h3>Fonctionnalités principales</h3>
+            <ul>
+                <li>🗺️ <strong>Cartographie</strong> : Visualisez tous vos équipements sur une carte interactive</li>
+                <li>📥 <strong>Import Shapefile</strong> : Importez des fichiers SIG existants</li>
+                <li>📤 <strong>Export</strong> : Exportez vos données vers Excel, CSV, GeoJSON</li>
+                <li>🔄 <strong>Synchronisation</strong> : Synchronisez avec le serveur en un clic</li>
+                <li>📴 <strong>Mode hors-ligne</strong> : Travaillez sans connexion internet</li>
+            </ul>
+        </section>
+
+        <!-- Récapitulatif -->
+        <section id="recap">
+            <h2><span class="icon">📋</span> Récapitulatif des adresses</h2>
+
+            <table>
+                <tr>
+                    <th>Application</th>
+                    <th>Adresse</th>
+                    <th>Usage</th>
+                </tr>
+                <tr>
+                    <td>🏛️ Portail Citoyen</td>
+                    <td><code>https://geoclic.fr</code></td>
+                    <td>Signalements par les habitants</td>
+                </tr>
+                <tr>
+                    <td>📊 GéoClic Data</td>
+                    <td><code>https://geoclic.fr/admin</code></td>
+                    <td>Administration du patrimoine</td>
+                </tr>
+                <tr>
+                    <td>📋 Gestion Demandes</td>
+                    <td><code>https://geoclic.fr/demandes</code></td>
+                    <td>Traitement des signalements</td>
+                </tr>
+                <tr>
+                    <td>📲 Mobile PWA</td>
+                    <td><code>https://geoclic.fr/mobile</code></td>
+                    <td>Relevé terrain (navigateur)</td>
+                </tr>
+                <tr>
+                    <td>🗺️ SIG Web</td>
+                    <td><code>https://geoclic.fr/sig</code></td>
+                    <td>Cartographie avec fonds IGN</td>
+                </tr>
+                <tr>
+                    <td>📚 API (développeurs)</td>
+                    <td><code>https://geoclic.fr/api/docs</code></td>
+                    <td>Documentation technique</td>
+                </tr>
+            </table>
+
+            <div class="alert alert-info">
+                <div class="alert-icon">💡</div>
+                <div class="alert-content">
+                    <h4>Besoin d'aide ?</h4>
+                    <p>Si vous rencontrez des difficultés, contactez votre administrateur système ou consultez la documentation complète.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Aide -->
+        <section id="aide">
+            <h2><span class="icon">❓</span> Questions fréquentes</h2>
+
+            <h3>Je n'arrive pas à me connecter</h3>
+            <p>Vérifiez que :</p>
+            <ul>
+                <li>Votre adresse email est correcte (attention aux espaces)</li>
+                <li>Votre mot de passe est correct (attention aux majuscules)</li>
+                <li>Votre compte est bien activé (demandez à l'administrateur)</li>
+            </ul>
+
+            <h3>La page ne s'affiche pas</h3>
+            <p>Vérifiez que :</p>
+            <ul>
+                <li>Vous êtes connecté à internet</li>
+                <li>L'adresse est correcte (pas de faute de frappe)</li>
+                <li>Le serveur est en fonctionnement (contactez l'administrateur)</li>
+            </ul>
+
+            <h3>Le GPS ne fonctionne pas sur mon téléphone</h3>
+            <p>Pour que le GPS fonctionne :</p>
+            <ul>
+                <li>Activez la localisation dans les paramètres du téléphone</li>
+                <li>Autorisez l'application à accéder à votre position</li>
+                <li>Utilisez HTTPS (le GPS ne fonctionne pas en HTTP)</li>
+                <li>Sortez à l'extérieur pour une meilleure réception</li>
+            </ul>
+
+            <h3>Comment synchroniser mes données ?</h3>
+            <p>Dans les applications mobiles, cherchez le bouton <strong>"Synchroniser"</strong> (souvent représenté par deux flèches en cercle). Appuyez dessus pour envoyer vos données au serveur.</p>
+        </section>
+
+        <footer>
+            <p>📘 <strong>GéoClic Suite V14</strong> - Guide des Applications</p>
+            <p>Document généré en 2026 - Tous droits réservés</p>
+            <p>Pour toute question, contactez votre administrateur système.</p>
+        </footer>
+    </div>
+</body>
+</html>
