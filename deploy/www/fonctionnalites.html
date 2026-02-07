@@ -4,246 +4,621 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fonctionnalités - GéoClic Suite</title>
-    <meta name="description" content="Découvrez les fonctionnalités de GéoClic Suite : SIG Web, gestion de patrimoine, application mobile, portail citoyen.">
-    <link rel="stylesheet" href="style.css">
+    <meta name="description" content="Découvrez les 7 applications de GéoClic Suite : SIG Web, relevé terrain, portail citoyen, gestion des demandes, dashboard dirigeant.">
     <style>
-        /* Grid Fonctionnalités */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 40px;
-            padding: 20px 60px;
-            max-width: 1300px;
-            margin: 0 auto;
+        :root {
+            --primary: #1565C0;
+            --primary-dark: #0D47A1;
+            --secondary: #37474F;
+            --accent: #FF6F00;
+            --success: #2E7D32;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --text: #212121;
+            --text-light: #757575;
+            --border: #E0E0E0;
         }
 
-        .card {
-            background: var(--white);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--background);
         }
 
-        .card img {
+        /* Navigation */
+        nav {
+            background: var(--surface);
+            padding: 15px 0;
+            position: fixed;
             width: 100%;
-            height: 140px;
-            object-fit: cover;
-            object-position: top;
-            border-bottom: 1px solid var(--border);
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        .card-content {
-            padding: 15px;
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .card h3 {
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5em;
+            font-weight: 700;
             color: var(--primary);
-            font-size: 1.1em;
-            margin-bottom: 5px;
+            text-decoration: none;
         }
 
-        .card .subtitle {
-            color: var(--text-light);
-            font-size: 0.85em;
-            margin-bottom: 10px;
+        .logo img { height: 40px; width: auto; }
+        .logo span { color: var(--secondary); }
+
+        .nav-links { display: flex; gap: 30px; align-items: center; }
+        .nav-links a { color: var(--secondary); text-decoration: none; font-weight: 500; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--primary); }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
         }
 
-        .card ul {
-            list-style: none;
-            font-size: 0.8em;
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-accent { background: var(--accent); color: white; }
+        .btn-accent:hover { background: #E65100; }
+
+        /* Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 120px 20px 50px;
+            text-align: center;
         }
 
-        .card li {
-            padding: 3px 0;
-            color: var(--text);
+        .page-header h1 { font-size: 2.3em; margin-bottom: 12px; }
+        .page-header p { font-size: 1.1em; opacity: 0.92; max-width: 700px; margin: 0 auto; }
+
+        /* Visual blocks - images contextuelles */
+        .visual-section {
+            padding: 50px 20px;
+            background: var(--surface);
         }
 
-        .card li::before {
-            content: "✓ ";
-            color: var(--success);
-            font-weight: bold;
+        .visual-section:nth-child(even) {
+            background: var(--background);
         }
 
-        /* Row 2 - Cartes horizontales portrait */
-        .cards-row-portrait {
+        .visual-inner {
+            max-width: 850px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .visual-inner img {
+            max-width: 100%;
+            width: 850px;
+            border-radius: 8px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+
+        .visual-inner .caption {
+            margin-top: 15px;
+            font-size: 1.05em;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        /* Section */
+        .section { padding: 70px 20px; }
+        .section-alt { background: var(--surface); }
+        .section-container { max-width: 1100px; margin: 0 auto; }
+
+        /* Feature Block */
+        .feature-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+            margin-bottom: 70px;
+        }
+
+        .feature-block:last-child { margin-bottom: 0; }
+        .feature-block.reverse { direction: rtl; }
+        .feature-block.reverse > * { direction: ltr; }
+
+        .feature-content h2 { font-size: 1.6em; color: var(--secondary); margin-bottom: 8px; }
+        .feature-content .subtitle { color: var(--primary); font-weight: 600; margin-bottom: 12px; font-size: 0.9em; }
+        .feature-content p { color: var(--text-light); margin-bottom: 15px; font-size: 0.95em; }
+
+        .feature-content ul { list-style: none; padding: 0; }
+        .feature-content li { padding: 5px 0; display: flex; align-items: flex-start; gap: 8px; font-size: 0.9em; }
+        .feature-content li .check { color: var(--success); font-weight: bold; font-size: 1.1em; margin-top: 1px; }
+
+        .feature-image { border-radius: 10px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+        .feature-image img { width: 100%; display: block; }
+
+        /* Device mockups pour les screenshots */
+        .feature-device {
             display: flex;
             justify-content: center;
-            gap: 50px;
-            padding: 0 60px 20px;
-            max-width: 1300px;
+            align-items: center;
+        }
+
+        /* Laptop mockup */
+        .feat-laptop {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .feat-laptop-screen {
+            background: #1a1a1a;
+            border-radius: 8px 8px 0 0;
+            padding: 8px 8px 0 8px;
+            border: 2px solid #333;
+            border-bottom: none;
+        }
+
+        .feat-laptop-screen img {
+            width: 100%;
+            display: block;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .feat-laptop-base {
+            background: linear-gradient(180deg, #c0c0c0 0%, #a0a0a0 100%);
+            height: 14px;
+            border-radius: 0 0 8px 8px;
+            position: relative;
+        }
+
+        .feat-laptop-base::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: #888;
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* Phone mockup */
+        .feat-phone {
+            position: relative;
+            width: 180px;
             margin: 0 auto;
         }
 
-        .card-horizontal {
-            background: var(--white);
-            border-radius: 8px;
+        .feat-phone-frame {
+            background: #1a1a1a;
+            border-radius: 24px;
+            padding: 10px 6px;
+            border: 2px solid #333;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+
+        .feat-phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 5px;
+            background: #333;
+            border-radius: 3px;
+        }
+
+        .feat-phone-frame img {
+            width: 100%;
+            display: block;
+            border-radius: 16px;
+        }
+
+        /* Templates Section */
+        .templates-section { background: var(--secondary); color: white; }
+        .templates-section h2 { text-align: center; font-size: 1.6em; margin-bottom: 12px; }
+        .templates-section .intro { text-align: center; opacity: 0.9; max-width: 600px; margin: 0 auto 30px; font-size: 0.95em; }
+
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .template-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+
+        .template-card:hover { background: rgba(255,255,255,0.15); }
+        .template-card .icon { font-size: 1.8em; margin-bottom: 8px; }
+        .template-card h3 { font-size: 0.95em; margin-bottom: 5px; }
+        .template-card p { font-size: 0.8em; opacity: 0.8; }
+
+        /* Comparison Section */
+        .comparison-section { background: #F5F7FA; }
+        .comparison-section h2 { text-align: center; font-size: 1.6em; color: var(--secondary); margin-bottom: 30px; }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            display: flex;
-            align-items: stretch;
-            width: 45%;
-            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
 
-        .card-horizontal img {
-            width: 140px;
-            height: auto;
-            object-fit: cover;
-            flex-shrink: 0;
+        .comparison-table th, .comparison-table td { padding: 15px 18px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.92em; }
+        .comparison-table th { background: var(--secondary); color: white; }
+        .comparison-table tr:last-child td { border-bottom: none; }
+        .comparison-table .problem { color: #C62828; }
+        .comparison-table .solution { color: var(--success); font-weight: 500; }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            text-align: center;
+            padding: 60px 20px;
         }
 
-        .card-horizontal .card-content {
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        .cta-section h2 { font-size: 1.8em; margin-bottom: 12px; }
+        .cta-section p { font-size: 1.05em; opacity: 0.95; margin-bottom: 25px; }
+
+        /* Footer */
+        footer {
+            background: var(--secondary);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            font-size: 0.9em;
         }
 
-        .card-horizontal h3 {
-            color: var(--primary);
-            font-size: 1.1em;
-            margin-bottom: 5px;
-        }
+        footer a { color: rgba(255,255,255,0.8); text-decoration: none; }
+        footer a:hover { color: white; }
 
-        .card-horizontal .subtitle {
-            color: var(--text-light);
-            font-size: 0.85em;
-            margin-bottom: 10px;
-        }
-
-        .card-horizontal ul {
-            list-style: none;
-            font-size: 0.8em;
-        }
-
-        .card-horizontal li {
-            padding: 2px 0;
-            color: var(--text);
-        }
-
-        .card-horizontal li::before {
-            content: "✓ ";
-            color: var(--success);
-            font-weight: bold;
-        }
-
-        @media (max-width: 900px) {
-            .cards-grid {
-                grid-template-columns: 1fr;
-            }
-            .cards-row-portrait {
-                flex-direction: column;
-                align-items: center;
-            }
-            .card-horizontal {
-                width: 100%;
-                max-width: 400px;
-            }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .feature-block { grid-template-columns: 1fr; gap: 25px; }
+            .feature-block.reverse { direction: ltr; }
+            .comparison-table { font-size: 0.85em; }
+            .page-header h1 { font-size: 1.8em; }
         }
     </style>
 </head>
 <body>
+    <!-- Navigation -->
     <nav>
-        <a href="index.html" class="logo">
-            <img src="assets/logo.png" alt="GéoClic">
-            <span>GéoClic</span> Suite
-        </a>
-        <div class="nav-links">
-            <a href="fonctionnalites.html" style="color: var(--primary);">Fonctionnalités</a>
-            <a href="tarifs.html">Tarifs</a>
-            <a href="mailto:contact@geoclic.fr">Contact</a>
-            <a href="mailto:contact@geoclic.fr?subject=Demande de démonstration" class="btn-demo">Demander une démo</a>
+        <div class="nav-container">
+            <a href="index.html" class="logo"><img src="screenshots/logo.png" alt="GéoClic">GéoClic<span>Suite</span></a>
+            <div class="nav-links">
+                <a href="fonctionnalites.html">Fonctionnalités</a>
+                <a href="comparatif.html">Comparatif</a>
+                <a href="tarifs.html">Tarifs</a>
+                <a href="#contact" class="btn btn-primary">Demander une démo</a>
+            </div>
         </div>
     </nav>
 
+    <!-- Header -->
     <header class="page-header">
-        <h1>Fonctionnalités</h1>
-        <p>5 applications intégrées pour gérer votre patrimoine territorial</p>
+        <h1>7 applications intégrées</h1>
+        <p>Participation citoyenne, SIG cartographique, relevé terrain, gestion des interventions et pilotage dirigeant. Tout est inclus, sans module supplémentaire.</p>
     </header>
 
-    <!-- Ligne 1 : Cartes verticales (paysage) -->
-    <div class="cards-grid">
-        <div class="card">
-            <img src="screenshots/sig-web.png" alt="SIG Web">
-            <div class="card-content">
-                <h3>SIG Web</h3>
-                <p class="subtitle">Cartographie professionnelle accessible à tous</p>
-                <ul>
-                    <li>Fonds IGN : Plan, Ortho, Cadastre, Historique</li>
-                    <li>Outils de mesure distance et surface</li>
-                    <li>Création de points, lignes, polygones</li>
-                    <li>Import/Export GeoJSON glisser-déposer</li>
-                </ul>
+    <!-- Bloc visuel SIG patrimoine -->
+    <section class="visual-section">
+        <div class="visual-inner">
+            <img src="screenshots/sig-patrimoine.png" alt="Modernisez votre gestion technique - Du bureau papier au SIG GéoClic">
+            <div class="caption">Modernisez votre gestion technique, simplement.</div>
+        </div>
+    </section>
+
+    <!-- SIG Web -->
+    <section class="section">
+        <div class="section-container">
+            <div class="feature-block">
+                <div class="feature-content">
+                    <p class="subtitle">Cartographie</p>
+                    <h2>SIG Web</h2>
+                    <p>Cartographie professionnelle accessible à tous, sans expertise SIG requise.</p>
+                    <ul>
+                        <li><span class="check">✓</span> <strong>Fonds IGN inclus</strong> : Plan, Ortho, Cadastre, Historique</li>
+                        <li><span class="check">✓</span> <strong>Outils de mesure</strong> : Distance et surface</li>
+                        <li><span class="check">✓</span> <strong>Création d'entités</strong> : Points, lignes, polygones</li>
+                        <li><span class="check">✓</span> <strong>Zones hiérarchiques</strong> : Commune &gt; Quartier &gt; Secteur</li>
+                        <li><span class="check">✓</span> <strong>Import/Export</strong> : GeoJSON, Shapefile, CSV</li>
+                        <li><span class="check">✓</span> <strong>Multi-projets</strong> : Plusieurs collectivités ou services</li>
+                    </ul>
+                </div>
+                <div class="feature-device">
+                    <div class="feat-laptop">
+                        <div class="feat-laptop-screen">
+                            <img src="screenshots/sig-web.png" alt="SIG Web GéoClic">
+                        </div>
+                        <div class="feat-laptop-base"></div>
+                    </div>
+                </div>
             </div>
         </div>
+    </section>
 
-        <div class="card">
-            <img src="screenshots/geoclic-data.png" alt="GéoClic Data">
-            <div class="card-content">
-                <h3>GéoClic Data</h3>
-                <p class="subtitle">Centre de contrôle du patrimoine</p>
-                <ul>
-                    <li>Tableau de bord et statistiques</li>
-                    <li>Lexique hiérarchique sur 6 niveaux</li>
-                    <li>Import CSV, GeoJSON, Shapefile</li>
-                    <li>Génération de QR Codes</li>
-                </ul>
+    <!-- GéoClic Data -->
+    <section class="section section-alt">
+        <div class="section-container">
+            <div class="feature-block reverse">
+                <div class="feature-content">
+                    <p class="subtitle">Administration</p>
+                    <h2>GéoClic Data</h2>
+                    <p>Centre de contrôle du patrimoine. Paramétrage, utilisateurs, imports et personnalisation.</p>
+                    <ul>
+                        <li><span class="check">✓</span> <strong>Tableau de bord</strong> et statistiques</li>
+                        <li><span class="check">✓</span> <strong>Lexique hiérarchique</strong> sur 6 niveaux</li>
+                        <li><span class="check">✓</span> <strong>Champs dynamiques</strong> : 13 types dont conditionnels</li>
+                        <li><span class="check">✓</span> <strong>Import</strong> : CSV, GeoJSON, Shapefile</li>
+                        <li><span class="check">✓</span> <strong>QR Codes</strong> pour vos équipements</li>
+                        <li><span class="check">✓</span> <strong>White-labeling</strong> : Logo, couleurs, nom</li>
+                        <li><span class="check">✓</span> <strong>Gestion utilisateurs</strong> et rôles par application</li>
+                    </ul>
+                </div>
+                <div class="feature-device">
+                    <div class="feat-laptop">
+                        <div class="feat-laptop-screen">
+                            <img src="screenshots/geoclic-data.png" alt="GéoClic Data - Administration">
+                        </div>
+                        <div class="feat-laptop-base"></div>
+                    </div>
+                </div>
             </div>
         </div>
+    </section>
 
-        <div class="card">
-            <img src="screenshots/demandes.png" alt="Gestion Demandes">
-            <div class="card-content">
-                <h3>Gestion des Demandes</h3>
-                <p class="subtitle">Back-office signalements citoyens</p>
-                <ul>
-                    <li>Workflow complet de traitement</li>
-                    <li>Notifications email automatiques</li>
-                    <li>Affectation aux agents</li>
-                    <li>Statistiques et délais moyens</li>
-                </ul>
+    <!-- Bloc visuel terrain sync -->
+    <section class="visual-section">
+        <div class="visual-inner">
+            <img src="screenshots/terrain-sync.png" alt="L'inventaire terrain synchronisé en temps réel vers le bureau">
+            <div class="caption">L'inventaire terrain, synchronisé en temps réel.</div>
+        </div>
+    </section>
+
+    <!-- Mobile PWA -->
+    <section class="section">
+        <div class="section-container">
+            <div class="feature-block">
+                <div class="feature-content">
+                    <p class="subtitle">Terrain</p>
+                    <h2>Relevé Terrain Mobile</h2>
+                    <p>Inventaire du patrimoine sur smartphone, même sans connexion. Synchronisation automatique au retour.</p>
+                    <ul>
+                        <li><span class="check">✓</span> <strong>GPS haute précision</strong> : Géolocalisation automatique</li>
+                        <li><span class="check">✓</span> <strong>Photos géotaggées</strong> : Compression automatique</li>
+                        <li><span class="check">✓</span> <strong>Mode hors-ligne</strong> : Synchronisation au retour</li>
+                        <li><span class="check">✓</span> <strong>Formulaires dynamiques</strong> et champs conditionnels</li>
+                        <li><span class="check">✓</span> <strong>PWA</strong> : Installable sans App Store</li>
+                    </ul>
+                </div>
+                <div class="feature-device">
+                    <div class="feat-phone">
+                        <div class="feat-phone-frame">
+                            <img src="screenshots/mobile-pwa.png" alt="Mobile PWA - Relevé terrain">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Ligne 2 : Cartes horizontales (portrait) -->
-    <div class="cards-row-portrait">
-        <div class="card-horizontal">
-            <img src="screenshots/mobile-pwa.png" alt="Mobile PWA">
-            <div class="card-content">
-                <h3>Mobile PWA</h3>
-                <p class="subtitle">Relevés terrain smartphone/tablette</p>
-                <ul>
-                    <li>Géolocalisation GPS haute précision</li>
-                    <li>Photos compressées automatiquement</li>
-                    <li>Mode hors-ligne avec synchronisation</li>
-                    <li>Installation sans App Store</li>
-                </ul>
+    <!-- Portail Citoyen -->
+    <section class="section section-alt">
+        <div class="section-container">
+            <div class="feature-block reverse">
+                <div class="feature-content">
+                    <p class="subtitle">Participation citoyenne</p>
+                    <h2>Portail Citoyen</h2>
+                    <p>Vos administrés signalent les problèmes en quelques clics et suivent le traitement en temps réel.</p>
+                    <ul>
+                        <li><span class="check">✓</span> <strong>Signalement géolocalisé</strong> avec photos</li>
+                        <li><span class="check">✓</span> <strong>Scan QR Code</strong> sur les équipements</li>
+                        <li><span class="check">✓</span> <strong>Suivi par token</strong> : Pas de compte à créer</li>
+                        <li><span class="check">✓</span> <strong>Carte interactive</strong> des signalements</li>
+                        <li><span class="check">✓</span> <strong>Personnalisable</strong> aux couleurs de la ville</li>
+                    </ul>
+                </div>
+                <div class="feature-device">
+                    <div class="feat-phone">
+                        <div class="feat-phone-frame">
+                            <img src="screenshots/portail.png" alt="Portail citoyen GéoClic">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </section>
 
-        <div class="card-horizontal">
-            <img src="screenshots/portail.png" alt="Portail Citoyen">
-            <div class="card-content">
-                <h3>Portail Citoyen</h3>
-                <p class="subtitle">Interface de signalement public</p>
-                <ul>
-                    <li>Signalement géolocalisé avec photos</li>
-                    <li>Scan QR Code sur équipements</li>
-                    <li>Suivi par token sans compte</li>
-                    <li>Interface simple et accessible</li>
-                </ul>
+    <!-- Gestion des Demandes -->
+    <section class="section">
+        <div class="section-container">
+            <div class="feature-block">
+                <div class="feature-content">
+                    <p class="subtitle">Back-office</p>
+                    <h2>Gestion des Demandes</h2>
+                    <p>Traitez les signalements citoyens, affectez aux services, suivez les délais et pilotez avec des KPI.</p>
+                    <ul>
+                        <li><span class="check">✓</span> <strong>Workflow complet</strong> : Nouveau → En cours → Traité</li>
+                        <li><span class="check">✓</span> <strong>Affectation aux services</strong> et agents</li>
+                        <li><span class="check">✓</span> <strong>Notifications email</strong> citoyens et agents</li>
+                        <li><span class="check">✓</span> <strong>Dashboard dirigeant</strong> avec KPI et graphiques</li>
+                        <li><span class="check">✓</span> <strong>Détection de doublons</strong> automatique</li>
+                        <li><span class="check">✓</span> <strong>Statistiques</strong> : Délais, volumes, catégories</li>
+                    </ul>
+                </div>
+                <div class="feature-device">
+                    <div class="feat-laptop">
+                        <div class="feat-laptop-screen">
+                            <img src="screenshots/dashboard.png" alt="Dashboard GéoClic - Gestion des demandes">
+                        </div>
+                        <div class="feat-laptop-base"></div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
+    <!-- Services Terrain + PWA Agent -->
+    <section class="section section-alt">
+        <div class="section-container">
+            <div class="feature-block reverse">
+                <div class="feature-content">
+                    <p class="subtitle">Interventions</p>
+                    <h2>Services Terrain & PWA Agent</h2>
+                    <p>Les agents terrain reçoivent les demandes, planifient les interventions et communiquent avec le back-office.</p>
+                    <ul>
+                        <li><span class="check">✓</span> <strong>Liste des demandes</strong> assignées à l'agent</li>
+                        <li><span class="check">✓</span> <strong>Navigation GPS</strong> vers le signalement (Google Maps, Waze)</li>
+                        <li><span class="check">✓</span> <strong>Tchat interne</strong> avec le back-office</li>
+                        <li><span class="check">✓</span> <strong>Planification</strong> d'interventions avec date/heure</li>
+                        <li><span class="check">✓</span> <strong>Prise en charge</strong>, traitement et clôture</li>
+                        <li><span class="check">✓</span> <strong>PWA mobile</strong> pour les agents sur le terrain</li>
+                    </ul>
+                </div>
+                <div class="feature-device">
+                    <div class="feat-laptop">
+                        <div class="feat-laptop-screen">
+                            <img src="screenshots/demandes.png" alt="Services terrain - Gestion des interventions">
+                        </div>
+                        <div class="feat-laptop-base"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Templates -->
+    <section class="section templates-section">
+        <div class="section-container">
+            <h2>Templates métiers prêts à l'emploi</h2>
+            <p class="intro">Démarrez rapidement avec des structures préconfigurées pour les métiers courants des collectivités.</p>
+
+            <div class="templates-grid">
+                <div class="template-card">
+                    <div class="icon">💡</div>
+                    <h3>Éclairage Public</h3>
+                    <p>Candélabres, luminaires, armoires</p>
+                </div>
+                <div class="template-card">
+                    <div class="icon">🪑</div>
+                    <h3>Mobilier Urbain</h3>
+                    <p>Bancs, poubelles, abris bus</p>
+                </div>
+                <div class="template-card">
+                    <div class="icon">🌳</div>
+                    <h3>Espaces Verts</h3>
+                    <p>Arbres, massifs, aires de jeux</p>
+                </div>
+                <div class="template-card">
+                    <div class="icon">🛣️</div>
+                    <h3>Voirie</h3>
+                    <p>Chaussées, trottoirs, signalisation</p>
+                </div>
+                <div class="template-card">
+                    <div class="icon">🔧</div>
+                    <h3>Réseaux</h3>
+                    <p>Eau, assainissement, électricité</p>
+                </div>
+                <div class="template-card">
+                    <div class="icon">🏛️</div>
+                    <h3>Bâtiments</h3>
+                    <p>Mairie, écoles, équipements</p>
+                </div>
+                <div class="template-card">
+                    <div class="icon">⚱️</div>
+                    <h3>Cimetières</h3>
+                    <p>Concessions, columbariums</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section class="section comparison-section">
+        <div class="section-container">
+            <h2>GéoClic vs. les solutions traditionnelles</h2>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Problème courant</th>
+                        <th>Solution GéoClic</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="problem">Les logiciels SIG sont trop complexes pour nos agents</td>
+                        <td class="solution">Interface intuitive pensée pour les non-spécialistes</td>
+                    </tr>
+                    <tr>
+                        <td class="problem">Les licences SIG coûtent cher</td>
+                        <td class="solution">Fonds IGN gratuits, pas de licence cartographique</td>
+                    </tr>
+                    <tr>
+                        <td class="problem">Nos données sont éparpillées dans des fichiers Excel</td>
+                        <td class="solution">Base centralisée avec import Excel/CSV</td>
+                    </tr>
+                    <tr>
+                        <td class="problem">Le relevé terrain nécessite un outil externe (GeoContrib...)</td>
+                        <td class="solution">Relevé terrain mobile intégré nativement</td>
+                    </tr>
+                    <tr>
+                        <td class="problem">L'application mobile nécessite un déploiement MDM</td>
+                        <td class="solution">PWA installable depuis le navigateur</td>
+                    </tr>
+                    <tr>
+                        <td class="problem">Chaque module est facturé séparément</td>
+                        <td class="solution">Tout inclus dans un tarif unique</td>
+                    </tr>
+                    <tr>
+                        <td class="problem">Les données sont hébergées à l'étranger</td>
+                        <td class="solution">Hébergement France, conforme RGPD</td>
+                    </tr>
+                    <tr>
+                        <td class="problem">Le coût augmente avec le nombre d'utilisateurs</td>
+                        <td class="solution">Utilisateurs illimités, tarif fixe</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section" id="contact">
+        <h2>Prêt à simplifier votre gestion territoriale ?</h2>
+        <p>Démonstration personnalisée gratuite de 30 minutes.</p>
+        <a href="mailto:contact@geoclic.fr?subject=Demande de démonstration GéoClic" class="btn btn-accent">Demander une démonstration gratuite</a>
+    </section>
+
+    <!-- Footer -->
     <footer>
-        <div class="trust">
-            <span>✓ Hébergement France</span>
-            <span>✓ Conforme RGPD</span>
-            <span>✓ Fonds IGN gratuits</span>
-            <span>✓ Utilisateurs illimités</span>
-        </div>
+        <p>&copy; 2026 GéoClic Suite - <a href="index.html">Accueil</a> | <a href="fonctionnalites.html">Fonctionnalités</a> | <a href="comparatif.html">Comparatif</a> | <a href="tarifs.html">Tarifs</a></p>
     </footer>
 </body>
 </html>

@@ -4,110 +4,405 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tarifs - GéoClic Suite</title>
-    <meta name="description" content="Tarifs GéoClic Suite : Licence ou SaaS, utilisateurs illimités, toutes applications incluses.">
-    <link rel="stylesheet" href="style.css">
+    <meta name="description" content="Tarifs GéoClic Suite : tarification progressive par taille de commune. Tout inclus, utilisateurs illimités, sans surprise.">
+    <style>
+        :root {
+            --primary: #1565C0;
+            --primary-dark: #0D47A1;
+            --secondary: #37474F;
+            --accent: #FF6F00;
+            --success: #2E7D32;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --text: #212121;
+            --text-light: #757575;
+            --border: #E0E0E0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; line-height: 1.6; color: var(--text); background: var(--background); }
+
+        nav { background: var(--surface); padding: 15px 0; position: fixed; width: 100%; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .nav-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 10px; font-size: 1.5em; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .logo img { height: 40px; } .logo span { color: var(--secondary); }
+        .nav-links { display: flex; gap: 30px; align-items: center; }
+        .nav-links a { color: var(--secondary); text-decoration: none; font-weight: 500; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--primary); }
+
+        .btn { display: inline-block; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.3s; cursor: pointer; border: none; font-size: 1em; }
+        .btn-primary { background: var(--primary); color: white; } .btn-primary:hover { background: var(--primary-dark); }
+        .btn-accent { background: var(--accent); color: white; } .btn-accent:hover { background: #E65100; }
+        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); } .btn-outline:hover { background: var(--primary); color: white; }
+        .btn-large { padding: 15px 40px; font-size: 1.1em; }
+
+        .page-header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 120px 20px 60px; text-align: center; }
+        .page-header h1 { font-size: 2.5em; margin-bottom: 15px; }
+        .page-header p { font-size: 1.2em; opacity: 0.95; max-width: 700px; margin: 0 auto; }
+
+        .section { padding: 80px 20px; }
+        .section-container { max-width: 1100px; margin: 0 auto; }
+        .section-title { text-align: center; margin-bottom: 50px; }
+        .section-title h2 { font-size: 2em; color: var(--secondary); margin-bottom: 15px; }
+        .section-title p { color: var(--text-light); font-size: 1.1em; max-width: 700px; margin: 0 auto; }
+
+        .tout-en-un { background: var(--surface); border: 2px solid var(--primary); border-radius: 12px; padding: 30px 40px; display: flex; align-items: center; gap: 30px; margin-bottom: 50px; box-shadow: 0 4px 20px rgba(21,101,192,0.1); }
+        .tout-en-un .icon { font-size: 3em; }
+        .tout-en-un h3 { color: var(--primary); font-size: 1.3em; margin-bottom: 5px; }
+        .tout-en-un p { color: var(--text-light); }
+        .tout-en-un .modules { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .tout-en-un .module-badge { background: #E3F2FD; color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 500; }
+
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .pricing-card { background: var(--surface); border-radius: 12px; padding: 28px 22px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; position: relative; border: 2px solid transparent; transition: all 0.3s; }
+        .pricing-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+        .pricing-card.featured { border-color: var(--primary); }
+        .pricing-card.featured::before { content: "Populaire"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 4px 16px; border-radius: 20px; font-size: 0.8em; font-weight: 600; }
+        .pricing-card .commune-size { color: var(--text-light); font-size: 0.85em; margin-bottom: 6px; }
+        .pricing-card h3 { color: var(--secondary); font-size: 1.15em; margin-bottom: 12px; }
+        .pricing-card .price .amount { font-size: 2.3em; font-weight: 700; color: var(--primary); }
+        .pricing-card .price .currency { font-size: 1.2em; color: var(--primary); }
+        .pricing-card .price .period { color: var(--text-light); font-size: 0.9em; }
+        .pricing-card .annual { color: var(--success); font-size: 0.82em; font-weight: 500; margin: 5px 0 18px; }
+        .pricing-card .features { list-style: none; padding: 0; margin-bottom: 20px; text-align: left; }
+        .pricing-card .features li { padding: 7px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; font-size: 0.88em; }
+        .pricing-card .features li:last-child { border-bottom: none; }
+        .pricing-card .features .check { color: var(--success); font-weight: bold; font-size: 1.1em; }
+
+        .included-section { background: var(--surface); }
+        .included-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .included-card { background: var(--background); border-radius: 10px; padding: 25px; }
+        .included-card h3 { color: var(--secondary); margin-bottom: 12px; }
+        .included-card ul { list-style: none; padding: 0; }
+        .included-card li { padding: 6px 0; color: var(--text); font-size: 0.95em; }
+        .included-card li::before { content: "\2713 "; color: var(--success); font-weight: bold; }
+
+        .savings-section { background: var(--secondary); color: white; }
+        .savings-section .section-title h2 { color: white; }
+        .savings-section .section-title p { color: rgba(255,255,255,0.8); }
+        .savings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; text-align: center; }
+        .savings-item .value { font-size: 2.5em; font-weight: 700; color: #a4e400; }
+        .savings-item .label { opacity: 0.85; margin-top: 5px; }
+
+        .options-section { background: #F5F7FA; }
+        .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .option-card { background: var(--surface); border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .option-card h3 { color: var(--secondary); margin-bottom: 10px; }
+        .option-card .price { color: var(--primary); font-size: 1.3em; font-weight: 600; margin-bottom: 15px; }
+        .option-card p { color: var(--text-light); font-size: 0.95em; }
+
+        .faq-section { background: var(--surface); }
+        .faq-title { text-align: center; margin-bottom: 40px; }
+        .faq-title h2 { font-size: 1.8em; color: var(--secondary); }
+        .faq-list { max-width: 800px; margin: 0 auto; }
+        .faq-item { border-bottom: 1px solid var(--border); padding: 25px 0; }
+        .faq-item:last-child { border-bottom: none; }
+        .faq-item h3 { color: var(--secondary); font-size: 1.1em; margin-bottom: 10px; }
+        .faq-item p { color: var(--text-light); }
+
+        .cta-section { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; text-align: center; padding: 80px 20px; }
+        .cta-section h2 { font-size: 2em; margin-bottom: 15px; }
+        .cta-section p { font-size: 1.1em; opacity: 0.95; margin-bottom: 30px; }
+
+        footer { background: var(--secondary); color: white; padding: 30px 20px; text-align: center; }
+        footer a { color: rgba(255,255,255,0.8); text-decoration: none; }
+
+        @media (max-width: 768px) { .nav-links { display: none; } .pricing-grid { grid-template-columns: 1fr 1fr; } .tout-en-un { flex-direction: column; text-align: center; } .savings-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 500px) { .pricing-grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
     <nav>
-        <a href="index.html" class="logo">
-            <img src="assets/logo.png" alt="GéoClic">
-            <span>GéoClic</span> Suite
-        </a>
-        <div class="nav-links">
-            <a href="fonctionnalites.html">Fonctionnalités</a>
-            <a href="tarifs.html" style="color: var(--primary);">Tarifs</a>
-            <a href="mailto:contact@geoclic.fr">Contact</a>
-            <a href="mailto:contact@geoclic.fr?subject=Demande de démonstration" class="btn-demo">Demander une démo</a>
+        <div class="nav-container">
+            <a href="index.html" class="logo"><img src="screenshots/logo.png" alt="GéoClic">GéoClic<span>Suite</span></a>
+            <div class="nav-links">
+                <a href="fonctionnalites.html">Fonctionnalités</a>
+                <a href="comparatif.html">Comparatif</a>
+                <a href="tarifs.html">Tarifs</a>
+                <a href="#contact" class="btn btn-primary">Demander une démo</a>
+            </div>
         </div>
     </nav>
 
     <header class="page-header">
-        <h1>Tarifs</h1>
-        <p>Une tarification simple, tout inclus, utilisateurs illimités</p>
+        <h1>Un tarif adapté à votre commune</h1>
+        <p>Tout est inclus. Pas de module en supplément, pas de coût par utilisateur. Le prix varie uniquement selon la taille de votre collectivité.</p>
     </header>
 
-    <section class="pricing">
-        <table class="pricing-table">
-            <thead>
-                <tr>
-                    <th>Fonctionnalité</th>
-                    <th>Licence<br><small style="font-weight:normal;">2 900 € HT</small></th>
-                    <th>SaaS<br><small style="font-weight:normal;">149 €/mois HT</small></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>SIG Web (Cartographie IGN)</td>
-                    <td><span class="check">✓</span></td>
-                    <td><span class="check">✓</span></td>
-                </tr>
-                <tr>
-                    <td>GéoClic Data (Administration)</td>
-                    <td><span class="check">✓</span></td>
-                    <td><span class="check">✓</span></td>
-                </tr>
-                <tr>
-                    <td>Mobile PWA (Terrain)</td>
-                    <td><span class="check">✓</span></td>
-                    <td><span class="check">✓</span></td>
-                </tr>
-                <tr>
-                    <td>Portail Citoyen</td>
-                    <td><span class="check">✓</span></td>
-                    <td><span class="check">✓</span></td>
-                </tr>
-                <tr>
-                    <td>Gestion des Demandes</td>
-                    <td><span class="check">✓</span></td>
-                    <td><span class="check">✓</span></td>
-                </tr>
-                <tr>
-                    <td>Utilisateurs</td>
-                    <td>Illimités</td>
-                    <td>Illimités</td>
-                </tr>
-                <tr>
-                    <td>Hébergement</td>
-                    <td>Votre serveur</td>
-                    <td class="highlight">Cloud France inclus</td>
-                </tr>
-                <tr>
-                    <td>Mises à jour</td>
-                    <td>Avec maintenance</td>
-                    <td class="highlight">Automatiques</td>
-                </tr>
-                <tr>
-                    <td>Sauvegardes</td>
-                    <td>À votre charge</td>
-                    <td class="highlight">Quotidiennes incluses</td>
-                </tr>
-                <tr>
-                    <td>Support</td>
-                    <td>Email (72h)</td>
-                    <td class="highlight">Prioritaire (48h)</td>
-                </tr>
-                <tr>
-                    <td>SSL/HTTPS</td>
-                    <td>À configurer</td>
-                    <td class="highlight">Inclus</td>
-                </tr>
-            </tbody>
-        </table>
+    <section class="section">
+        <div class="section-container">
+            <div class="tout-en-un">
+                <div class="icon">📦</div>
+                <div>
+                    <h3>Tout-en-un : 7 applications pour un seul tarif</h3>
+                    <p>Chez les concurrents, le SIG et les signalements sont vendus séparément. Chez GéoClic, tout est intégré.</p>
+                    <div class="modules">
+                        <span class="module-badge">SIG Web</span>
+                        <span class="module-badge">GéoClic Data</span>
+                        <span class="module-badge">Portail Citoyen</span>
+                        <span class="module-badge">Gestion Demandes</span>
+                        <span class="module-badge">Services Terrain</span>
+                        <span class="module-badge">PWA Mobile Terrain</span>
+                        <span class="module-badge">PWA Relevé Mobile</span>
+                    </div>
+                </div>
+            </div>
 
-        <div class="pricing-cta">
-            <h3>Une question ? Besoin d'une démonstration ?</h3>
-            <p>Nous vous présentons la solution en 30 minutes.</p>
-            <a href="mailto:contact@geoclic.fr?subject=Demande de démonstration GéoClic" class="btn-primary">Demander une démonstration</a>
+            <div class="section-title">
+                <h2>Abonnement SaaS - Hébergement inclus</h2>
+                <p>Hébergement France (OVH), mises à jour automatiques, sauvegardes quotidiennes, support inclus.</p>
+            </div>
+
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="commune-size">&lt; 1 000 hab.</div>
+                    <h3>Village</h3>
+                    <div class="price">
+                        <span class="currency">&euro;</span><span class="amount">199</span>
+                        <span class="period">HT/mois</span>
+                    </div>
+                    <div class="annual">soit 1 990 &euro;/an (2 mois offerts)</div>
+                    <ul class="features">
+                        <li><span class="check">&#10003;</span> 7 applications incluses</li>
+                        <li><span class="check">&#10003;</span> Utilisateurs illimités</li>
+                        <li><span class="check">&#10003;</span> Hébergement France</li>
+                        <li><span class="check">&#10003;</span> Support email</li>
+                    </ul>
+                    <a href="mailto:contact@geoclic.fr?subject=Devis GéoClic - Village" class="btn btn-outline">Devis</a>
+                </div>
+
+                <div class="pricing-card">
+                    <div class="commune-size">1 000 - 3 500 hab.</div>
+                    <h3>Bourg</h3>
+                    <div class="price">
+                        <span class="currency">&euro;</span><span class="amount">299</span>
+                        <span class="period">HT/mois</span>
+                    </div>
+                    <div class="annual">soit 2 990 &euro;/an (2 mois offerts)</div>
+                    <ul class="features">
+                        <li><span class="check">&#10003;</span> 7 applications incluses</li>
+                        <li><span class="check">&#10003;</span> Utilisateurs illimités</li>
+                        <li><span class="check">&#10003;</span> Hébergement France</li>
+                        <li><span class="check">&#10003;</span> Support email</li>
+                    </ul>
+                    <a href="mailto:contact@geoclic.fr?subject=Devis GéoClic - Bourg" class="btn btn-outline">Devis</a>
+                </div>
+
+                <div class="pricing-card featured">
+                    <div class="commune-size">3 500 - 10 000 hab.</div>
+                    <h3>Petite ville</h3>
+                    <div class="price">
+                        <span class="currency">&euro;</span><span class="amount">399</span>
+                        <span class="period">HT/mois</span>
+                    </div>
+                    <div class="annual">soit 3 990 &euro;/an (2 mois offerts)</div>
+                    <ul class="features">
+                        <li><span class="check">&#10003;</span> 7 applications incluses</li>
+                        <li><span class="check">&#10003;</span> Utilisateurs illimités</li>
+                        <li><span class="check">&#10003;</span> Hébergement France</li>
+                        <li><span class="check">&#10003;</span> Support prioritaire</li>
+                    </ul>
+                    <a href="mailto:contact@geoclic.fr?subject=Devis GéoClic - Petite ville" class="btn btn-primary">Démo</a>
+                </div>
+
+                <div class="pricing-card">
+                    <div class="commune-size">10 000 - 25 000 hab.</div>
+                    <h3>Ville moyenne</h3>
+                    <div class="price">
+                        <span class="currency">&euro;</span><span class="amount">549</span>
+                        <span class="period">HT/mois</span>
+                    </div>
+                    <div class="annual">soit 5 490 &euro;/an (2 mois offerts)</div>
+                    <ul class="features">
+                        <li><span class="check">&#10003;</span> 7 applications incluses</li>
+                        <li><span class="check">&#10003;</span> Utilisateurs illimités</li>
+                        <li><span class="check">&#10003;</span> Serveur dédié</li>
+                        <li><span class="check">&#10003;</span> Support prioritaire</li>
+                    </ul>
+                    <a href="mailto:contact@geoclic.fr?subject=Devis GéoClic - Ville moyenne" class="btn btn-outline">Devis</a>
+                </div>
+
+                <div class="pricing-card">
+                    <div class="commune-size">&gt; 25 000 hab.</div>
+                    <h3>Grande ville</h3>
+                    <div class="price">
+                        <span class="currency">&euro;</span><span class="amount">799</span>
+                        <span class="period">HT/mois</span>
+                    </div>
+                    <div class="annual">soit 7 990 &euro;/an (2 mois offerts)</div>
+                    <ul class="features">
+                        <li><span class="check">&#10003;</span> 7 applications incluses</li>
+                        <li><span class="check">&#10003;</span> Utilisateurs illimités</li>
+                        <li><span class="check">&#10003;</span> Serveur dédié performant</li>
+                        <li><span class="check">&#10003;</span> Support prioritaire + tél</li>
+                    </ul>
+                    <a href="mailto:contact@geoclic.fr?subject=Devis GéoClic - Grande ville" class="btn btn-outline">Devis</a>
+                </div>
+            </div>
+
+            <p style="text-align: center; color: var(--text-light); font-size: 0.9em;">Intercommunalités et EPCI : tarif sur devis selon le nombre de communes. <a href="mailto:contact@geoclic.fr?subject=Devis GéoClic - Intercommunalité" style="color: var(--primary);">Contactez-nous</a>.</p>
         </div>
     </section>
 
-    <footer>
-        <div class="trust">
-            <span>✓ Hébergement France</span>
-            <span>✓ Conforme RGPD</span>
-            <span>✓ Fonds IGN gratuits</span>
-            <span>✓ Utilisateurs illimités</span>
+    <section class="section included-section">
+        <div class="section-container">
+            <div class="section-title">
+                <h2>Tout est inclus dans chaque formule</h2>
+                <p>Pas de modules à acheter séparément. Pas de surprise.</p>
+            </div>
+            <div class="included-grid">
+                <div class="included-card">
+                    <h3>🗺️ Cartographie &amp; SIG</h3>
+                    <ul>
+                        <li>SIG Web avec fonds IGN gratuits</li>
+                        <li>Plan, Ortho, Cadastre, Historique</li>
+                        <li>Import Shapefile / GeoJSON / CSV</li>
+                        <li>Zones hiérarchiques (Commune &gt; Quartier &gt; Secteur)</li>
+                    </ul>
+                </div>
+                <div class="included-card">
+                    <h3>📱 Applications mobiles (PWA)</h3>
+                    <ul>
+                        <li>Relevé terrain (mode hors-ligne)</li>
+                        <li>Services terrain (interventions)</li>
+                        <li>GPS, photos, champs dynamiques</li>
+                        <li>Installation instantanée sans App Store</li>
+                    </ul>
+                </div>
+                <div class="included-card">
+                    <h3>📢 Signalements citoyens</h3>
+                    <ul>
+                        <li>Portail public personnalisable</li>
+                        <li>Catégories hiérarchiques avec icônes</li>
+                        <li>Détection automatique de doublons</li>
+                        <li>Suivi en temps réel pour le citoyen</li>
+                    </ul>
+                </div>
+                <div class="included-card">
+                    <h3>💼 Back-office complet</h3>
+                    <ul>
+                        <li>Workflow de traitement des demandes</li>
+                        <li>Affectation aux services et agents</li>
+                        <li>Tchat interne back-office / terrain</li>
+                        <li>Planification d'interventions</li>
+                    </ul>
+                </div>
+                <div class="included-card">
+                    <h3>📈 Pilotage</h3>
+                    <ul>
+                        <li>Dashboard dirigeant avec KPI</li>
+                        <li>Statistiques par service, catégorie, zone</li>
+                        <li>Comparaison inter-périodes</li>
+                        <li>Notifications email automatiques</li>
+                    </ul>
+                </div>
+                <div class="included-card">
+                    <h3>🔐 Infrastructure &amp; sécurité</h3>
+                    <ul>
+                        <li>Hébergement France (OVH), conforme RGPD</li>
+                        <li>HTTPS/SSL automatique</li>
+                        <li>Sauvegardes quotidiennes (28 jours)</li>
+                        <li>Mises à jour automatiques</li>
+                    </ul>
+                </div>
+            </div>
         </div>
+    </section>
+
+    <section class="section savings-section">
+        <div class="section-container">
+            <div class="section-title">
+                <h2>Le tout-en-un, c'est aussi des économies</h2>
+                <p>En combinant SIG et signalements dans une seule solution, vous économisez sur les licences, la formation et l'intégration.</p>
+            </div>
+            <div class="savings-grid">
+                <div class="savings-item">
+                    <div class="value">-50%</div>
+                    <div class="label">vs Neocity + solution SIG séparée</div>
+                </div>
+                <div class="savings-item">
+                    <div class="value">0 &euro;</div>
+                    <div class="label">par utilisateur supplémentaire</div>
+                </div>
+                <div class="savings-item">
+                    <div class="value">1 seul</div>
+                    <div class="label">interlocuteur, 1 seule facture</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section options-section">
+        <div class="section-container">
+            <div class="section-title"><h2>Services complémentaires</h2></div>
+            <div class="options-grid">
+                <div class="option-card">
+                    <h3>Formation sur site</h3>
+                    <p class="price">800 &euro; HT / jour</p>
+                    <p>Formation dans vos locaux : prise en main par vos équipes. Exercices pratiques sur vos données.</p>
+                </div>
+                <div class="option-card">
+                    <h3>Import de données</h3>
+                    <p class="price">&Agrave; partir de 500 &euro; HT</p>
+                    <p>Migration de vos données existantes (Excel, Shapefile, autre logiciel) vers GéoClic.</p>
+                </div>
+                <div class="option-card">
+                    <h3>Personnalisation</h3>
+                    <p class="price">Sur devis</p>
+                    <p>Développement de fonctionnalités spécifiques. Intégrations avec vos outils existants.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section faq-section">
+        <div class="section-container">
+            <div class="faq-title"><h2>Questions fréquentes</h2></div>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <h3>Pourquoi le prix varie par taille de commune ?</h3>
+                    <p>Une commune de 500 habitants génère moins de données qu'une ville de 30 000. Le serveur nécessaire est moins puissant. Le tarif progressif permet aux petites communes d'accéder à la solution à un prix adapté.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Y a-t-il un engagement de durée ?</h3>
+                    <p>Non. L'abonnement est sans engagement, résiliable à tout moment avec un préavis d'un mois. Vos données vous sont restituées.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Puis-je tester avant de m'engager ?</h3>
+                    <p>Oui. Démonstration personnalisée gratuite de 30 minutes, suivie d'un accès test si souhaité.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Les données sont-elles conformes RGPD ?</h3>
+                    <p>Oui. Hébergement France (OVH), HTTPS, mots de passe chiffrés, sauvegardes quotidiennes. Chaque collectivité a son propre serveur isolé. <a href="comparatif.html" style="color: var(--primary);">Voir notre conformité RGPD</a>.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Combien d'utilisateurs puis-je créer ?</h3>
+                    <p>Illimité. Agents terrain, back-office, élus : tous peuvent utiliser la solution sans surcoût.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Que se passe-t-il si ma commune grandit ?</h3>
+                    <p>Vous passez au palier supérieur. Pas de migration, pas de coupure. L'évolution est transparente.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Qu'est-ce qu'une PWA ?</h3>
+                    <p>Une Progressive Web App est une application mobile qui s'installe directement depuis le navigateur, sans App Store. Elle se met à jour automatiquement, fonctionne hors-ligne, et ne nécessite aucune gestion de flotte mobile (MDM). <a href="comparatif.html" style="color: var(--primary);">En savoir plus</a>.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Ma commune peut-elle avoir sa propre adresse web ?</h3>
+                    <p>Oui. Par défaut : maville.geoclic.fr. Vous pouvez aussi utiliser votre propre domaine (signalements.maville.fr).</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section" id="contact">
+        <h2>Prêt à simplifier la gestion de votre collectivité ?</h2>
+        <p>Démonstration personnalisée gratuite. 30 minutes pour découvrir tout ce que GéoClic peut faire pour vous.</p>
+        <a href="mailto:contact@geoclic.fr?subject=Demande de démonstration GéoClic" class="btn btn-accent btn-large">Demander une démonstration gratuite</a>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 GéoClic Suite - Solution française pour les collectivités - Conforme RGPD</p>
+        <p style="margin-top: 10px;"><a href="index.html">Accueil</a> | <a href="fonctionnalites.html">Fonctionnalités</a> | <a href="comparatif.html">Comparatif</a> | <a href="tarifs.html">Tarifs</a></p>
     </footer>
 </body>
 </html>
