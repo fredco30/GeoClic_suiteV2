@@ -156,6 +156,34 @@
               @click="openPhotoInNewTab(selectedPoint.photos[0])"
             />
 
+            <!-- Classification -->
+            <div class="mb-4" v-if="getPointHierarchy(selectedPoint).famille">
+              <v-row dense>
+                <v-col cols="6">
+                  <div class="text-caption text-grey">Famille</div>
+                  <div>{{ getPointHierarchy(selectedPoint).famille }}</div>
+                </v-col>
+                <v-col cols="6">
+                  <div class="text-caption text-grey">Catégorie</div>
+                  <div>{{ getPointHierarchy(selectedPoint).categorie || '-' }}</div>
+                </v-col>
+              </v-row>
+              <v-row dense class="mt-1">
+                <v-col cols="6">
+                  <div class="text-caption text-grey">Type</div>
+                  <v-chip size="small" :color="selectedPoint.couleur || 'primary'">
+                    {{ getPointHierarchy(selectedPoint).type || '-' }}
+                  </v-chip>
+                </v-col>
+                <v-col cols="6">
+                  <div class="text-caption text-grey">Projet</div>
+                  <div>{{ getPointProjet(selectedPoint) }}</div>
+                </v-col>
+              </v-row>
+            </div>
+
+            <v-divider class="my-3" v-if="getPointHierarchy(selectedPoint).famille" />
+
             <div class="mb-4">
               <div class="text-caption text-grey">Description</div>
               <div>{{ selectedPoint.description || 'Aucune description' }}</div>
@@ -181,7 +209,15 @@
                 :key="key"
               >
                 <v-list-item-title>{{ key }}</v-list-item-title>
-                <v-list-item-subtitle>{{ formatValue(value) }}</v-list-item-subtitle>
+                <v-list-item-subtitle>
+                  <template v-if="isColorValue(String(value))">
+                    <span class="color-swatch" :style="{ backgroundColor: String(value) }"></span>
+                    {{ value }}
+                  </template>
+                  <template v-else>
+                    {{ formatValue(value) }}
+                  </template>
+                </v-list-item-subtitle>
               </v-list-item>
               <v-list-item v-if="!Object.keys(selectedPoint.donnees_techniques || {}).length">
                 <v-list-item-subtitle class="text-grey">
@@ -820,6 +856,44 @@ function openPhotoInNewTab(photo: any) {
   }
 }
 
+function getPointHierarchy(point: Point): { famille: string | null, categorie: string | null, type: string | null } {
+  const lexiqueCode = point.lexique_code || point.lexique_id
+  if (!lexiqueCode) return { famille: null, categorie: null, type: null }
+
+  const entry = lexiqueStore.getByCode(lexiqueCode)
+  if (!entry) return { famille: null, categorie: null, type: null }
+
+  // Remonter la hiérarchie
+  const hierarchy: any[] = [entry]
+  let current = entry
+  while (current.parent_id) {
+    const parent = lexiqueStore.getByCode(current.parent_id) || lexiqueStore.getById(current.parent_id)
+    if (parent) {
+      hierarchy.unshift(parent)
+      current = parent
+    } else {
+      break
+    }
+  }
+
+  return {
+    famille: hierarchy.find((h: any) => h.niveau === 0)?.libelle || null,
+    categorie: hierarchy.find((h: any) => h.niveau === 1)?.libelle || null,
+    type: hierarchy.find((h: any) => h.niveau === 2)?.libelle || null,
+  }
+}
+
+function getPointProjet(point: Point): string {
+  const projetId = point.project_id || point.projet_id
+  if (!projetId) return '-'
+  const projet = projets.value.find((p: any) => p.id === projetId)
+  return projet?.nom || projet?.name || '-'
+}
+
+function isColorValue(value: string): boolean {
+  return /^#[0-9A-Fa-f]{3,8}$/.test(value)
+}
+
 function formatValue(value: any): string {
   if (Array.isArray(value)) return value.join(', ')
   if (typeof value === 'boolean') return value ? 'Oui' : 'Non'
@@ -941,5 +1015,15 @@ onUnmounted(() => {
   0% { transform: scale(1); }
   50% { transform: scale(1.2); }
   100% { transform: scale(1); }
+}
+
+.color-swatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,0.2);
+  vertical-align: middle;
+  margin-right: 6px;
 }
 </style>
