@@ -82,71 +82,119 @@
 
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: var(--primary-dark); }
-        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
-        .btn-outline:hover { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 2px solid var(--secondary); color: var(--secondary); }
+        .btn-outline:hover { background: var(--secondary); color: white; }
         .btn-accent { background: var(--accent); color: white; }
         .btn-accent:hover { background: #E65100; }
         .btn-large { padding: 15px 40px; font-size: 1.1em; }
 
-        /* Hero - 2 colonnes */
+        /* Hero - layout texte gauche / devices droite */
         .hero {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 120px 20px 60px;
+            background: linear-gradient(180deg, #EDF2F7 0%, #FAFAFA 100%);
+            padding: 110px 20px 50px;
         }
 
-        .hero-inner {
+        .hero-grid {
             max-width: 1200px;
             margin: 0 auto;
-            text-align: center;
-        }
-
-        .hero-inner h1 {
-            font-size: 2.4em;
-            font-weight: 700;
-            line-height: 1.2;
-            margin-bottom: 15px;
-        }
-
-        .hero-inner .subtitle {
-            font-size: 1.15em;
-            opacity: 0.92;
-            max-width: 800px;
-            margin: 0 auto 40px;
-        }
-
-        .hero-columns {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 40px;
-            margin-bottom: 35px;
+            align-items: center;
         }
 
-        .hero-col {
-            text-align: center;
+        .hero-text .badge {
+            display: inline-block;
+            font-size: 0.85em;
+            color: var(--secondary);
+            margin-bottom: 20px;
+            font-weight: 500;
         }
 
-        .hero-col img {
+        .hero-text h1 {
+            font-size: 2.6em;
+            font-weight: 800;
+            line-height: 1.15;
+            color: var(--secondary);
+            margin-bottom: 20px;
+        }
+
+        .hero-text .subtitle {
+            font-size: 1.1em;
+            color: var(--text-light);
+            margin-bottom: 30px;
+            line-height: 1.7;
+        }
+
+        .hero-buttons { display: flex; gap: 15px; flex-wrap: wrap; }
+
+        /* Device mockups */
+        .hero-devices {
+            position: relative;
+            min-height: 380px;
+        }
+
+        /* Laptop mockup */
+        .device-laptop {
+            position: relative;
             width: 100%;
-            max-width: 500px;
-            border-radius: 10px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
-            margin-bottom: 14px;
+            max-width: 520px;
+            margin-left: auto;
         }
 
-        .hero-col-label {
-            font-size: 1.15em;
-            font-weight: 600;
-            opacity: 0.95;
+        .laptop-screen {
+            background: #1a1a2e;
+            border-radius: 8px 8px 0 0;
+            padding: 6px 6px 0;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
         }
 
-        .hero-col-desc {
-            font-size: 0.9em;
-            opacity: 0.75;
-            margin-top: 4px;
+        .laptop-screen img {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            display: block;
         }
 
-        .hero-buttons { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .laptop-base {
+            background: linear-gradient(180deg, #d4d4d8, #c0c0c4);
+            height: 14px;
+            border-radius: 0 0 8px 8px;
+            position: relative;
+        }
+
+        .laptop-base::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: #b0b0b4;
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* Phone mockup */
+        .device-phone {
+            position: absolute;
+            bottom: -10px;
+            right: -15px;
+            width: 130px;
+            z-index: 10;
+        }
+
+        .phone-frame {
+            background: #1a1a2e;
+            border-radius: 18px;
+            padding: 8px 5px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .phone-frame img {
+            width: 100%;
+            border-radius: 12px;
+            display: block;
+        }
 
         /* Barre stats + navigation ancres */
         .anchor-bar {
@@ -168,9 +216,7 @@
             flex-wrap: wrap;
         }
 
-        .stat-item {
-            text-align: center;
-        }
+        .stat-item { text-align: center; }
 
         .stat-number {
             font-size: 1.8em;
@@ -354,11 +400,15 @@
         .footer-bottom { text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 0.85em; }
 
         /* Responsive */
+        @media (max-width: 900px) {
+            .hero-grid { grid-template-columns: 1fr; text-align: center; }
+            .hero-buttons { justify-content: center; }
+            .hero-devices { min-height: 300px; max-width: 500px; margin: 0 auto; }
+            .device-phone { width: 100px; right: -5px; }
+            .hero-text h1 { font-size: 2em; }
+        }
         @media (max-width: 768px) {
             .nav-links { display: none; }
-            .hero-columns { grid-template-columns: 1fr; gap: 25px; }
-            .hero-col img { max-width: 400px; }
-            .hero-inner h1 { font-size: 1.8em; }
             .pillars-grid { grid-template-columns: 1fr; }
             .cost-grid { grid-template-columns: 1fr; }
             .cost-vs { transform: rotate(90deg); }
@@ -386,28 +436,31 @@
         </div>
     </nav>
 
-    <!-- Hero - 2 colonnes égales -->
+    <!-- Hero -->
     <section class="hero">
-        <div class="hero-inner">
-            <h1>Participation citoyenne et gestion de patrimoine réunies dans une seule suite</h1>
-            <p class="subtitle">La première solution française qui intègre portail de signalement citoyen, SIG cartographique et relevé terrain autonome. Sans module supplémentaire.</p>
-
-            <div class="hero-columns">
-                <div class="hero-col">
-                    <img src="screenshots/portail.png" alt="Portail citoyen GéoClic - Signalement par les habitants">
-                    <div class="hero-col-label">Portail Citoyen</div>
-                    <div class="hero-col-desc">Vos administrés signalent et suivent en temps réel</div>
-                </div>
-                <div class="hero-col">
-                    <img src="screenshots/sig-web.png" alt="SIG Web GéoClic - Cartographie et relevé terrain">
-                    <div class="hero-col-label">SIG et Relevé Terrain</div>
-                    <div class="hero-col-desc">Inventaire du patrimoine sur le terrain, sans outil externe</div>
+        <div class="hero-grid">
+            <div class="hero-text">
+                <div class="badge">Technologie souveraine &amp; Hébergement certifié France</div>
+                <h1>Une ville mieux gérée, des citoyens écoutés.</h1>
+                <p class="subtitle">GéoClic réunit le signalement citoyen et la gestion technique dans une seule interface. Pour une fraction du prix des solutions séparées.</p>
+                <div class="hero-buttons">
+                    <a href="mailto:contact@geoclic.fr?subject=Demande de démonstration GéoClic" class="btn btn-accent btn-large">Voir une démo live</a>
+                    <a href="comparatif.html" class="btn btn-outline">Comparer les tarifs</a>
                 </div>
             </div>
 
-            <div class="hero-buttons">
-                <a href="mailto:contact@geoclic.fr?subject=Demande de démonstration GéoClic" class="btn btn-accent btn-large">Demander une démonstration</a>
-                <a href="fonctionnalites.html" class="btn btn-outline" style="color: white; border-color: white;">Découvrir les 7 applications</a>
+            <div class="hero-devices">
+                <div class="device-laptop">
+                    <div class="laptop-screen">
+                        <img src="screenshots/dashboard.png" alt="Dashboard GéoClic - Tableau de bord des demandes citoyennes">
+                    </div>
+                    <div class="laptop-base"></div>
+                </div>
+                <div class="device-phone">
+                    <div class="phone-frame">
+                        <img src="screenshots/portail.png" alt="Portail citoyen GéoClic sur mobile">
+                    </div>
+                </div>
             </div>
         </div>
     </section>
