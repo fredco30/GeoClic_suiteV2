@@ -1191,25 +1191,49 @@ fleet/
 # Lister les clients
 ./fleet/geoclic-fleet.sh list
 
-# Pousser le code vers un serveur
-./fleet/geoclic-fleet.sh push geoclic-prod
+# Provisionner un nouveau serveur (Docker, SSL, code)
+./fleet/geoclic-fleet.sh provision --name mairie-lyon --domain lyon.geoclic.fr --ip 51.210.X.X --email admin@lyon.fr
 
-# Déployer (push + rebuild Docker)
-./fleet/geoclic-fleet.sh deploy geoclic-prod
+# Initialiser la DB du nouveau client (migrations + super admin)
+./fleet/geoclic-fleet.sh init --client mairie-lyon --email admin@lyon.fr --password MotDePasse! --collectivite "Mairie de Lyon"
+
+# Initialiser avec données de démonstration
+./fleet/geoclic-fleet.sh init --client demo --email admin@demo.geoclic.fr --password demo2026! --with-demo
+
+# Mettre à jour un client (code + rebuild)
+./fleet/geoclic-fleet.sh update --client mairie-lyon
+
+# Mettre à jour TOUS les clients
+./fleet/geoclic-fleet.sh update --all
+
+# Mettre à jour avec une migration SQL
+./fleet/geoclic-fleet.sh update --client mairie-lyon --migration 025_nouvelle_feature.sql
 
 # Vérifier l'état
-./fleet/geoclic-fleet.sh status geoclic-prod
+./fleet/geoclic-fleet.sh status
 
 # Accéder en SSH
-./fleet/geoclic-fleet.sh ssh geoclic-prod
+./fleet/geoclic-fleet.sh ssh mairie-lyon
 ```
+
+### Workflow nouveau client
+```
+1. provision  → Installe Docker, SSL, copie le code, lance les containers
+2. init       → Applique les 25 migrations SQL, crée le super admin
+3. Le client se connecte → Wizard d'onboarding (catégories, services, email)
+```
+
+### Scripts d'initialisation
+- **scripts/init_client.sh** : Applique toutes les migrations SQL dans l'ordre + crée le super admin + configure le branding initial. Appelé automatiquement par `fleet init`.
+- **scripts/reset_demo.sh** : Nettoie et recharge les données de démo (pour serveur de démonstration uniquement).
+- **database/demo_data.sql** : Données fictives réalistes (12 signalements, 4 services, 3 comptes).
 
 ### Patterns importants
 - SSH user: `ubuntu` (pas root) - toujours utiliser sudo
 - rsync excludes: `node_modules`, `.git`, `deploy/.env`, `nginx/ssl`, `backups`
 - `--rsync-path="sudo rsync"` obligatoire pour écrire dans `/opt/geoclic/`
 - Line endings: toujours fixer avec `sed -i 's/\r$//'` après écriture de scripts bash
-- Documentation complète: `docs/GUIDE_FLEET.md`
+- Documentation complète: `docs/GUIDE_FLEET_COMPLET.md`
 
 ---
 
