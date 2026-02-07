@@ -4,10 +4,12 @@ Endpoints SANS authentification pour consultation et signalements.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from typing import Optional, List
 from datetime import datetime
+import logging
 import json
 
 from database import get_db
@@ -531,3 +533,86 @@ async def get_urgency_levels():
         {"code": "urgent", "label": "Urgent - À traiter rapidement", "color": "#FF9800"},
         {"code": "critique", "label": "Critique - Danger immédiat", "color": "#F44336"},
     ]
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FORMULAIRE DE CONTACT (site commercial)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class ContactFormRequest(BaseModel):
+    nom: str
+    email: EmailStr
+    collectivite: str = ""
+    objet: str
+    message: str
+
+
+@router.post("/contact")
+async def submit_contact_form(
+    data: ContactFormRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Reçoit un message du formulaire de contact du site commercial.
+    Stocke en base et envoie un email de notification.
+    SANS authentification (endpoint public).
+    """
+    logger = logging.getLogger("geoclic.contact")
+
+    # Validation basique anti-spam
+    if len(data.message) < 10:
+        raise HTTPException(400, "Le message doit contenir au moins 10 caractères")
+    if len(data.nom) < 2:
+        raise HTTPException(400, "Nom invalide")
+
+    # Stocker en base
+    try:
+        await db.execute(text("""
+            INSERT INTO contact_messages (nom, email, collectivite, objet, message)
+            VALUES (:nom, :email, :collectivite, :objet, :message)
+        """), {
+            "nom": data.nom,
+            "email": data.email,
+            "collectivite": data.collectivite,
+            "objet": data.objet,
+            "message": data.message,
+        })
+        await db.commit()
+    except Exception as e:
+        logger.warning(f"Erreur stockage contact (table manquante?): {e}")
+        # Continue quand même - l'email sera envoyé
+
+    # Envoyer un email de notification à l'admin
+    try:
+        from routers.settings import get_email_settings
+        email_config = await get_email_settings(db)
+        if email_config and email_config.get("smtp_host"):
+            import smtplib
+            from email.mime.text import MIMEText
+
+            admin_email = email_config.get("smtp_from_email", "contact@geoclic.fr")
+            msg = MIMEText(
+                f"Nouveau message de contact GéoClic\n\n"
+                f"Nom: {data.nom}\n"
+                f"Email: {data.email}\n"
+                f"Collectivité: {data.collectivite}\n"
+                f"Objet: {data.objet}\n\n"
+                f"Message:\n{data.message}",
+                "plain", "utf-8"
+            )
+            msg["Subject"] = f"[GéoClic Contact] {data.objet} - {data.collectivite or data.nom}"
+            msg["From"] = admin_email
+            msg["To"] = admin_email
+            msg["Reply-To"] = data.email
+
+            with smtplib.SMTP(email_config["smtp_host"], int(email_config.get("smtp_port", 587))) as server:
+                server.starttls()
+                if email_config.get("smtp_username"):
+                    server.login(email_config["smtp_username"], email_config.get("smtp_password", ""))
+                server.send_message(msg)
+
+            logger.info(f"Email contact envoyé pour {data.email}")
+    except Exception as e:
+        logger.warning(f"Email contact non envoyé (SMTP non configuré?): {e}")
+
+    return {"status": "ok", "message": "Message reçu"}
