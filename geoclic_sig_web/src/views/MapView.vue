@@ -1025,6 +1025,8 @@ if ((L as any).DivOverlay?.prototype?._updatePosition) {
   }
 }
 
+console.log('[SIG] ===== MapView module loaded =====')
+
 const mapStore = useMapStore()
 
 // Refs
@@ -1748,7 +1750,9 @@ function toggleProjectPanel() {
 }
 
 async function selectProject(project: any) {
+  console.log('[SIG] selectProject called:', project.name)
   await mapStore.selectProject(project)
+  console.log('[SIG] selectProject done, layers:', mapStore.layers.length, 'map:', !!map.value)
   showProjectPanel.value = false
   showToast(`Projet "${project.name}" chargé`, 'success')
   // Forcer le rendu des couches après le chargement des données
@@ -2060,16 +2064,16 @@ function createLeafletLayerGroup(layer: { data: GeoJSON.FeatureCollection | null
 // Note: pas de check _animatingZoom — le monkey-patch Leaflet protège contre les crash
 watch(
   () => mapStore.layers.map(l => `${l.id}:${l.visible}:${l.data?.features?.length || 0}`).join(','),
-  () => {
+  (newVal, oldVal) => {
+    console.log('[SIG] Watch fired! fingerprint:', oldVal, '→', newVal, 'map:', !!map.value)
     if (!map.value) return
     renderLayers()
   }
 )
 
 function renderLayers() {
+  console.log('[SIG] renderLayers called, map:', !!map.value, 'layers:', mapStore.layers.length)
   if (!map.value) return
-
-  console.log('[SIG] renderLayers called, layers:', mapStore.layers.length)
 
   // Supprimer les couches existantes de la carte (Leaflet gère le cleanup des events)
   layerGroups.value.forEach((group) => {
