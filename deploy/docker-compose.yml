@@ -73,6 +73,10 @@ services:
       # Photos
       PHOTO_STORAGE_PATH: /app/photos
       PHOTO_MAX_SIZE_MB: ${PHOTO_MAX_SIZE:-10}
+      # Monitoring Sentry (optionnel - laisser vide pour désactiver)
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
+      SENTRY_TRACES_RATE: ${SENTRY_TRACES_RATE:-0.1}
     volumes:
       - photos_data:/app/photos
       - ./logs:/app/logs

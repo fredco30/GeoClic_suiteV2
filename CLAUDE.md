@@ -581,6 +581,7 @@ GeoClic_Suite/
     - GeoJSON + métadonnées (source, date, comptage)
     - Résumé du contenu par catégorie
 - **Fix cascade filtre** : `filteredLayers` utilisait `layer.id` pour le lookup lexique, mais le nouveau format `${projectId}_${code}` cassait le filtre. Ajout de `getLayerLexiqueCode()` pour extraire le code.
+- **Aperçu couleur dans propriétés** : Les valeurs hexadécimales (#RGB, #RRGGBB, #RRGGBBAA) dans les données techniques s'affichent avec un carré coloré au lieu du code brut. Fonction `isColorValue()` + template conditionnel avec `.color-swatch`.
 - **Fichiers modifiés :** `geoclic_sig_web/src/stores/map.ts`, `geoclic_sig_web/src/views/MapView.vue`
 
 ### Autres tâches en attente
@@ -958,7 +959,8 @@ async def get_demande(): ...
 - **SIG lexiqueMap merge**: Quand plusieurs projets sont chargés, le `lexiqueMap` fusionne les entrées de tous les projets. `loadLexique()` crée une nouvelle Map à partir de l'existante et y ajoute les nouvelles entrées (pas de remplacement). Cela permet aux filtres cascade de fonctionner avec des données multi-projets.
 - **SIG features _project_id/_project_name**: Chaque feature GeoJSON du SIG porte `_project_id` et `_project_name` dans ses properties. Ces champs sont dans `HIDDEN_PROPERTIES` (pas affichés au détail) mais utilisés par les stats (répartition par projet) et l'export CSV.
 - **SIG Turf.js**: La dépendance `@turf/turf` est installée dans geoclic_sig_web. Utilisée pour calculer le linéaire total (`turf.length()` en mètres) et la surface totale (`turf.area()` en m²) dans le cockpit Stats.
-- **SIG dashboard panel**: Le panneau droit du SIG est un composant unique avec 3 onglets (Stats/Propriétés/Export) géré par `dashboardTab` ref. Le watch sur `selectedFeature` ouvre automatiquement l'onglet Propriétés. Pas de panneaux séparés stats-panel/feature-panel.
+- **SIG dashboard panel**: Le panneau droit du SIG est un composant unique avec 3 onglets (Stats/Propriétés/Export) géré par `dashboardTab` ref. Le watch sur `selectedFeature` ouvre automatiquement l'onglet Propriétés. Pas de panneaux séparés stats-panel/feature-panel. Le panneau s'ouvre par défaut (`showStatsPanel = ref(true)`).
+- **SIG aperçu couleurs**: Les valeurs hex (#RGB, #RRGGBB, #RRGGBBAA) dans les données techniques (custom_properties) sont détectées par `isColorValue()` et affichées avec un carré coloré `.color-swatch` au lieu du code brut. Le type de retour de `getCustomProperties()` inclut un flag `isColor: boolean`.
 
 ## Liste des Migrations
 
@@ -1264,15 +1266,15 @@ deploy/www/                   # Copie de production (montée par nginx)
 
 | Critère | Note initiale | Note actuelle | Commentaire |
 |---|---|---|---|
-| Richesse fonctionnelle | 9/10 | 9.5/10 | +Dashboard dirigeant, onboarding, FAQ, guides, toast, breadcrumbs |
+| Richesse fonctionnelle | 9/10 | 9.5/10 | +Dashboard dirigeant, onboarding, FAQ, guides, toast, breadcrumbs, SIG multi-projets + cockpit |
 | Architecture technique | 7/10 | 7.5/10 | +Multi-workers, logging structuré, CI/CD, health endpoint |
 | Sécurité | 4/10 | 8/10 | Injections SQL corrigées, secrets externalisés, rate limiting, uploads validés |
 | Qualité du code | 6/10 | 7/10 | +CI/CD, tests corrigés, linting pipeline |
 | Scalabilité | 4/10 | 6/10 | +4 workers (~200 req), backup amélioré (manque Redis, S3) |
-| UX/Design | 5/10 | 7/10 | +White-labeling, toast notifications, breadcrumbs, onboarding wizard |
+| UX/Design | 5/10 | 7.5/10 | +White-labeling, toast, breadcrumbs, onboarding, SIG cockpit 3 onglets, aperçu couleurs |
 | Documentation | 8/10 | 9/10 | +Guides par rôle, FAQ citoyen, doc production, doc tests |
 | Prêt pour la production | 5/10 | 7.5/10 | White-label, onboarding, sécurisé, backups (manque multi-tenant) |
-| **Note globale** | **5.7/10** | **7.7/10** | **Produit commercial viable pour déploiement mono-client** |
+| **Note globale** | **5.7/10** | **7.8/10** | **Produit commercial viable pour déploiement mono-client** |
 
 ### Qualité Code par Application Frontend
 
@@ -1335,18 +1337,18 @@ deploy/www/                   # Copie de production (montée par nginx)
 - Vite : mix 5.x et 7.x
 - Pinia : mix 2.x et 3.x
 
-#### Manques pour la commercialisation
+#### Manques restants pour la commercialisation
 - Pas de multi-tenancy (1 instance Docker = 1 client)
-- Pas de white-labeling (logo, couleurs, nom configurables)
-- Pas de CI/CD (pas de GitHub Actions)
-- Pas de monitoring applicatif (Sentry, Prometheus)
-- Pas de documentation utilisateur (guides par rôle)
-- Pas d'onboarding wizard pour nouveaux clients
-- Pas de tableau de bord dirigeant avec KPI visuels
-- Email synchrone (smtplib bloque le thread)
-- Uvicorn mono-worker (~50 requêtes concurrentes max)
 - Pas de cache Redis
 - Photos stockées localement (pas de S3/CDN)
+- Email synchrone (smtplib bloque le thread)
+- ~~Pas de white-labeling~~ → FAIT (Phase 14.1)
+- ~~Pas de CI/CD~~ → FAIT (Phase 13.2)
+- ~~Pas de monitoring applicatif~~ → FAIT (Sentry intégré)
+- ~~Pas de documentation utilisateur~~ → FAIT (Phase 14.4)
+- ~~Pas d'onboarding wizard~~ → FAIT (Phase 14.2)
+- ~~Pas de tableau de bord dirigeant~~ → FAIT (Phase 14.3)
+- ~~Uvicorn mono-worker~~ → FAIT (4 workers, Phase 13.1)
 
 ---
 
@@ -1626,7 +1628,7 @@ Pour chaque phase, vérifier avant de passer à la suivante :
 - [x] Pipeline CI/CD GitHub Actions (.github/workflows/ci.yml: tests API, builds frontend, build Docker)
 - [x] Tests corrigés (conftest.py: geoclic_users + /api/auth/login, test_auth.py idem)
 - [x] Backup amélioré (DB format custom + SQL, photos via tar, vérification intégrité pg_restore --list, rotation hebdo 28j)
-- [ ] Sentry (à configurer sur l'instance de production)
+- [x] Sentry intégré (sentry-sdk[fastapi], config via SENTRY_DSN env var, guide: docs/GUIDE_SENTRY.md)
 - [ ] Table agents unifiée (reporté: risque de régression élevé, nécessite migration complexe)
 - [ ] Unification frontend versions (reporté: nécessite tests manuels sur chaque app, Pinia 2→3 breaking changes)
 - **Duplication documentée:** MiniMap.vue (2 copies, diff=height), useTheme.ts (4 copies identiques), fix icônes Leaflet (3 copies)

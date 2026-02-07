@@ -26,6 +26,23 @@ import os
 from config import settings
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# SENTRY - MONITORING & ERROR TRACKING
+# ═══════════════════════════════════════════════════════════════════════════════
+
+if settings.sentry_dsn:
+    import sentry_sdk
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        environment=settings.sentry_environment,
+        # Trace 10% des requêtes pour le monitoring de performance (configurable)
+        traces_sample_rate=settings.sentry_traces_sample_rate,
+        # Envoyer les infos de la requête HTTP (URL, méthode, headers)
+        send_default_pii=False,  # Pas de données personnelles (RGPD)
+        # Attacher l'URL et la méthode à chaque erreur
+        enable_tracing=True,
+    )
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # LOGGING STRUCTURÉ
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -108,6 +125,10 @@ async def lifespan(app: FastAPI):
     """Gestion du cycle de vie de l'application."""
     # Démarrage
     logger.info("GéoClic Suite V14 API - Démarrage...")
+    if settings.sentry_dsn:
+        logger.info(f"Sentry activé (env: {settings.sentry_environment})")
+    else:
+        logger.info("Sentry non configuré (SENTRY_DSN vide)")
     await create_tables()
     logger.info("Base de données connectée")
     ensure_photo_directories()
@@ -216,8 +237,14 @@ async def global_exception_handler(request: Request, exc: Exception):
     """
     Capture toutes les exceptions non gérées et retourne une réponse JSON.
     Cela garantit que les headers CORS sont ajoutés même en cas d'erreur 500.
+    Les erreurs sont envoyées à Sentry si configuré.
     """
     logger.error(f"Erreur non gérée sur {request.method} {request.url.path}: {exc}", exc_info=True)
+
+    # Envoyer à Sentry si configuré
+    if settings.sentry_dsn:
+        import sentry_sdk
+        sentry_sdk.capture_exception(exc)
 
     return JSONResponse(
         status_code=500,
@@ -288,5 +315,11 @@ async def health_check():
     else:
         health["status"] = "degraded"
         health["checks"]["storage"] = {"status": "error", "detail": "Répertoire photos inaccessible"}
+
+    # Vérification Sentry
+    if settings.sentry_dsn:
+        health["checks"]["sentry"] = {"status": "ok", "environment": settings.sentry_environment}
+    else:
+        health["checks"]["sentry"] = {"status": "disabled"}
 
     return health
