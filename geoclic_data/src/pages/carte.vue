@@ -749,18 +749,23 @@ function updateMarkers() {
   points.value.forEach(point => {
     const lexiqueCode = point.lexique_code || point.lexique_id
     const category = lexiqueCode ? lexiqueStore.getByCode(lexiqueCode) : null
+    const bgColor = category?.couleur || point.couleur || '#1976D2'
+    const iconClass = category?.icone || point.icone || 'mdi-map-marker'
     const marker = L.marker([point.latitude, point.longitude], {
       icon: L.divIcon({
         className: 'custom-marker',
-        html: `<div class="marker-icon" style="background-color: ${category?.couleur || point.color_value || '#1976D2'}">
-          <i class="mdi ${category?.icone || point.icon_name || 'mdi-map-marker'}"></i>
+        iconSize: [36, 36],
+        iconAnchor: [18, 36],
+        popupAnchor: [0, -36],
+        html: `<div class="marker-icon" style="background-color: ${bgColor}">
+          <i class="mdi ${iconClass}"></i>
         </div>`,
       }),
     })
 
     marker.on('click', () => selectPoint(point))
     const pointName = point.name || point.nom || 'Point'
-    marker.bindTooltip(pointName, { direction: 'top', offset: [0, -20] })
+    marker.bindTooltip(pointName, { direction: 'top', offset: [0, -36] })
     markersLayer!.addLayer(marker)
   })
 
@@ -901,20 +906,21 @@ onUnmounted(() => {
 }
 
 .marker-icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  border: 2px solid white;
 }
 
 .marker-icon i {
   transform: rotate(45deg);
   color: white;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .temp-marker-icon {
