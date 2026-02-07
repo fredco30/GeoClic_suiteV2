@@ -349,6 +349,7 @@ export const useMapStore = defineStore('map', () => {
             comment: point.comment,
             color_value: point.color_value,
             icon_name: point.icon_name,
+            photos: point.photos || [],
           }
         }
 

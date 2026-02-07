@@ -772,12 +772,27 @@
           {{ getGeometryLabel(mapStore.selectedFeature.geometry.type) }}
         </div>
         <div class="feature-properties">
-          <div class="feature-property" v-for="(value, key) in mapStore.selectedFeature.properties" :key="key">
-            <span class="property-key">{{ formatPropertyKey(key) }}</span>
-            <span class="property-value">{{ value || '-' }}</span>
+          <div class="feature-property" v-for="prop in getDisplayProperties(mapStore.selectedFeature.properties)" :key="prop.key">
+            <span class="property-key">{{ prop.label }}</span>
+            <span class="property-value">{{ prop.value }}</span>
           </div>
-          <div v-if="Object.keys(mapStore.selectedFeature.properties || {}).length === 0" class="no-properties">
+          <div v-if="getDisplayProperties(mapStore.selectedFeature.properties).length === 0" class="no-properties">
             Aucune propriété définie
+          </div>
+        </div>
+        <!-- Photos -->
+        <div v-if="mapStore.selectedFeature.properties?.photos?.length" class="feature-photos">
+          <h4 class="photos-title">Photos</h4>
+          <div class="photos-grid">
+            <a
+              v-for="photo in mapStore.selectedFeature.properties.photos"
+              :key="photo.id"
+              :href="photo.url"
+              target="_blank"
+              class="photo-thumb"
+            >
+              <img :src="photo.thumbnail_url || photo.url" :alt="photo.filename" />
+            </a>
           </div>
         </div>
       </div>
@@ -1464,26 +1479,43 @@ function toggleLayerPanel() {
 function zoomToData() {
   if (!map.value) return
 
-  const allBounds: L.LatLngBounds[] = []
+  try {
+    const allBounds: L.LatLngBounds[] = []
 
-  mapStore.visibleLayers.forEach(layer => {
-    if (layer.data?.features?.length) {
-      const geoJsonLayer = L.geoJSON(layer.data)
-      allBounds.push(geoJsonLayer.getBounds())
+    mapStore.visibleLayers.forEach(layer => {
+      if (layer.data?.features?.length) {
+        const geoJsonLayer = L.geoJSON(layer.data)
+        const bounds = geoJsonLayer.getBounds()
+        if (bounds.isValid()) {
+          allBounds.push(bounds)
+        }
+      }
+    })
+
+    if (allBounds.length > 0) {
+      const combinedBounds = allBounds.reduce((acc, bounds) => acc.extend(bounds))
+      map.value.closeTooltip()
+      map.value.fitBounds(combinedBounds, { padding: [50, 50] })
     }
-  })
-
-  if (allBounds.length > 0) {
-    const combinedBounds = allBounds.reduce((acc, bounds) => acc.extend(bounds))
-    map.value.fitBounds(combinedBounds, { padding: [50, 50] })
+  } catch (e) {
+    console.warn('zoomToData error:', e)
   }
 }
 
 function zoomToFeature() {
   if (!map.value || !mapStore.selectedFeature) return
 
-  const layer = L.geoJSON(mapStore.selectedFeature)
-  map.value.fitBounds(layer.getBounds(), { padding: [100, 100], maxZoom: 18 })
+  try {
+    const layer = L.geoJSON(mapStore.selectedFeature)
+    const bounds = layer.getBounds()
+    if (bounds.isValid()) {
+      map.value.closeTooltip()
+      map.value.fitBounds(bounds, { padding: [100, 100], maxZoom: 18 })
+    }
+  } catch (e) {
+    // Leaflet peut crasher si des overlays orphelins existent
+    console.warn('zoomToFeature error:', e)
+  }
 }
 
 function editFeature() {
@@ -1626,6 +1658,30 @@ function getGeometryLabel(type: string): string {
     MultiPolygon: 'Multi-polygones'
   }
   return labels[type] || type
+}
+
+// Propriétés à afficher dans le panneau détail avec labels français
+const PROPERTY_LABELS: Record<string, string> = {
+  name: 'Nom',
+  type: 'Catégorie',
+  subtype: 'Type',
+  condition_state: 'État',
+  point_status: 'Statut',
+  comment: 'Commentaire',
+}
+
+// Propriétés internes à masquer
+const HIDDEN_PROPERTIES = new Set(['id', 'color_value', 'icon_name', 'sync_status', 'lexique_code', 'photos'])
+
+function getDisplayProperties(properties: Record<string, any> | null): { key: string; label: string; value: string }[] {
+  if (!properties) return []
+  return Object.entries(properties)
+    .filter(([key, value]) => !HIDDEN_PROPERTIES.has(key) && value != null && value !== '')
+    .map(([key, value]) => ({
+      key,
+      label: PROPERTY_LABELS[key] || formatPropertyKey(key),
+      value: String(value),
+    }))
 }
 
 function formatPropertyKey(key: string): string {
@@ -1924,8 +1980,9 @@ function handleKeydown(e: KeyboardEvent) {
 watch(() => mapStore.visibleLayers, (layers) => {
   if (!map.value) return
 
-  // Supprimer les couches existantes
+  // Supprimer les couches existantes (clearLayers nettoie aussi les tooltips)
   layerGroups.value.forEach(group => {
+    group.clearLayers()
     map.value?.removeLayer(group)
   })
   layerGroups.value.clear()
@@ -3438,6 +3495,44 @@ watch(
   padding: 20px;
   color: #95a5a6;
   font-size: 0.85rem;
+}
+
+.feature-photos {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.photos-title {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin: 0 0 8px 0;
+  font-weight: 500;
+}
+
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.photo-thumb {
+  display: block;
+  border-radius: 6px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border: 1px solid #e0e0e0;
+}
+
+.photo-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-thumb:hover {
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
 .feature-actions {
