@@ -98,8 +98,16 @@ export const useMapStore = defineStore('map', () => {
   const mapCenter = ref<[number, number]>([46.603354, 1.888334]) // France center
   const mapZoom = ref(6)
 
-  // Multi-projets : IDs des projets cochés
-  const activeProjectIds = ref<Set<string>>(new Set())
+  // Multi-projets : IDs des projets cochés (restaurés depuis localStorage)
+  const STORAGE_KEY = 'sig_active_projects'
+  const storedIds = localStorage.getItem(STORAGE_KEY)
+  const activeProjectIds = ref<Set<string>>(
+    storedIds ? new Set(JSON.parse(storedIds)) : new Set()
+  )
+
+  function persistActiveProjects() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...activeProjectIds.value]))
+  }
 
   // Compat : "currentProject" = dernier projet coché (pour backward compat)
   const currentProject = computed<Project | null>(() => {
@@ -148,6 +156,30 @@ export const useMapStore = defineStore('map', () => {
       console.error('Erreur chargement projets:', error)
     } finally {
       loading.value = false
+    }
+  }
+
+  // Restaurer les projets actifs depuis localStorage après chargement
+  async function restoreActiveProjects() {
+    if (activeProjectIds.value.size === 0 || projects.value.length === 0) return
+
+    // Valider que les IDs stockés existent toujours
+    const validIds = [...activeProjectIds.value].filter(id =>
+      projects.value.some(p => p.id === id)
+    )
+
+    if (validIds.length === 0) {
+      activeProjectIds.value = new Set()
+      persistActiveProjects()
+      return
+    }
+
+    activeProjectIds.value = new Set(validIds)
+    persistActiveProjects()
+
+    // Charger les couches de chaque projet actif
+    for (const projectId of validIds) {
+      await addProjectLayers(projectId)
     }
   }
 
@@ -408,6 +440,7 @@ export const useMapStore = defineStore('map', () => {
       activeProjectIds.value = new Set(activeProjectIds.value)
       await addProjectLayers(projectId)
     }
+    persistActiveProjects()
   }
 
   // Vérifier si un projet est actif
@@ -421,6 +454,7 @@ export const useMapStore = defineStore('map', () => {
     layers.value = layers.value.filter(l => !l.projectId)
     activeProjectIds.value = new Set([project.id])
     await addProjectLayers(project.id)
+    persistActiveProjects()
   }
 
   // Charger et ajouter les couches d'un projet (sans effacer les autres)
@@ -670,6 +704,7 @@ export const useMapStore = defineStore('map', () => {
     visibleApiZones,
     apiZonesByLevel,
     loadProjects,
+    restoreActiveProjects,
     selectProject,
     loadProjectData,
     addProjectLayers,
