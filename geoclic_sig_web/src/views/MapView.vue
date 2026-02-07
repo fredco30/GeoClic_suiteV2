@@ -1666,15 +1666,15 @@ function getGeometryLabel(type: string): string {
 // Propriétés à afficher dans le panneau détail avec labels français
 const PROPERTY_LABELS: Record<string, string> = {
   name: 'Nom',
-  type: 'Catégorie',
-  subtype: 'Type',
+  categorie: 'Catégorie',
+  type: 'Type',
   condition_state: 'État',
   point_status: 'Statut',
   comment: 'Commentaire',
 }
 
 // Propriétés internes à masquer
-const HIDDEN_PROPERTIES = new Set(['id', 'color_value', 'icon_name', 'sync_status', 'lexique_code', 'photos'])
+const HIDDEN_PROPERTIES = new Set(['id', 'color_value', 'icon_name', 'sync_status', 'lexique_code', 'photos', '_category_icon', '_category_color'])
 
 function getDisplayProperties(properties: Record<string, any> | null): { key: string; label: string; value: string }[] {
   if (!properties) return []
@@ -1979,57 +1979,95 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
+// Nettoyer proprement un LayerGroup (unbind tooltips/popups/events avant de supprimer)
+function cleanupLayerGroup(group: L.LayerGroup) {
+  try {
+    group.eachLayer((layer: any) => {
+      try {
+        layer.unbindTooltip?.()
+        layer.unbindPopup?.()
+        layer.off?.()
+      } catch (_) { /* ignore cleanup errors */ }
+    })
+    group.clearLayers()
+  } catch (_) { /* ignore cleanup errors */ }
+}
+
+// Créer un LayerGroup Leaflet à partir d'une couche du store
+function createLeafletLayerGroup(layer: { data: GeoJSON.FeatureCollection | null; color: string; icon?: string; id: string }) {
+  const group = L.layerGroup()
+  if (!layer.data) return group
+
+  L.geoJSON(layer.data, {
+    style: () => ({
+      color: layer.color,
+      weight: 2,
+      fillOpacity: 0.3
+    }),
+    pointToLayer: (feature, latlng) => {
+      const iconName = feature.properties?._category_icon || layer.icon || 'mdi-map-marker'
+      const iconColor = feature.properties?._category_color || layer.color || '#3498db'
+      return L.marker(latlng, {
+        icon: L.divIcon({
+          className: 'sig-marker',
+          html: `<div class="sig-marker-pin" style="background-color: ${iconColor}"><i class="mdi ${iconName}"></i></div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          tooltipAnchor: [0, -32],
+        })
+      })
+    },
+    onEachFeature: (feature, featureLayer) => {
+      featureLayer.on('click', () => {
+        mapStore.selectFeature(feature)
+      })
+
+      if (feature.properties?.name) {
+        featureLayer.bindTooltip(feature.properties.name)
+      }
+    }
+  }).addTo(group)
+
+  return group
+}
+
 // Watch pour les changements de couches
-watch(() => mapStore.visibleLayers, (layers) => {
+// Fingerprint = identité + visibilité + nombre de features (détecte les changements de données)
+watch(
+  () => mapStore.layers.map(l => `${l.id}:${l.visible}:${l.data?.features?.length || 0}`).join(','),
+  () => {
+    if (!map.value) return
+
+    const m = map.value
+
+    // Si la carte est en pleine animation de zoom, attendre la fin
+    if ((m as any)._animatingZoom) {
+      m.once('zoomend', () => renderLayers())
+      return
+    }
+    renderLayers()
+  }
+)
+
+function renderLayers() {
   if (!map.value) return
 
-  // Supprimer les couches existantes (clearLayers nettoie aussi les tooltips)
-  layerGroups.value.forEach(group => {
-    group.clearLayers()
-    map.value?.removeLayer(group)
+  // Nettoyer toutes les couches existantes
+  layerGroups.value.forEach((group) => {
+    cleanupLayerGroup(group)
+    try { map.value?.removeLayer(group) } catch (_) {}
   })
   layerGroups.value.clear()
 
   // Ajouter les couches visibles
-  layers.forEach(layer => {
-    if (!layer.data) return
+  mapStore.layers.forEach(layer => {
+    if (!layer.visible || !layer.data) return
 
-    const group = L.layerGroup()
-
-    L.geoJSON(layer.data, {
-      style: () => ({
-        color: layer.color,
-        weight: 2,
-        fillOpacity: 0.3
-      }),
-      pointToLayer: (feature, latlng) => {
-        const iconName = feature.properties?._category_icon || layer.icon || 'mdi-map-marker'
-        const iconColor = feature.properties?._category_color || layer.color || '#3498db'
-        return L.marker(latlng, {
-          icon: L.divIcon({
-            className: 'sig-marker',
-            html: `<div class="sig-marker-pin" style="background-color: ${iconColor}"><i class="mdi ${iconName}"></i></div>`,
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-            tooltipAnchor: [0, -32],
-          })
-        })
-      },
-      onEachFeature: (feature, featureLayer) => {
-        featureLayer.on('click', () => {
-          mapStore.selectFeature(feature)
-        })
-
-        if (feature.properties?.name) {
-          featureLayer.bindTooltip(feature.properties.name)
-        }
-      }
-    }).addTo(group)
-
+    const group = createLeafletLayerGroup(layer)
     group.addTo(map.value!)
     layerGroups.value.set(layer.id, group)
   })
-}, { deep: true })
+}
 
 // Couche pour les zones API
 const apiZonesLayerGroup = ref<L.LayerGroup | null>(null)
@@ -2040,9 +2078,10 @@ watch(
   () => {
     if (!map.value) return
 
-    // Supprimer la couche existante
+    // Supprimer la couche existante avec cleanup
     if (apiZonesLayerGroup.value) {
-      map.value.removeLayer(apiZonesLayerGroup.value)
+      cleanupLayerGroup(apiZonesLayerGroup.value)
+      try { map.value.removeLayer(apiZonesLayerGroup.value) } catch (_) {}
     }
 
     // Afficher les zones si visible globalement

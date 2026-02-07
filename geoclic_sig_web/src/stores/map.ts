@@ -447,8 +447,18 @@ export const useMapStore = defineStore('map', () => {
         let categoryDisplay = { label: 'Autres', icon: 'mdi-map-marker', color: '#95a5a6' }
 
         if (lexiqueCode && lexiqueMap.value.size > 0) {
-          // Chercher l'ancêtre level 2 (catégorie)
-          const cat = getLexiqueAncestor(lexiqueCode, 2)
+          // Chercher l'ancêtre level 2 (catégorie) pour le groupement
+          let cat = getLexiqueAncestor(lexiqueCode, 2)
+
+          // Si pas trouvé, essayer level 1 (peut-être seulement 2 niveaux)
+          if (!cat) cat = getLexiqueAncestor(lexiqueCode, 1)
+
+          // Fallback : essayer point.type comme code lexique direct
+          if (!cat && point.type) {
+            const typeEntry = lexiqueMap.value.get(point.type)
+            if (typeEntry) cat = typeEntry
+          }
+
           if (cat) {
             categoryCode = cat.code
             categoryDisplay = getLexiqueDisplay(cat.code)
@@ -456,14 +466,8 @@ export const useMapStore = defineStore('map', () => {
             // Peut-être que le point est directement au level 1 ou 2
             const direct = lexiqueMap.value.get(lexiqueCode)
             if (direct) {
-              if (direct.level <= 2) {
-                categoryCode = direct.code
-                categoryDisplay = getLexiqueDisplay(direct.code)
-              } else {
-                // Fallback : utiliser l'entrée elle-même
-                categoryCode = lexiqueCode
-                categoryDisplay = getLexiqueDisplay(lexiqueCode)
-              }
+              categoryCode = direct.code
+              categoryDisplay = getLexiqueDisplay(direct.code)
             }
           }
         } else if (point.type) {
@@ -472,10 +476,18 @@ export const useMapStore = defineStore('map', () => {
           categoryDisplay = { label: point.type, icon: 'mdi-map-marker', color: '#3498db' }
         }
 
-        // Résoudre le label complet du point depuis le lexique
-        const pointDisplay = lexiqueCode && lexiqueMap.value.size > 0
+        // Résoudre les labels depuis le lexique pour l'affichage dans le détail
+        const pointEntry = lexiqueCode && lexiqueMap.value.size > 0
+          ? lexiqueMap.value.get(lexiqueCode)
+          : null
+        const pointDisplay = pointEntry
           ? getLexiqueDisplay(lexiqueCode)
           : { label: '', icon: '', color: '' }
+
+        // Résoudre la catégorie (level 2) pour le label "Catégorie" dans le détail
+        const catEntry = lexiqueCode && lexiqueMap.value.size > 0
+          ? (getLexiqueAncestor(lexiqueCode, 2) || getLexiqueAncestor(lexiqueCode, 1))
+          : null
 
         const feature: GeoJSON.Feature = {
           type: 'Feature',
@@ -483,8 +495,8 @@ export const useMapStore = defineStore('map', () => {
           properties: {
             id: point.id,
             name: point.name,
-            type: pointDisplay.label || point.type,
-            subtype: point.subtype,
+            categorie: catEntry?.label || point.type || '',
+            type: pointDisplay.label || point.subtype || '',
             lexique_code: point.lexique_code,
             condition_state: point.condition_state,
             point_status: point.point_status,
