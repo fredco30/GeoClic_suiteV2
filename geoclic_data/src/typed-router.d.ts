@@ -29,9 +29,12 @@ declare module 'vue-router/auto-routes' {
     '/point-detail': RouteRecordInfo<'/point-detail', '/point-detail', Record<never, never>, Record<never, never>>,
     '/points': RouteRecordInfo<'/points', '/points', Record<never, never>, Record<never, never>>,
     '/profil': RouteRecordInfo<'/profil', '/profil', Record<never, never>, Record<never, never>>,
-    '/projets': RouteRecordInfo<'/projets', '/projets', Record<never, never>, Record<never, never>>,
+    '/projets/': RouteRecordInfo<'/projets/', '/projets', Record<never, never>, Record<never, never>>,
+    '/projets/[id]': RouteRecordInfo<'/projets/[id]', '/projets/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/qrcodes': RouteRecordInfo<'/qrcodes', '/qrcodes', Record<never, never>, Record<never, never>>,
     '/utilisateurs': RouteRecordInfo<'/utilisateurs', '/utilisateurs', Record<never, never>, Record<never, never>>,
+    '/zones/': RouteRecordInfo<'/zones/', '/zones', Record<never, never>, Record<never, never>>,
+    '/zones/edit': RouteRecordInfo<'/zones/edit', '/zones/edit', Record<never, never>, Record<never, never>>,
   }
 
   /**
@@ -89,8 +92,12 @@ declare module 'vue-router/auto-routes' {
       routes: '/profil'
       views: never
     }
-    'src/pages/projets.vue': {
-      routes: '/projets'
+    'src/pages/projets/index.vue': {
+      routes: '/projets/'
+      views: never
+    }
+    'src/pages/projets/[id].vue': {
+      routes: '/projets/[id]'
       views: never
     }
     'src/pages/qrcodes.vue': {
@@ -99,6 +106,14 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/utilisateurs.vue': {
       routes: '/utilisateurs'
+      views: never
+    }
+    'src/pages/zones/index.vue': {
+      routes: '/zones/'
+      views: never
+    }
+    'src/pages/zones/edit.vue': {
+      routes: '/zones/edit'
       views: never
     }
   }
