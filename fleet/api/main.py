@@ -80,6 +80,13 @@ class ProvisionRequest(BaseModel):
     ssh_port: int = 22
 
 
+class InitRequest(BaseModel):
+    email: str
+    password: str
+    collectivite: str
+    with_demo: bool = False
+
+
 class UpdateRequest(BaseModel):
     services: Optional[str] = None
     migration: Optional[str] = None
@@ -243,6 +250,29 @@ async def provision_server(
 
     asyncio.create_task(run_fleet_cmd_async(args, task_id))
     return {"task_id": task_id, "message": "Provisioning démarré"}
+
+
+@app.post("/api/fleet/servers/{name}/init")
+async def init_server(
+    name: str,
+    data: InitRequest,
+    admin: dict = Depends(get_current_admin),
+):
+    """Initialise la base de données d'un serveur (migrations + super admin + branding)."""
+    task_id = f"init_{name}_{uuid.uuid4().hex[:8]}"
+
+    args = [
+        "init",
+        "--client", name,
+        "--email", data.email,
+        "--password", data.password,
+        "--collectivite", data.collectivite,
+    ]
+    if data.with_demo:
+        args.append("--with-demo")
+
+    asyncio.create_task(run_fleet_cmd_async(args, task_id))
+    return {"task_id": task_id, "message": "Initialisation de la base de données démarrée"}
 
 
 @app.post("/api/fleet/servers/{name}/update")
