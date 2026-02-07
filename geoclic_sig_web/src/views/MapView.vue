@@ -294,20 +294,19 @@
         </button>
       </div>
       <div class="panel-body">
-        <!-- Filtres cascade -->
+        <!-- Filtres cascade dynamiques -->
         <div v-if="mapStore.layers.length > 0" class="layer-filters">
-          <select v-model="layerFilterFamille" @change="onLayerFamilleChange" class="layer-filter-select">
-            <option value="">Toutes les familles</option>
-            <option v-for="f in lexiqueFamilles" :key="f.code" :value="f.code">{{ f.label }}</option>
-          </select>
-          <select v-model="layerFilterCategorie" @change="onLayerCategorieChange" class="layer-filter-select" :disabled="!layerFilterFamille">
-            <option value="">Toutes les catégories</option>
-            <option v-for="c in lexiqueCategories" :key="c.code" :value="c.code">{{ c.label }}</option>
-          </select>
-          <select v-model="layerFilterType" class="layer-filter-select" :disabled="!layerFilterCategorie">
-            <option value="">Tous les types</option>
-            <option v-for="t in lexiqueTypes" :key="t.code" :value="t.code">{{ t.label }}</option>
-          </select>
+          <template v-for="level in sigActiveLevels" :key="level">
+            <select
+              v-model="sigCascadeFilters[level]"
+              @change="onSigCascadeChange(level)"
+              class="layer-filter-select"
+              :disabled="level > 0 && !sigCascadeFilters[level - 1]"
+            >
+              <option value="">{{ sigLevelPlaceholders[level] || `Niveau ${level}` }}</option>
+              <option v-for="item in sigCascadeOptions(level)" :key="item.code" :value="item.code">{{ item.label }}</option>
+            </select>
+          </template>
         </div>
         <div v-if="mapStore.layers.length > 0" class="layers-list">
           <div v-for="layer in filteredLayers" :key="layer.id" class="layer-item" :class="{ 'layer-hidden': !layer.visible }">
@@ -1052,26 +1051,32 @@ const showCadastre = ref(false)
 const showLayerPanel = ref(false)
 const showStatsPanel = ref(false)
 const showProjectPanel = ref(false)
-// Cascade layer filters
-const layerFilterFamille = ref<string>('')
-const layerFilterCategorie = ref<string>('')
-const layerFilterType = ref<string>('')
+// Dynamic cascade layer filters
+const sigCascadeFilters = ref<Record<number, string>>({})
+const sigLevelPlaceholders: Record<number, string> = {
+  0: 'Toutes les familles',
+  1: 'Tous les types',
+  2: 'Tous les sous-types',
+  3: 'Toutes les variantes',
+  4: 'Tous les détails',
+  5: 'Toutes les précisions',
+}
 
-// Cascade filter options from lexique
-const lexiqueFamilles = computed(() => {
+const sigActiveLevels = computed(() => {
   const entries = Array.from(mapStore.lexiqueMap.values())
-  return entries.filter(e => e.level === 0).sort((a, b) => a.label.localeCompare(b.label))
+  const levelsWithEntries = new Set(entries.map(e => e.level))
+  return Array.from(levelsWithEntries).sort((a, b) => a - b)
 })
-const lexiqueCategories = computed(() => {
-  if (!layerFilterFamille.value) return []
+
+function sigCascadeOptions(level: number) {
   const entries = Array.from(mapStore.lexiqueMap.values())
-  return entries.filter(e => e.level === 1 && e.parent_code === layerFilterFamille.value).sort((a, b) => a.label.localeCompare(b.label))
-})
-const lexiqueTypes = computed(() => {
-  if (!layerFilterCategorie.value) return []
-  const entries = Array.from(mapStore.lexiqueMap.values())
-  return entries.filter(e => e.level === 2 && e.parent_code === layerFilterCategorie.value).sort((a, b) => a.label.localeCompare(b.label))
-})
+  if (level === 0) {
+    return entries.filter(e => e.level === 0).sort((a, b) => a.label.localeCompare(b.label))
+  }
+  const parentCode = sigCascadeFilters.value[level - 1]
+  if (!parentCode) return []
+  return entries.filter(e => e.level === level && e.parent_code === parentCode).sort((a, b) => a.label.localeCompare(b.label))
+}
 
 // Get all descendant codes of a given code
 function getDescendantCodes(code: string): string[] {
@@ -1097,22 +1102,26 @@ function isDescendantOf(code: string, ancestorCode: string): boolean {
 
 // Filtered layers based on cascade selection
 const filteredLayers = computed(() => {
-  const filterCode = layerFilterType.value || layerFilterCategorie.value || layerFilterFamille.value
+  // Find the deepest non-empty filter
+  let filterCode = ''
+  for (const lvl of [...sigActiveLevels.value].reverse()) {
+    if (sigCascadeFilters.value[lvl]) {
+      filterCode = sigCascadeFilters.value[lvl]
+      break
+    }
+  }
   if (!filterCode) return mapStore.layers
   return mapStore.layers.filter(layer => {
-    // Layer id is the lexique code of the grouping category
-    // Check if this layer's code is the filter code or a descendant of it
     return isDescendantOf(layer.id, filterCode)
   })
 })
 
-function onLayerFamilleChange() {
-  layerFilterCategorie.value = ''
-  layerFilterType.value = ''
-}
-
-function onLayerCategorieChange() {
-  layerFilterType.value = ''
+function onSigCascadeChange(level: number) {
+  for (const lvl of sigActiveLevels.value) {
+    if (lvl > level) {
+      sigCascadeFilters.value[lvl] = ''
+    }
+  }
 }
 const showPerimeterPanel = ref(false)
 const showHelp = ref(false)

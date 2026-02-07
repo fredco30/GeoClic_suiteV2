@@ -31,7 +31,7 @@
               @update:model-value="debouncedSearch"
             />
           </v-col>
-          <v-col cols="12" md="2">
+          <v-col v-if="projets.length > 1" cols="12" md="2">
             <v-select
               v-model="filterProjet"
               label="Projet"
@@ -43,45 +43,18 @@
               @update:model-value="applyFilters"
             />
           </v-col>
-          <v-col cols="12" md="2">
+          <v-col v-for="level in activeLevels" :key="level" cols="12" md="2">
             <v-autocomplete
-              v-model="filterFamille"
-              label="Famille"
-              :items="familleOptions"
+              v-model="cascadeFilters[level]"
+              :label="levelNames[level]"
+              :items="cascadeOptions(level)"
               item-title="libelle"
               item-value="code"
               clearable
               hide-details
               auto-select-first
-              @update:model-value="onFamilleChange"
-            />
-          </v-col>
-          <v-col cols="12" md="2">
-            <v-autocomplete
-              v-model="filterCategorie"
-              label="Catégorie"
-              :items="categorieOptions"
-              item-title="libelle"
-              item-value="code"
-              clearable
-              hide-details
-              :disabled="!filterFamille"
-              auto-select-first
-              @update:model-value="onCategorieChange"
-            />
-          </v-col>
-          <v-col cols="12" md="2">
-            <v-autocomplete
-              v-model="filterType"
-              label="Type / Modèle"
-              :items="typeOptions"
-              item-title="libelle"
-              item-value="code"
-              clearable
-              hide-details
-              :disabled="!filterCategorie"
-              auto-select-first
-              @update:model-value="applyFilters"
+              :disabled="level > 0 && !cascadeFilters[level - 1]"
+              @update:model-value="onCascadeChange(level)"
             />
           </v-col>
           <v-col cols="12" md="2" class="d-flex gap-2 justify-end flex-wrap">
@@ -393,9 +366,9 @@
               <p><strong>Filtres actuels:</strong></p>
               <ul class="ml-4">
                 <li v-if="filterProjet">Projet: {{ getProjet(filterProjet)?.nom }}</li>
-                <li v-if="filterCategorie">Catégorie: {{ getCategory(filterCategorie)?.libelle }}</li>
+                <li v-if="activeFilterCode">Catégorie: {{ getCategory(activeFilterCode)?.libelle }}</li>
                 <li v-if="search">Recherche: "{{ search }}"</li>
-                <li v-if="!filterProjet && !filterCategorie && !search">Aucun filtre (tous les points)</li>
+                <li v-if="!filterProjet && !activeFilterCode && !search">Aucun filtre (tous les points)</li>
               </ul>
             </div>
 
@@ -455,9 +428,9 @@ const lexiqueStore = useLexiqueStore()
 // State
 const search = ref('')
 const filterProjet = ref<string | null>(null)
-const filterFamille = ref<string | null>(null)
-const filterCategorie = ref<string | null>(null)
-const filterType = ref<string | null>(null)
+// Dynamic cascade filters: one ref per level (0=Famille, 1=Type, 2=Sous-type, etc.)
+const cascadeFilters = ref<Record<number, string | null>>({})
+const levelNames = ['Famille', 'Type', 'Sous-type', 'Variante', 'Détail', 'Précision']
 const showEditDialog = ref(false)
 const showDeleteDialog = ref(false)
 const showDeletePhotoDialog = ref(false)
@@ -503,23 +476,33 @@ const loading = computed(() => pointsStore.loading)
 const points = computed(() => pointsStore.points)
 const total = computed(() => pointsStore.total)
 const pagination = computed(() => pointsStore.pagination)
-// Filtres cascade: Famille (N0) → Catégorie (N1) → Type (N2)
-const familleOptions = computed(() =>
-  lexiqueStore.entries.filter(e => e.niveau === 0).sort((a, b) => a.libelle.localeCompare(b.libelle))
-)
-const categorieOptions = computed(() => {
-  if (!filterFamille.value) return []
-  return lexiqueStore.entries
-    .filter(e => e.niveau === 1 && e.parent_id === filterFamille.value)
-    .sort((a, b) => a.libelle.localeCompare(b.libelle))
+// Dynamic cascade: detect which levels have entries
+const activeLevels = computed(() => {
+  const levelsWithEntries = new Set(lexiqueStore.entries.map(e => e.niveau))
+  return Array.from(levelsWithEntries).sort((a, b) => a - b)
 })
-const typeOptions = computed(() => {
-  if (!filterCategorie.value) return []
+
+// Options for each cascade level
+function cascadeOptions(level: number) {
+  if (level === 0) {
+    return lexiqueStore.entries.filter(e => e.niveau === 0).sort((a, b) => a.libelle.localeCompare(b.libelle))
+  }
+  const parentCode = cascadeFilters.value[level - 1]
+  if (!parentCode) return []
   return lexiqueStore.entries
-    .filter(e => e.niveau === 2 && e.parent_id === filterCategorie.value)
+    .filter(e => e.niveau === level && e.parent_id === parentCode)
     .sort((a, b) => a.libelle.localeCompare(b.libelle))
-})
+}
+
 const allCategories = computed(() => lexiqueStore.entries)
+
+// The deepest non-null cascade filter code (used for photo export + display)
+const activeFilterCode = computed(() => {
+  for (const lvl of [...activeLevels.value].reverse()) {
+    if (cascadeFilters.value[lvl]) return cascadeFilters.value[lvl]
+  }
+  return null
+})
 
 // Methods
 
@@ -600,20 +583,25 @@ function debouncedSearch() {
   }, 300)
 }
 
-function onFamilleChange() {
-  filterCategorie.value = null
-  filterType.value = null
-  applyFilters()
-}
-
-function onCategorieChange() {
-  filterType.value = null
+function onCascadeChange(level: number) {
+  // Clear all levels below the changed one
+  for (const lvl of activeLevels.value) {
+    if (lvl > level) {
+      cascadeFilters.value[lvl] = null
+    }
+  }
   applyFilters()
 }
 
 async function applyFilters() {
-  // Utiliser le filtre le plus précis disponible
-  const lexiqueId = filterType.value || filterCategorie.value || filterFamille.value || null
+  // Use the most specific filter (deepest non-null level)
+  let lexiqueId: string | null = null
+  for (const lvl of [...activeLevels.value].reverse()) {
+    if (cascadeFilters.value[lvl]) {
+      lexiqueId = cascadeFilters.value[lvl]
+      break
+    }
+  }
   pointsStore.setFilters({
     projet_id: filterProjet.value,
     lexique_id: lexiqueId,
@@ -750,7 +738,7 @@ async function openPhotoExport() {
       },
       body: JSON.stringify({
         project_id: filterProjet.value || undefined,
-        lexique_code: filterCategorie.value || undefined,
+        lexique_code: activeFilterCode.value || undefined,
       }),
     })
 
@@ -784,7 +772,7 @@ async function downloadPhotosExport() {
       },
       body: JSON.stringify({
         project_id: filterProjet.value || undefined,
-        lexique_code: filterCategorie.value || undefined,
+        lexique_code: activeFilterCode.value || undefined,
       }),
     })
 

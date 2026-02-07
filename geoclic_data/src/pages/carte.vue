@@ -4,7 +4,7 @@
     <v-card class="toolbar-card mb-4">
       <v-card-text class="py-2">
         <v-row align="center" dense>
-          <v-col cols="12" md="2">
+          <v-col v-if="projets.length > 1" cols="12" md="2">
             <v-select
               v-model="selectedProjet"
               label="Projet"
@@ -17,48 +17,19 @@
               @update:model-value="filterPoints"
             />
           </v-col>
-          <v-col cols="12" md="2">
+          <v-col v-for="level in activeLevels" :key="level" cols="12" md="2">
             <v-autocomplete
-              v-model="selectedFamille"
-              label="Famille"
-              :items="familleOptions"
+              v-model="cascadeFilters[level]"
+              :label="levelNames[level]"
+              :items="cascadeOptions(level)"
               item-title="libelle"
               item-value="code"
               clearable
               hide-details
               density="compact"
               auto-select-first
-              @update:model-value="onFamilleChange"
-            />
-          </v-col>
-          <v-col cols="12" md="2">
-            <v-autocomplete
-              v-model="selectedCategorie"
-              label="Catégorie"
-              :items="categorieOptions"
-              item-title="libelle"
-              item-value="code"
-              clearable
-              hide-details
-              density="compact"
-              :disabled="!selectedFamille"
-              auto-select-first
-              @update:model-value="onCategorieChange"
-            />
-          </v-col>
-          <v-col cols="12" md="2">
-            <v-autocomplete
-              v-model="selectedType"
-              label="Type / Modèle"
-              :items="typeOptions"
-              item-title="libelle"
-              item-value="code"
-              clearable
-              hide-details
-              density="compact"
-              :disabled="!selectedCategorie"
-              auto-select-first
-              @update:model-value="filterPoints"
+              :disabled="level > 0 && !cascadeFilters[level - 1]"
+              @update:model-value="onCascadeChange(level)"
             />
           </v-col>
           <v-col cols="12" md="2">
@@ -425,9 +396,9 @@ let tempMarker: L.Marker | null = null
 
 // State
 const selectedProjet = ref<string | null>(null)
-const selectedFamille = ref<string | null>(null)
-const selectedCategorie = ref<string | null>(null)
-const selectedType = ref<string | null>(null)
+// Dynamic cascade filters
+const cascadeFilters = ref<Record<number, string | null>>({})
+const levelNames = ['Famille', 'Type', 'Sous-type', 'Variante', 'Détail', 'Précision']
 const searchText = ref('')
 const mapStyle = ref('streets')
 const projets = ref<any[]>([])
@@ -461,22 +432,23 @@ const pointForm = ref({
 
 // Computed
 const allCategories = computed(() => lexiqueStore.entries)
-// Filtres cascade: Famille (N0) → Catégorie (N1) → Type (N2)
-const familleOptions = computed(() =>
-  lexiqueStore.entries.filter(e => e.niveau === 0).sort((a, b) => a.libelle.localeCompare(b.libelle))
-)
-const categorieOptions = computed(() => {
-  if (!selectedFamille.value) return []
-  return lexiqueStore.entries
-    .filter(e => e.niveau === 1 && e.parent_id === selectedFamille.value)
-    .sort((a, b) => a.libelle.localeCompare(b.libelle))
+
+// Dynamic cascade: detect which levels have entries
+const activeLevels = computed(() => {
+  const levelsWithEntries = new Set(lexiqueStore.entries.map(e => e.niveau))
+  return Array.from(levelsWithEntries).sort((a, b) => a - b)
 })
-const typeOptions = computed(() => {
-  if (!selectedCategorie.value) return []
+
+function cascadeOptions(level: number) {
+  if (level === 0) {
+    return lexiqueStore.entries.filter(e => e.niveau === 0).sort((a, b) => a.libelle.localeCompare(b.libelle))
+  }
+  const parentCode = cascadeFilters.value[level - 1]
+  if (!parentCode) return []
   return lexiqueStore.entries
-    .filter(e => e.niveau === 2 && e.parent_id === selectedCategorie.value)
+    .filter(e => e.niveau === level && e.parent_id === parentCode)
     .sort((a, b) => a.libelle.localeCompare(b.libelle))
-})
+}
 const points = computed(() => pointsStore.points)
 const zoneFilterItems = computed(() => {
   // Grouper par type avec séparateurs
@@ -811,19 +783,24 @@ function selectPoint(point: Point) {
   }
 }
 
-function onFamilleChange() {
-  selectedCategorie.value = null
-  selectedType.value = null
-  loadPoints()
-}
-
-function onCategorieChange() {
-  selectedType.value = null
+function onCascadeChange(level: number) {
+  for (const lvl of activeLevels.value) {
+    if (lvl > level) {
+      cascadeFilters.value[lvl] = null
+    }
+  }
   loadPoints()
 }
 
 async function loadPoints() {
-  const lexiqueId = selectedType.value || selectedCategorie.value || selectedFamille.value || null
+  // Use the most specific filter (deepest non-null level)
+  let lexiqueId: string | null = null
+  for (const lvl of [...activeLevels.value].reverse()) {
+    if (cascadeFilters.value[lvl]) {
+      lexiqueId = cascadeFilters.value[lvl]
+      break
+    }
+  }
   pointsStore.setFilters({
     projet_id: selectedProjet.value,
     lexique_id: lexiqueId,
