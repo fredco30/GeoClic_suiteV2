@@ -39,7 +39,7 @@ const allSections = [
   { id: 'dns', label: 'Configurer le DNS', icon: '🌐', group: 'prerequis' },
   { id: 'ssh', label: 'Configurer SSH', icon: '🔑', group: 'prerequis' },
   { id: 'provisioning', label: 'Provisionner un serveur', icon: '⚡', group: 'install' },
-  { id: 'init-db', label: 'Initialiser la base de données', icon: '🗄️', group: 'install', badge: 'Nouveau' },
+  { id: 'init-db', label: 'Initialiser la base de données', icon: '🗄️', group: 'install', badge: 'Automatique' },
   { id: 'update', label: 'Mettre à jour les serveurs', icon: '🔄', group: 'gestion' },
   { id: 'status', label: 'Voir l\'état des serveurs', icon: '📊', group: 'gestion' },
   { id: 'backup', label: 'Sauvegardes', icon: '💾', group: 'gestion' },
@@ -172,39 +172,29 @@ const filteredSections = computed(() => {
               <p>Copier sur le VPS</p>
             </div>
             <div class="wf-arrow">→</div>
-            <div class="wf-step">
-              <span class="wf-icon">📦</span>
-              <strong>4. Provisionner</strong>
-              <p>Docker, code, SSL</p>
-            </div>
-            <div class="wf-arrow">→</div>
             <div class="wf-step wf-step-new">
-              <span class="wf-icon">🗄️</span>
-              <strong>5. Initialiser DB</strong>
-              <p>25 migrations + admin</p>
+              <span class="wf-icon">📦</span>
+              <strong>4. Installer</strong>
+              <p>Un clic = tout automatique</p>
             </div>
             <div class="wf-arrow">→</div>
             <div class="wf-step wf-step-done">
               <span class="wf-icon">✅</span>
-              <strong>6. C'est prêt !</strong>
+              <strong>5. C'est prêt !</strong>
               <p>Le client se connecte</p>
             </div>
           </div>
 
           <div class="info-box">
-            <strong>Temps total estimé :</strong> ~20 minutes (dont ~15 min d'installation automatique)
+            <strong>Temps total estimé :</strong> ~20 minutes dont ~15 min d'installation automatique.<br>
+            L'étape 4 fait <strong>tout en un clic</strong> : Docker, code, SSL, 25 migrations SQL, compte admin, branding.
           </div>
 
           <h3>Commandes essentielles</h3>
           <div class="cmd-grid">
             <div class="cmd-card" @click="scrollToSection('provisioning')">
-              <code>provision</code>
-              <p>Installer GéoClic sur un nouveau VPS</p>
-              <span class="cmd-badge badge-essential">Essentiel</span>
-            </div>
-            <div class="cmd-card" @click="scrollToSection('init-db')">
-              <code>init</code>
-              <p>Créer les tables et le compte admin</p>
+              <code>+ Ajouter</code>
+              <p>Installer GéoClic sur un nouveau VPS (tout automatique)</p>
               <span class="cmd-badge badge-essential">Essentiel</span>
             </div>
             <div class="cmd-card" @click="scrollToSection('update')">
@@ -434,10 +424,15 @@ chmod 700 /home/ubuntu/.ssh && chmod 600 /home/ubuntu/.ssh/authorized_keys</code
           <h3>Via l'interface web (recommandé)</h3>
           <ol>
             <li>Cliquez <router-link to="/add"><strong>+ Ajouter un serveur</strong></router-link></li>
-            <li>Remplissez : domaine, IP, email</li>
-            <li>Testez la connexion SSH (bouton vert = OK)</li>
-            <li>Confirmez et lancez l'installation</li>
+            <li><strong>Étape 1 :</strong> Remplissez domaine, IP, email</li>
+            <li><strong>Étape 2 :</strong> Testez la connexion SSH (bouton vert = OK)</li>
+            <li><strong>Étape 3 :</strong> Configurez le compte admin (mot de passe, nom de collectivité, option démo)</li>
+            <li><strong>Étape 4 :</strong> Vérifiez le récapitulatif et lancez l'installation</li>
+            <li><strong>Étape 5 :</strong> Le provisioning + l'initialisation BDD se lancent <strong>automatiquement</strong></li>
           </ol>
+          <div class="success-box">
+            <strong>Tout est automatique !</strong> Un seul clic sur "Lancer l'installation complète" fait tout : Docker, code, SSL, 25 migrations, compte admin, branding. Le serveur est prêt à l'emploi à la fin.
+          </div>
 
           <h3>Via le terminal</h3>
           <div class="code-block">
@@ -485,7 +480,7 @@ chmod 700 /home/ubuntu/.ssh && chmod 600 /home/ubuntu/.ssh/authorized_keys</code
           </div>
 
           <div class="info-box">
-            <strong>Après le provisionnement :</strong> L'étape suivante est d'<strong>initialiser la base de données</strong> (section ci-dessous).
+            <strong>Via l'interface web :</strong> L'initialisation de la base de données (25 migrations + compte admin) se lance <strong>automatiquement</strong> juste après le provisionnement. La commande CLI ci-dessus ne fait que le provisionnement — il faut ensuite lancer <code>init</code> séparément.
           </div>
         </div>
       </div>
@@ -494,41 +489,20 @@ chmod 700 /home/ubuntu/.ssh && chmod 600 /home/ubuntu/.ssh/authorized_keys</code
       <div id="section-init-db" class="section card" :class="{ open: openSection === 'init-db' }">
         <h2 @click="toggle('init-db')">
           <span class="section-icon">🗄️</span> Initialiser la base de données
-          <span class="badge-new">Nouveau</span>
+          <span class="badge-new">Automatique</span>
           <span class="chevron">{{ openSection === 'init-db' ? '▼' : '▶' }}</span>
         </h2>
         <div v-show="openSection === 'init-db'" class="section-content">
-          <p>Après le provisionnement, la base de données est vide. Cette commande applique les <strong>25 migrations SQL</strong> qui créent toutes les tables et fonctionnalités, puis crée le compte super administrateur.</p>
 
-          <div class="info-box">
-            <strong>C'est quoi les "25 migrations" ?</strong> Ce sont des fichiers SQL qui créent progressivement toutes les tables, vues, triggers et fonctions de GéoClic. Sans elles, le client n'aurait aucune fonctionnalité (pas de demandes, pas de services, pas d'auth...).
+          <div class="success-box">
+            <strong>C'est automatique !</strong> Quand vous ajoutez un serveur via
+            <router-link to="/add">+ Ajouter</router-link>, l'initialisation de la base de données
+            se lance automatiquement juste après le provisionnement. Vous n'avez <strong>rien à faire manuellement</strong>.
           </div>
 
-          <h3>La commande</h3>
-          <div class="code-block">
-            <code>sudo /opt/geoclic/fleet/geoclic-fleet.sh init \
-  --client ville-lyon \
-  --email admin@lyon.fr \
-  --password MotDePasse2026! \
-  --collectivite "Mairie de Lyon"</code>
-            <button class="copy-btn" @click="copyCode($event)">Copier</button>
-          </div>
+          <h3>Ce qui se passe automatiquement (étape 5 du wizard)</h3>
+          <p>Après que les 10 conteneurs Docker sont démarrés, le wizard enchaîne automatiquement l'initialisation :</p>
 
-          <h3>Paramètres</h3>
-          <table class="help-table">
-            <thead>
-              <tr><th>Paramètre</th><th>Obligatoire</th><th>Description</th><th>Exemple</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><code>--client</code></td><td>Oui</td><td>Nom du serveur (donné lors du provision)</td><td><code>ville-lyon</code></td></tr>
-              <tr><td><code>--email</code></td><td>Oui</td><td>Email du super administrateur</td><td><code>admin@lyon.fr</code></td></tr>
-              <tr><td><code>--password</code></td><td>Oui</td><td>Mot de passe du super admin</td><td><code>MotDePasse2026!</code></td></tr>
-              <tr><td><code>--collectivite</code></td><td>Non</td><td>Nom de la collectivité (défaut: "Ma Collectivité")</td><td><code>"Mairie de Lyon"</code></td></tr>
-              <tr><td><code>--with-demo</code></td><td>Non</td><td>Charger les données de démonstration</td><td>(pas de valeur)</td></tr>
-            </tbody>
-          </table>
-
-          <h3>Ce que fait la commande</h3>
           <div class="steps">
             <div class="step-item">
               <span class="step-num">1</span>
@@ -548,7 +522,7 @@ chmod 700 /home/ubuntu/.ssh && chmod 600 /home/ubuntu/.ssh/authorized_keys</code
               <span class="step-num">3</span>
               <div>
                 <strong>Crée le compte super admin</strong>
-                <p>Hash bcrypt du mot de passe, tous les droits sur toutes les applications</p>
+                <p>Avec l'email et le mot de passe que vous avez saisis à l'étape 3</p>
               </div>
             </div>
             <div class="step-item">
@@ -558,29 +532,33 @@ chmod 700 /home/ubuntu/.ssh && chmod 600 /home/ubuntu/.ssh/authorized_keys</code
                 <p>Enregistre le nom de la collectivité et les couleurs par défaut</p>
               </div>
             </div>
+            <div class="step-item" v-if="true">
+              <span class="step-num">5</span>
+              <div>
+                <strong>Charge les données démo (optionnel)</strong>
+                <p>Si vous avez coché l'option à l'étape 3 : 12 signalements, 4 services, 3 comptes agents</p>
+              </div>
+            </div>
           </div>
 
-          <h3>Avec données de démonstration</h3>
-          <p>Ajoutez <code>--with-demo</code> pour charger des données fictives réalistes :</p>
+          <div class="info-box">
+            <strong>C'est quoi les "25 migrations" ?</strong> Ce sont des fichiers SQL qui créent progressivement toutes les tables, vues, triggers et fonctions de GéoClic. Sans elles, le client n'aurait aucune fonctionnalité (pas de demandes, pas de services, pas d'auth...). Vous n'avez pas besoin de les connaître, elles s'appliquent automatiquement.
+          </div>
+
+          <h3>Alternative : commande CLI (avancé)</h3>
+          <p>Si vous avez besoin de relancer l'initialisation manuellement (par exemple après un échec réseau), vous pouvez utiliser la commande CLI :</p>
           <div class="code-block">
             <code>sudo /opt/geoclic/fleet/geoclic-fleet.sh init \
-  --client demo-serveur \
-  --email admin@demo.geoclic.fr \
-  --password demo2026! \
-  --collectivite "Ville de Montpellier" \
-  --with-demo</code>
+  --client ville-lyon \
+  --email admin@lyon.fr \
+  --password MotDePasse2026! \
+  --collectivite "Mairie de Lyon"</code>
             <button class="copy-btn" @click="copyCode($event)">Copier</button>
           </div>
-          <p>Les données de démo incluent :</p>
-          <ul>
-            <li>3 comptes utilisateurs (admin, voirie, espaces verts)</li>
-            <li>4 services municipaux</li>
-            <li>15 catégories de signalement</li>
-            <li>12 signalements fictifs autour de Montpellier</li>
-          </ul>
+          <p>Ajoutez <code>--with-demo</code> pour charger les données de démonstration.</p>
 
           <div class="success-box">
-            <strong>C'est terminé !</strong> Le client peut se connecter sur <code>https://lyon.geoclic.fr/admin/</code> avec son email et mot de passe. Le wizard d'onboarding le guidera pour la configuration.
+            <strong>Résultat :</strong> Le client peut se connecter sur <code>https://domaine/data/</code> avec son email et mot de passe. Le wizard d'onboarding le guidera pour configurer les catégories, services et email.
           </div>
         </div>
       </div>
