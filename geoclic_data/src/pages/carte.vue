@@ -21,9 +21,9 @@
             <v-select
               v-model="selectedCategorie"
               label="Catégorie"
-              :items="categories"
-              item-title="libelle"
-              item-value="id"
+              :items="categoriesHierarchiques"
+              item-title="displayLabel"
+              item-value="code"
               clearable
               hide-details
               density="compact"
@@ -429,6 +429,19 @@ const pointForm = ref({
 // Computed
 const categories = computed(() => lexiqueStore.entries.filter(e => e.niveau === 1))
 const allCategories = computed(() => lexiqueStore.entries)
+// Catégories hiérarchiques triées avec indentation pour le filtre
+const categoriesHierarchiques = computed(() => {
+  return lexiqueStore.entries
+    .slice()
+    .sort((a, b) => {
+      if (a.niveau !== b.niveau) return a.niveau - b.niveau
+      return (a.libelle || '').localeCompare(b.libelle || '')
+    })
+    .map(e => ({
+      ...e,
+      displayLabel: e.niveau === 0 ? e.libelle : `${'  '.repeat(e.niveau)}└ ${e.libelle}`
+    }))
+})
 const points = computed(() => pointsStore.points)
 const zoneFilterItems = computed(() => {
   // Grouper par type avec séparateurs

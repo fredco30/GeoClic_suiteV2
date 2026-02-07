@@ -182,8 +182,16 @@ async def list_points(
         params["type_filter"] = type_filter
 
     if lexique_code:
-        where_clauses.append("lexique_code LIKE :lexique_code")
-        params["lexique_code"] = f"{lexique_code}%"
+        # Support comma-separated codes for hierarchical filtering
+        codes = [c.strip() for c in lexique_code.split(',') if c.strip()]
+        if len(codes) == 1:
+            where_clauses.append("lexique_code = :lexique_code")
+            params["lexique_code"] = codes[0]
+        else:
+            lc_placeholders = ", ".join([f":lc_{i}" for i in range(len(codes))])
+            where_clauses.append(f"lexique_code IN ({lc_placeholders})")
+            for i, c in enumerate(codes):
+                params[f"lc_{i}"] = c
 
     if search:
         # Recherche insensible à la casse dans nom et commentaire
@@ -400,8 +408,16 @@ async def export_geojson(
         params["sync_status"] = sync_status.value
 
     if lexique_code:
-        where_clauses.append("lexique_code LIKE :lexique_code")
-        params["lexique_code"] = f"{lexique_code}%"
+        # Support comma-separated codes for hierarchical filtering
+        codes = [c.strip() for c in lexique_code.split(',') if c.strip()]
+        if len(codes) == 1:
+            where_clauses.append("lexique_code = :lexique_code")
+            params["lexique_code"] = codes[0]
+        else:
+            lc_placeholders = ", ".join([f":lc_{i}" for i in range(len(codes))])
+            where_clauses.append(f"lexique_code IN ({lc_placeholders})")
+            for i, c in enumerate(codes):
+                params[f"lc_{i}"] = c
 
     if date_start:
         where_clauses.append("created_at >= :date_start")
@@ -496,8 +512,16 @@ async def export_csv(
         params["sync_status"] = sync_status.value
 
     if lexique_code:
-        where_clauses.append("lexique_code LIKE :lexique_code")
-        params["lexique_code"] = f"{lexique_code}%"
+        # Support comma-separated codes for hierarchical filtering
+        codes = [c.strip() for c in lexique_code.split(',') if c.strip()]
+        if len(codes) == 1:
+            where_clauses.append("lexique_code = :lexique_code")
+            params["lexique_code"] = codes[0]
+        else:
+            lc_placeholders = ", ".join([f":lc_{i}" for i in range(len(codes))])
+            where_clauses.append(f"lexique_code IN ({lc_placeholders})")
+            for i, c in enumerate(codes):
+                params[f"lc_{i}"] = c
 
     if date_start:
         where_clauses.append("created_at >= :date_start")
@@ -647,8 +671,16 @@ async def export_zip_with_photos(
         params["sync_status"] = sync_status.value
 
     if lexique_code:
-        where_clauses.append("lexique_code LIKE :lexique_code")
-        params["lexique_code"] = f"{lexique_code}%"
+        # Support comma-separated codes for hierarchical filtering
+        codes = [c.strip() for c in lexique_code.split(',') if c.strip()]
+        if len(codes) == 1:
+            where_clauses.append("lexique_code = :lexique_code")
+            params["lexique_code"] = codes[0]
+        else:
+            lc_placeholders = ", ".join([f":lc_{i}" for i in range(len(codes))])
+            where_clauses.append(f"lexique_code IN ({lc_placeholders})")
+            for i, c in enumerate(codes):
+                params[f"lc_{i}"] = c
 
     if date_start:
         where_clauses.append("created_at >= :date_start")
