@@ -150,6 +150,86 @@
         .feature-image { border-radius: 10px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
         .feature-image img { width: 100%; display: block; }
 
+        /* Device mockups pour les screenshots */
+        .feature-device {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Laptop mockup */
+        .feat-laptop {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .feat-laptop-screen {
+            background: #1a1a1a;
+            border-radius: 8px 8px 0 0;
+            padding: 8px 8px 0 8px;
+            border: 2px solid #333;
+            border-bottom: none;
+        }
+
+        .feat-laptop-screen img {
+            width: 100%;
+            display: block;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .feat-laptop-base {
+            background: linear-gradient(180deg, #c0c0c0 0%, #a0a0a0 100%);
+            height: 14px;
+            border-radius: 0 0 8px 8px;
+            position: relative;
+        }
+
+        .feat-laptop-base::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: #888;
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* Phone mockup */
+        .feat-phone {
+            position: relative;
+            width: 180px;
+            margin: 0 auto;
+        }
+
+        .feat-phone-frame {
+            background: #1a1a1a;
+            border-radius: 24px;
+            padding: 10px 6px;
+            border: 2px solid #333;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+
+        .feat-phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 5px;
+            background: #333;
+            border-radius: 3px;
+        }
+
+        .feat-phone-frame img {
+            width: 100%;
+            display: block;
+            border-radius: 16px;
+        }
+
         /* Templates Section */
         .templates-section { background: var(--secondary); color: white; }
         .templates-section h2 { text-align: center; font-size: 1.6em; margin-bottom: 12px; }
@@ -271,8 +351,13 @@
                         <li><span class="check">✓</span> <strong>Multi-projets</strong> : Plusieurs collectivités ou services</li>
                     </ul>
                 </div>
-                <div class="feature-image">
-                    <img src="screenshots/sig-web.png" alt="SIG Web GéoClic">
+                <div class="feature-device">
+                    <div class="feat-laptop">
+                        <div class="feat-laptop-screen">
+                            <img src="screenshots/sig-web.png" alt="SIG Web GéoClic">
+                        </div>
+                        <div class="feat-laptop-base"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -296,8 +381,13 @@
                         <li><span class="check">✓</span> <strong>Gestion utilisateurs</strong> et rôles par application</li>
                     </ul>
                 </div>
-                <div class="feature-image">
-                    <img src="screenshots/geoclic-data.png" alt="GéoClic Data - Administration">
+                <div class="feature-device">
+                    <div class="feat-laptop">
+                        <div class="feat-laptop-screen">
+                            <img src="screenshots/geoclic-data.png" alt="GéoClic Data - Administration">
+                        </div>
+                        <div class="feat-laptop-base"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -327,8 +417,12 @@
                         <li><span class="check">✓</span> <strong>PWA</strong> : Installable sans App Store</li>
                     </ul>
                 </div>
-                <div class="feature-image">
-                    <img src="screenshots/mobile-pwa.png" alt="Mobile PWA - Relevé terrain">
+                <div class="feature-device">
+                    <div class="feat-phone">
+                        <div class="feat-phone-frame">
+                            <img src="screenshots/mobile-pwa.png" alt="Mobile PWA - Relevé terrain">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -350,8 +444,12 @@
                         <li><span class="check">✓</span> <strong>Personnalisable</strong> aux couleurs de la ville</li>
                     </ul>
                 </div>
-                <div class="feature-image">
-                    <img src="screenshots/portail.png" alt="Portail citoyen GéoClic">
+                <div class="feature-device">
+                    <div class="feat-phone">
+                        <div class="feat-phone-frame">
+                            <img src="screenshots/portail.png" alt="Portail citoyen GéoClic">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -374,8 +472,13 @@
                         <li><span class="check">✓</span> <strong>Statistiques</strong> : Délais, volumes, catégories</li>
                     </ul>
                 </div>
-                <div class="feature-image">
-                    <img src="screenshots/dashboard.png" alt="Dashboard GéoClic - Gestion des demandes">
+                <div class="feature-device">
+                    <div class="feat-laptop">
+                        <div class="feat-laptop-screen">
+                            <img src="screenshots/dashboard.png" alt="Dashboard GéoClic - Gestion des demandes">
+                        </div>
+                        <div class="feat-laptop-base"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -398,8 +501,13 @@
                         <li><span class="check">✓</span> <strong>PWA mobile</strong> pour les agents sur le terrain</li>
                     </ul>
                 </div>
-                <div class="feature-image">
-                    <img src="screenshots/demandes.png" alt="Services terrain - Gestion des interventions">
+                <div class="feature-device">
+                    <div class="feat-laptop">
+                        <div class="feat-laptop-screen">
+                            <img src="screenshots/demandes.png" alt="Services terrain - Gestion des interventions">
+                        </div>
+                        <div class="feat-laptop-base"></div>
+                    </div>
                 </div>
             </div>
         </div>
