@@ -21,7 +21,7 @@
     <v-card class="mb-4">
       <v-card-text>
         <v-row align="center">
-          <v-col cols="12" md="3">
+          <v-col cols="12" md="2">
             <v-text-field
               v-model="search"
               prepend-inner-icon="mdi-magnify"
@@ -31,7 +31,7 @@
               @update:model-value="debouncedSearch"
             />
           </v-col>
-          <v-col cols="12" md="3">
+          <v-col cols="12" md="2">
             <v-select
               v-model="filterProjet"
               label="Projet"
@@ -43,28 +43,57 @@
               @update:model-value="applyFilters"
             />
           </v-col>
-          <v-col cols="12" md="3">
-            <v-select
-              v-model="filterCategorie"
-              label="Catégorie"
-              :items="categories"
-              item-title="displayLabel"
+          <v-col cols="12" md="2">
+            <v-autocomplete
+              v-model="filterFamille"
+              label="Famille"
+              :items="familleOptions"
+              item-title="libelle"
               item-value="code"
               clearable
               hide-details
+              auto-select-first
+              @update:model-value="onFamilleChange"
+            />
+          </v-col>
+          <v-col cols="12" md="2">
+            <v-autocomplete
+              v-model="filterCategorie"
+              label="Catégorie"
+              :items="categorieOptions"
+              item-title="libelle"
+              item-value="code"
+              clearable
+              hide-details
+              :disabled="!filterFamille"
+              auto-select-first
+              @update:model-value="onCategorieChange"
+            />
+          </v-col>
+          <v-col cols="12" md="2">
+            <v-autocomplete
+              v-model="filterType"
+              label="Type / Modèle"
+              :items="typeOptions"
+              item-title="libelle"
+              item-value="code"
+              clearable
+              hide-details
+              :disabled="!filterCategorie"
+              auto-select-first
               @update:model-value="applyFilters"
             />
           </v-col>
-          <v-col cols="12" md="3" class="d-flex gap-2 justify-end flex-wrap">
-            <v-btn variant="outlined" @click="exportCSV">
+          <v-col cols="12" md="2" class="d-flex gap-2 justify-end flex-wrap">
+            <v-btn variant="outlined" size="small" @click="exportCSV">
               <v-icon start>mdi-file-excel</v-icon>
               CSV
             </v-btn>
-            <v-btn variant="outlined" @click="exportGeoJSON">
+            <v-btn variant="outlined" size="small" @click="exportGeoJSON">
               <v-icon start>mdi-code-json</v-icon>
               GeoJSON
             </v-btn>
-            <v-btn variant="outlined" color="secondary" @click="openPhotoExport">
+            <v-btn variant="outlined" size="small" color="secondary" @click="openPhotoExport">
               <v-icon start>mdi-image-multiple</v-icon>
               Photos
             </v-btn>
@@ -426,7 +455,9 @@ const lexiqueStore = useLexiqueStore()
 // State
 const search = ref('')
 const filterProjet = ref<string | null>(null)
+const filterFamille = ref<string | null>(null)
 const filterCategorie = ref<string | null>(null)
+const filterType = ref<string | null>(null)
 const showEditDialog = ref(false)
 const showDeleteDialog = ref(false)
 const showDeletePhotoDialog = ref(false)
@@ -472,19 +503,21 @@ const loading = computed(() => pointsStore.loading)
 const points = computed(() => pointsStore.points)
 const total = computed(() => pointsStore.total)
 const pagination = computed(() => pointsStore.pagination)
-// Toutes les catégories triées par niveau et libellé pour le filtre
-const categories = computed(() => {
+// Filtres cascade: Famille (N0) → Catégorie (N1) → Type (N2)
+const familleOptions = computed(() =>
+  lexiqueStore.entries.filter(e => e.niveau === 0).sort((a, b) => a.libelle.localeCompare(b.libelle))
+)
+const categorieOptions = computed(() => {
+  if (!filterFamille.value) return []
   return lexiqueStore.entries
-    .slice()
-    .sort((a, b) => {
-      if (a.niveau !== b.niveau) return a.niveau - b.niveau
-      return (a.libelle || '').localeCompare(b.libelle || '')
-    })
-    .map(e => ({
-      ...e,
-      // Préfixe visuel selon le niveau
-      displayLabel: e.niveau === 0 ? e.libelle : `${'  '.repeat(e.niveau)}└ ${e.libelle}`
-    }))
+    .filter(e => e.niveau === 1 && e.parent_id === filterFamille.value)
+    .sort((a, b) => a.libelle.localeCompare(b.libelle))
+})
+const typeOptions = computed(() => {
+  if (!filterCategorie.value) return []
+  return lexiqueStore.entries
+    .filter(e => e.niveau === 2 && e.parent_id === filterCategorie.value)
+    .sort((a, b) => a.libelle.localeCompare(b.libelle))
 })
 const allCategories = computed(() => lexiqueStore.entries)
 
@@ -567,10 +600,23 @@ function debouncedSearch() {
   }, 300)
 }
 
+function onFamilleChange() {
+  filterCategorie.value = null
+  filterType.value = null
+  applyFilters()
+}
+
+function onCategorieChange() {
+  filterType.value = null
+  applyFilters()
+}
+
 async function applyFilters() {
+  // Utiliser le filtre le plus précis disponible
+  const lexiqueId = filterType.value || filterCategorie.value || filterFamille.value || null
   pointsStore.setFilters({
     projet_id: filterProjet.value,
-    lexique_id: filterCategorie.value,
+    lexique_id: lexiqueId,
     search: search.value,
   })
   await pointsStore.fetchPoints()

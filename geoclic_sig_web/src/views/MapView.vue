@@ -294,8 +294,23 @@
         </button>
       </div>
       <div class="panel-body">
+        <!-- Filtres cascade -->
+        <div v-if="mapStore.layers.length > 0" class="layer-filters">
+          <select v-model="layerFilterFamille" @change="onLayerFamilleChange" class="layer-filter-select">
+            <option value="">Toutes les familles</option>
+            <option v-for="f in lexiqueFamilles" :key="f.code" :value="f.code">{{ f.label }}</option>
+          </select>
+          <select v-model="layerFilterCategorie" @change="onLayerCategorieChange" class="layer-filter-select" :disabled="!layerFilterFamille">
+            <option value="">Toutes les catégories</option>
+            <option v-for="c in lexiqueCategories" :key="c.code" :value="c.code">{{ c.label }}</option>
+          </select>
+          <select v-model="layerFilterType" class="layer-filter-select" :disabled="!layerFilterCategorie">
+            <option value="">Tous les types</option>
+            <option v-for="t in lexiqueTypes" :key="t.code" :value="t.code">{{ t.label }}</option>
+          </select>
+        </div>
         <div v-if="mapStore.layers.length > 0" class="layers-list">
-          <div v-for="layer in mapStore.layers" :key="layer.id" class="layer-item" :class="{ 'layer-hidden': !layer.visible }">
+          <div v-for="layer in filteredLayers" :key="layer.id" class="layer-item" :class="{ 'layer-hidden': !layer.visible }">
             <div class="layer-visibility">
               <input
                 type="checkbox"
@@ -1037,6 +1052,68 @@ const showCadastre = ref(false)
 const showLayerPanel = ref(false)
 const showStatsPanel = ref(false)
 const showProjectPanel = ref(false)
+// Cascade layer filters
+const layerFilterFamille = ref<string>('')
+const layerFilterCategorie = ref<string>('')
+const layerFilterType = ref<string>('')
+
+// Cascade filter options from lexique
+const lexiqueFamilles = computed(() => {
+  const entries = Array.from(mapStore.lexiqueMap.values())
+  return entries.filter(e => e.level === 0).sort((a, b) => a.label.localeCompare(b.label))
+})
+const lexiqueCategories = computed(() => {
+  if (!layerFilterFamille.value) return []
+  const entries = Array.from(mapStore.lexiqueMap.values())
+  return entries.filter(e => e.level === 1 && e.parent_code === layerFilterFamille.value).sort((a, b) => a.label.localeCompare(b.label))
+})
+const lexiqueTypes = computed(() => {
+  if (!layerFilterCategorie.value) return []
+  const entries = Array.from(mapStore.lexiqueMap.values())
+  return entries.filter(e => e.level === 2 && e.parent_code === layerFilterCategorie.value).sort((a, b) => a.label.localeCompare(b.label))
+})
+
+// Get all descendant codes of a given code
+function getDescendantCodes(code: string): string[] {
+  const result = [code]
+  const entries = Array.from(mapStore.lexiqueMap.values())
+  const children = entries.filter(e => e.parent_code === code)
+  for (const child of children) {
+    result.push(...getDescendantCodes(child.code))
+  }
+  return result
+}
+
+// Check if a lexique code belongs to a given ancestor (or is the ancestor itself)
+function isDescendantOf(code: string, ancestorCode: string): boolean {
+  if (code === ancestorCode) return true
+  let current = mapStore.lexiqueMap.get(code)
+  while (current && current.parent_code) {
+    if (current.parent_code === ancestorCode) return true
+    current = mapStore.lexiqueMap.get(current.parent_code)
+  }
+  return false
+}
+
+// Filtered layers based on cascade selection
+const filteredLayers = computed(() => {
+  const filterCode = layerFilterType.value || layerFilterCategorie.value || layerFilterFamille.value
+  if (!filterCode) return mapStore.layers
+  return mapStore.layers.filter(layer => {
+    // Layer id is the lexique code of the grouping category
+    // Check if this layer's code is the filter code or a descendant of it
+    return isDescendantOf(layer.id, filterCode)
+  })
+})
+
+function onLayerFamilleChange() {
+  layerFilterCategorie.value = ''
+  layerFilterType.value = ''
+}
+
+function onLayerCategorieChange() {
+  layerFilterType.value = ''
+}
 const showPerimeterPanel = ref(false)
 const showHelp = ref(false)
 
@@ -2682,6 +2759,39 @@ watch(
 }
 
 /* Couches */
+.layer-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.layer-filter-select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #374151;
+  background: white;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.layer-filter-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.layer-filter-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f9fafb;
+}
+
 .layers-list {
   display: flex;
   flex-direction: column;

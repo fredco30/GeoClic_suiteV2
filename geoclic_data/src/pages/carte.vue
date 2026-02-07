@@ -4,7 +4,7 @@
     <v-card class="toolbar-card mb-4">
       <v-card-text class="py-2">
         <v-row align="center" dense>
-          <v-col cols="12" md="3">
+          <v-col cols="12" md="2">
             <v-select
               v-model="selectedProjet"
               label="Projet"
@@ -17,16 +17,47 @@
               @update:model-value="filterPoints"
             />
           </v-col>
-          <v-col cols="12" md="3">
-            <v-select
-              v-model="selectedCategorie"
-              label="Catégorie"
-              :items="categoriesHierarchiques"
-              item-title="displayLabel"
+          <v-col cols="12" md="2">
+            <v-autocomplete
+              v-model="selectedFamille"
+              label="Famille"
+              :items="familleOptions"
+              item-title="libelle"
               item-value="code"
               clearable
               hide-details
               density="compact"
+              auto-select-first
+              @update:model-value="onFamilleChange"
+            />
+          </v-col>
+          <v-col cols="12" md="2">
+            <v-autocomplete
+              v-model="selectedCategorie"
+              label="Catégorie"
+              :items="categorieOptions"
+              item-title="libelle"
+              item-value="code"
+              clearable
+              hide-details
+              density="compact"
+              :disabled="!selectedFamille"
+              auto-select-first
+              @update:model-value="onCategorieChange"
+            />
+          </v-col>
+          <v-col cols="12" md="2">
+            <v-autocomplete
+              v-model="selectedType"
+              label="Type / Modèle"
+              :items="typeOptions"
+              item-title="libelle"
+              item-value="code"
+              clearable
+              hide-details
+              density="compact"
+              :disabled="!selectedCategorie"
+              auto-select-first
               @update:model-value="filterPoints"
             />
           </v-col>
@@ -394,7 +425,9 @@ let tempMarker: L.Marker | null = null
 
 // State
 const selectedProjet = ref<string | null>(null)
+const selectedFamille = ref<string | null>(null)
 const selectedCategorie = ref<string | null>(null)
+const selectedType = ref<string | null>(null)
 const searchText = ref('')
 const mapStyle = ref('streets')
 const projets = ref<any[]>([])
@@ -427,20 +460,22 @@ const pointForm = ref({
 })
 
 // Computed
-const categories = computed(() => lexiqueStore.entries.filter(e => e.niveau === 1))
 const allCategories = computed(() => lexiqueStore.entries)
-// Catégories hiérarchiques triées avec indentation pour le filtre
-const categoriesHierarchiques = computed(() => {
+// Filtres cascade: Famille (N0) → Catégorie (N1) → Type (N2)
+const familleOptions = computed(() =>
+  lexiqueStore.entries.filter(e => e.niveau === 0).sort((a, b) => a.libelle.localeCompare(b.libelle))
+)
+const categorieOptions = computed(() => {
+  if (!selectedFamille.value) return []
   return lexiqueStore.entries
-    .slice()
-    .sort((a, b) => {
-      if (a.niveau !== b.niveau) return a.niveau - b.niveau
-      return (a.libelle || '').localeCompare(b.libelle || '')
-    })
-    .map(e => ({
-      ...e,
-      displayLabel: e.niveau === 0 ? e.libelle : `${'  '.repeat(e.niveau)}└ ${e.libelle}`
-    }))
+    .filter(e => e.niveau === 1 && e.parent_id === selectedFamille.value)
+    .sort((a, b) => a.libelle.localeCompare(b.libelle))
+})
+const typeOptions = computed(() => {
+  if (!selectedCategorie.value) return []
+  return lexiqueStore.entries
+    .filter(e => e.niveau === 2 && e.parent_id === selectedCategorie.value)
+    .sort((a, b) => a.libelle.localeCompare(b.libelle))
 })
 const points = computed(() => pointsStore.points)
 const zoneFilterItems = computed(() => {
@@ -776,10 +811,22 @@ function selectPoint(point: Point) {
   }
 }
 
+function onFamilleChange() {
+  selectedCategorie.value = null
+  selectedType.value = null
+  loadPoints()
+}
+
+function onCategorieChange() {
+  selectedType.value = null
+  loadPoints()
+}
+
 async function loadPoints() {
+  const lexiqueId = selectedType.value || selectedCategorie.value || selectedFamille.value || null
   pointsStore.setFilters({
     projet_id: selectedProjet.value,
-    lexique_id: selectedCategorie.value,
+    lexique_id: lexiqueId,
     search: searchText.value,
   })
   await pointsStore.fetchPoints()
