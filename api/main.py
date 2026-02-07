@@ -116,7 +116,7 @@ def ensure_photo_directories():
 
 
 from database import engine, create_tables
-from routers import auth, points, lexique, projects, sync, photos, stats, users, champs, qrcodes, ogs, imports, postgis, sig, public, demandes, zones, services
+from routers import auth, points, lexique, projects, sync, photos, stats, users, champs, qrcodes, ogs, imports, postgis, sig, public, demandes, zones, services, push
 from routers import settings as settings_router
 
 
@@ -274,6 +274,7 @@ app.include_router(demandes.router, prefix="/api/demandes", tags=["Demandes Cito
 app.include_router(zones.router, prefix="/api/zones", tags=["Zones géographiques"])
 app.include_router(settings_router.router, prefix="/api/settings", tags=["Paramètres système"])
 app.include_router(services.router, prefix="/api/services", tags=["GeoClic Services"])
+app.include_router(push.router, prefix="/api/push", tags=["Notifications Push"])
 
 
 @app.get("/", tags=["Health"])

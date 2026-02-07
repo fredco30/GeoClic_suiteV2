@@ -130,6 +130,59 @@ async function syncDemandes() {
   });
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// PUSH NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Recevoir une notification push
+self.addEventListener('push', (event) => {
+  let data = { title: 'GéoClic', body: 'Nouvelle notification', url: '/terrain/' };
+
+  try {
+    if (event.data) {
+      data = event.data.json();
+    }
+  } catch (e) {
+    console.warn('Push data parse error:', e);
+  }
+
+  const options = {
+    body: data.body,
+    icon: data.icon || '/terrain/icon-192.png',
+    badge: data.badge || '/terrain/icon-192.png',
+    data: { url: data.url || '/terrain/' },
+    vibrate: [200, 100, 200],
+    requireInteraction: true,
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+// Clic sur une notification
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const url = event.notification.data?.url || '/terrain/';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clients) => {
+        // Si une fenêtre est déjà ouverte, la focaliser et naviguer
+        for (const client of clients) {
+          if (client.url.includes('/terrain/')) {
+            client.focus();
+            client.navigate(url);
+            return;
+          }
+        }
+        // Sinon, ouvrir une nouvelle fenêtre
+        return self.clients.openWindow(url);
+      })
+  );
+});
+
 // Listen for messages from client
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {

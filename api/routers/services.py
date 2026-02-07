@@ -778,6 +778,35 @@ async def update_demande_agent(
     )
     await db.commit()
 
+    # Envoyer une notification push à l'agent assigné
+    if data.agent_service_id:
+        try:
+            from routers.push import send_push_to_user
+            # Trouver le user_id (geoclic_users) de l'agent assigné
+            agent_user = await db.execute(text("""
+                SELECT gu.id::text as user_id
+                FROM geoclic_users gu
+                JOIN demandes_services_agents dsa ON dsa.email = gu.email
+                WHERE dsa.id = CAST(:agent_id AS uuid)
+            """), {"agent_id": data.agent_service_id})
+            agent_row = agent_user.mappings().first()
+            if agent_row:
+                # Récupérer le numéro de la demande pour le message
+                dem_result = await db.execute(text(
+                    "SELECT numero_suivi FROM demandes_citoyens WHERE id = CAST(:id AS uuid)"
+                ), {"id": demande_id})
+                dem = dem_result.mappings().first()
+                num = dem["numero_suivi"] if dem else demande_id[:8]
+                await send_push_to_user(
+                    agent_row["user_id"],
+                    "Nouvelle demande assignée",
+                    f"La demande {num} vous a été assignée",
+                    f"/terrain/demandes/{demande_id}",
+                    db
+                )
+        except Exception as e:
+            logger.warning(f"Push notification échouée (non bloquant): {e}")
+
     return {"message": "Agent assigné" if data.agent_service_id else "Agent retiré"}
 
 
