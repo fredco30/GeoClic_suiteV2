@@ -1666,17 +1666,21 @@ let currentBaseLayer: L.TileLayer | null = null
 // Initialisation
 onMounted(async () => {
   initMap()
-  mapStore.loadProjects()
 
-  // Charger les zones API et zoomer dessus
-  await mapStore.loadApiZones()
+  // Charger projets et zones en parallèle
+  await Promise.allSettled([
+    mapStore.loadProjects(),
+    mapStore.loadApiZones(),
+  ])
+
+  // Zoomer sur les zones
   const bounds = mapStore.getApiZonesBounds()
   if (bounds && map.value) {
     map.value.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 })
   }
 
-  // Afficher les couches déjà chargées dans le store
-  // (cas où le composant est remonté avec un projet déjà sélectionné)
+  // Restaurer les projets actifs depuis localStorage
+  await mapStore.restoreActiveProjects()
   if (mapStore.layers.length > 0) {
     renderLayers()
   }

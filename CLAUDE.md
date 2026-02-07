@@ -1171,22 +1171,70 @@ sudo docker exec geoclic_api ls -la /app/tests/
 ## Fleet Manager - Gestion Multi-Serveurs (TERMINÉ - février 2026)
 
 ### Description
-Outil CLI unifié (`fleet/geoclic-fleet.sh`) pour gérer le déploiement de GéoClic sur plusieurs serveurs clients. Utilise rsync (pas git) pour pousser le code depuis la machine locale vers les serveurs.
+Application web complète (Vue 3 + FastAPI) + CLI bash pour gérer le déploiement de GéoClic sur plusieurs serveurs clients. Accessible sur `geoclic.fr/fleet/`. Utilise rsync (pas git) pour pousser le code depuis le serveur maître vers les serveurs clients.
 
 ### Fichiers principaux
 ```
 fleet/
-├── geoclic-fleet.sh       # CLI principal (register, push, deploy, status, ssh, logs)
+├── geoclic-fleet.sh       # CLI principal (16 commandes)
 ├── clients.conf           # Registre des serveurs (format pipe-delimited)
+├── aide.html              # Guide HTML standalone (legacy, remplacé par HelpView.vue)
+├── api/
+│   └── main.py            # API FastAPI (port 5555) - endpoints Fleet
+├── web/
+│   └── src/
+│       ├── services/api.ts        # Client API Fleet (auth, CRUD, provision, init)
+│       └── views/
+│           ├── DashboardView.vue  # Liste serveurs, KPI, clé SSH
+│           ├── AddServerView.vue  # Wizard 5 étapes (provision + init auto)
+│           ├── HelpView.vue       # Aide complète (18 sections, recherche, copier)
+│           └── LoginView.vue      # Connexion super admin
 └── fleet-config/
     └── docker-compose.tpl # Template docker-compose pour nouveaux clients
 ```
 
+### Interface web (geoclic.fr/fleet/)
+
+#### Wizard "Ajouter un serveur" - 5 étapes automatiques
+| Étape | Description |
+|-------|-------------|
+| 1. Informations | Domaine, IP, email, identifiant, SSH user/port |
+| 2. Connexion SSH | Copie clé publique, test connexion (bouton vert = OK) |
+| 3. Configuration | Mot de passe admin, nom collectivité, option données démo |
+| 4. Confirmation | Récapitulatif complet + explication des 2 phases |
+| 5. Installation | **Provision + Init enchaînés automatiquement** |
+
+**Un seul clic fait tout :** Docker, code, SSL, 25 migrations SQL, compte admin, branding.
+
+#### API Fleet (fleet/api/main.py)
+| Endpoint | Méthode | Description |
+|----------|---------|-------------|
+| `/api/fleet/servers` | GET | Liste tous les serveurs |
+| `/api/fleet/servers` | POST | Ajouter un serveur au registre |
+| `/api/fleet/servers/{name}` | DELETE | Retirer un serveur |
+| `/api/fleet/servers/{name}/provision` | POST | Provisionner (tâche longue) |
+| `/api/fleet/servers/{name}/init` | POST | Initialiser BDD (migrations + admin) |
+| `/api/fleet/servers/{name}/update` | POST | Mettre à jour |
+| `/api/fleet/servers/{name}/status` | GET | État détaillé |
+| `/api/fleet/servers/{name}/backup` | POST | Sauvegarder |
+| `/api/fleet/servers/{name}/logs` | GET | Logs Docker |
+| `/api/fleet/servers/status` | GET | État de tous les serveurs |
+| `/api/fleet/servers/update-all` | POST | Mettre à jour tous |
+| `/api/fleet/tasks/{id}` | GET | Statut d'une tâche |
+| `/api/fleet/tasks/{id}/log` | GET | Logs d'une tâche |
+| `/api/fleet/test-ssh` | POST | Tester connexion SSH |
+| `/api/fleet/ssh-key` | GET/POST | Clé SSH fleet (show/generate) |
+
+#### Page d'aide (HelpView.vue) - 18 sections
+- Recherche dans le sommaire, navigation groupée (Accueil, Prérequis, Installation, Gestion, Référence)
+- Boutons "Copier" sur tous les blocs de code
+- Badges : Essentiel, Gestion, Debug, Automatique
+- Sections : Démarrage rapide, Prérequis, Acheter VPS, DNS, SSH, Provisionner, Init DB (automatique), Mise à jour, Status, Sauvegardes, Logs, Registre, SSH direct, Référence commandes, Dépannage, Architecture, Glossaire, FAQ
+
 ### Serveurs enregistrés
 - **geoclic-prod** : geoclic.fr (51.210.8.158), user: ubuntu, branche: claude/hierarchical-zones-S5XGp
-- **Nouveau VPS** : 51.210.8.158, user: ubuntu, Ubuntu 24.10
 
-### Commandes principales
+### Commandes CLI principales
 ```bash
 # Lister les clients
 ./fleet/geoclic-fleet.sh list
@@ -1218,13 +1266,19 @@ fleet/
 
 ### Workflow nouveau client
 ```
+Via l'interface web (tout automatique) :
+1. + Ajouter → Remplir infos → Tester SSH → Config admin → Confirmer
+2. Un clic : provision (Docker, code, SSL, 10 conteneurs) + init (25 migrations, admin, branding)
+3. Le client se connecte → Wizard d'onboarding (catégories, services, email)
+
+Via le CLI (2 commandes séparées) :
 1. provision  → Installe Docker, SSL, copie le code, lance les containers
 2. init       → Applique les 25 migrations SQL, crée le super admin
-3. Le client se connecte → Wizard d'onboarding (catégories, services, email)
+3. Le client se connecte → Wizard d'onboarding
 ```
 
 ### Scripts d'initialisation
-- **scripts/init_client.sh** : Applique toutes les migrations SQL dans l'ordre + crée le super admin + configure le branding initial. Appelé automatiquement par `fleet init`.
+- **scripts/init_client.sh** : Applique toutes les migrations SQL dans l'ordre + crée le super admin + configure le branding initial. Appelé automatiquement par `fleet init` et par l'endpoint API `/api/fleet/servers/{name}/init`.
 - **scripts/reset_demo.sh** : Nettoie et recharge les données de démo (pour serveur de démonstration uniquement).
 - **database/demo_data.sql** : Données fictives réalistes (12 signalements, 4 services, 3 comptes).
 
@@ -1233,6 +1287,8 @@ fleet/
 - rsync excludes: `node_modules`, `.git`, `deploy/.env`, `nginx/ssl`, `backups`
 - `--rsync-path="sudo rsync"` obligatoire pour écrire dans `/opt/geoclic/`
 - Line endings: toujours fixer avec `sed -i 's/\r$//'` après écriture de scripts bash
+- **Auth Fleet web** : Utilise le JWT de l'API GéoClic principale (`/api/auth/login`), vérifie `is_super_admin`
+- **Tâches longues** : provision/init/update retournent un `task_id`, le frontend poll `/api/fleet/tasks/{id}` toutes les 3s
 - Documentation complète: `docs/GUIDE_FLEET_COMPLET.md`
 
 ---
