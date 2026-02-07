@@ -4,7 +4,7 @@
     <v-card class="toolbar-card mb-4">
       <v-card-text class="py-2">
         <v-row align="center" dense>
-          <v-col cols="12" md="3">
+          <v-col v-if="projets.length > 1" cols="12" md="2">
             <v-select
               v-model="selectedProjet"
               label="Projet"
@@ -17,17 +17,19 @@
               @update:model-value="filterPoints"
             />
           </v-col>
-          <v-col cols="12" md="3">
-            <v-select
-              v-model="selectedCategorie"
-              label="Catégorie"
-              :items="categories"
+          <v-col v-for="level in activeLevels" :key="level" cols="12" md="2">
+            <v-autocomplete
+              v-model="cascadeFilters[level]"
+              :label="levelNames[level]"
+              :items="cascadeOptions(level)"
               item-title="libelle"
-              item-value="id"
+              item-value="code"
               clearable
               hide-details
               density="compact"
-              @update:model-value="filterPoints"
+              auto-select-first
+              :disabled="level > 0 && !cascadeFilters[level - 1]"
+              @update:model-value="onCascadeChange(level)"
             />
           </v-col>
           <v-col cols="12" md="2">
@@ -82,6 +84,23 @@
               Export
             </v-btn>
             <HelpButton page-key="carte" size="sm" />
+          </v-col>
+        </v-row>
+        <v-row v-if="selectChamps.length > 0" align="center" class="mt-1">
+          <v-col cols="12" md="2" class="text-caption text-grey py-0">
+            Données techniques :
+          </v-col>
+          <v-col v-for="champ in selectChamps" :key="champ.id" cols="12" md="2">
+            <v-autocomplete
+              v-model="techFilters[champ.nom]"
+              :label="champ.nom"
+              :items="champ.options || []"
+              clearable
+              hide-details
+              density="compact"
+              auto-select-first
+              @update:model-value="loadPoints"
+            />
           </v-col>
         </v-row>
       </v-card-text>
@@ -156,6 +175,34 @@
               @click="openPhotoInNewTab(selectedPoint.photos[0])"
             />
 
+            <!-- Classification -->
+            <div class="mb-4" v-if="getPointHierarchy(selectedPoint).famille">
+              <v-row dense>
+                <v-col cols="6">
+                  <div class="text-caption text-grey">Famille</div>
+                  <div>{{ getPointHierarchy(selectedPoint).famille }}</div>
+                </v-col>
+                <v-col cols="6">
+                  <div class="text-caption text-grey">Catégorie</div>
+                  <div>{{ getPointHierarchy(selectedPoint).categorie || '-' }}</div>
+                </v-col>
+              </v-row>
+              <v-row dense class="mt-1">
+                <v-col cols="6">
+                  <div class="text-caption text-grey">Type</div>
+                  <v-chip size="small" :color="selectedPoint.couleur || 'primary'">
+                    {{ getPointHierarchy(selectedPoint).type || '-' }}
+                  </v-chip>
+                </v-col>
+                <v-col cols="6">
+                  <div class="text-caption text-grey">Projet</div>
+                  <div>{{ getPointProjet(selectedPoint) }}</div>
+                </v-col>
+              </v-row>
+            </div>
+
+            <v-divider class="my-3" v-if="getPointHierarchy(selectedPoint).famille" />
+
             <div class="mb-4">
               <div class="text-caption text-grey">Description</div>
               <div>{{ selectedPoint.description || 'Aucune description' }}</div>
@@ -181,7 +228,15 @@
                 :key="key"
               >
                 <v-list-item-title>{{ key }}</v-list-item-title>
-                <v-list-item-subtitle>{{ formatValue(value) }}</v-list-item-subtitle>
+                <v-list-item-subtitle>
+                  <template v-if="isColorValue(String(value))">
+                    <span class="color-swatch" :style="{ backgroundColor: String(value) }"></span>
+                    {{ value }}
+                  </template>
+                  <template v-else>
+                    {{ formatValue(value) }}
+                  </template>
+                </v-list-item-subtitle>
               </v-list-item>
               <v-list-item v-if="!Object.keys(selectedPoint.donnees_techniques || {}).length">
                 <v-list-item-subtitle class="text-grey">
@@ -334,8 +389,8 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { usePointsStore, type Point } from '@/stores/points'
 import HelpButton from '@/components/help/HelpButton.vue'
-import { useLexiqueStore } from '@/stores/lexique'
-import { projetsAPI, qrcodesAPI } from '@/services/api'
+import { useLexiqueStore, type ChampDynamique } from '@/stores/lexique'
+import { projetsAPI, qrcodesAPI, champsAPI } from '@/services/api'
 import api from '@/services/api'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -358,7 +413,11 @@ let tempMarker: L.Marker | null = null
 
 // State
 const selectedProjet = ref<string | null>(null)
-const selectedCategorie = ref<string | null>(null)
+// Dynamic cascade filters
+const cascadeFilters = ref<Record<number, string | null>>({})
+const levelNames = ['Famille', 'Type', 'Sous-type', 'Variante', 'Détail', 'Précision']
+const techFilters = ref<Record<string, string | null>>({})
+const loadedChamps = ref<ChampDynamique[]>([])
 const searchText = ref('')
 const mapStyle = ref('streets')
 const projets = ref<any[]>([])
@@ -391,8 +450,67 @@ const pointForm = ref({
 })
 
 // Computed
-const categories = computed(() => lexiqueStore.entries.filter(e => e.niveau === 1))
 const allCategories = computed(() => lexiqueStore.entries)
+
+// Dynamic cascade: detect which levels have entries
+const activeLevels = computed(() => {
+  const levelsWithEntries = new Set(lexiqueStore.entries.map(e => e.niveau))
+  return Array.from(levelsWithEntries).sort((a, b) => a - b)
+})
+
+function cascadeOptions(level: number) {
+  if (level === 0) {
+    return lexiqueStore.entries.filter(e => e.niveau === 0).sort((a, b) => a.libelle.localeCompare(b.libelle))
+  }
+  const parentCode = cascadeFilters.value[level - 1]
+  if (!parentCode) return []
+  return lexiqueStore.entries
+    .filter(e => e.niveau === level && e.parent_id === parentCode)
+    .sort((a, b) => a.libelle.localeCompare(b.libelle))
+}
+
+// The deepest non-null cascade filter code
+const activeFilterCode = computed(() => {
+  for (const lvl of [...activeLevels.value].reverse()) {
+    if (cascadeFilters.value[lvl]) return cascadeFilters.value[lvl]
+  }
+  return null
+})
+
+// Contextual champs: only select/multiselect fields
+const selectChamps = computed(() =>
+  loadedChamps.value.filter(c => c.type === 'select' || c.type === 'multiselect')
+)
+
+// Watch cascade: load champs with inheritance
+watch(activeFilterCode, async (code) => {
+  techFilters.value = {}
+  loadedChamps.value = []
+  if (!code) return
+
+  const codesToLoad = [code]
+  let entry = lexiqueStore.getByCode(code)
+  while (entry?.parent_id) {
+    codesToLoad.push(entry.parent_id)
+    entry = lexiqueStore.getByCode(entry.parent_id) || lexiqueStore.getById(entry.parent_id)
+  }
+
+  const allChamps: ChampDynamique[] = []
+  const seenNames = new Set<string>()
+  for (const c of codesToLoad) {
+    try {
+      const champs = await champsAPI.getByLexique(c)
+      for (const ch of champs) {
+        if (!seenNames.has(ch.nom)) {
+          seenNames.add(ch.nom)
+          allChamps.push(ch)
+        }
+      }
+    } catch { /* ignore */ }
+  }
+  loadedChamps.value = allChamps.sort((a: ChampDynamique, b: ChampDynamique) => a.ordre - b.ordre)
+})
+
 const points = computed(() => pointsStore.points)
 const zoneFilterItems = computed(() => {
   // Grouper par type avec séparateurs
@@ -727,11 +845,33 @@ function selectPoint(point: Point) {
   }
 }
 
+function onCascadeChange(level: number) {
+  for (const lvl of activeLevels.value) {
+    if (lvl > level) {
+      cascadeFilters.value[lvl] = null
+    }
+  }
+  loadPoints()
+}
+
 async function loadPoints() {
+  // Use the most specific filter (deepest non-null level)
+  let lexiqueId: string | null = null
+  for (const lvl of [...activeLevels.value].reverse()) {
+    if (cascadeFilters.value[lvl]) {
+      lexiqueId = cascadeFilters.value[lvl]
+      break
+    }
+  }
+  const cf: Record<string, string> = {}
+  for (const [key, value] of Object.entries(techFilters.value)) {
+    if (value) cf[key] = value
+  }
   pointsStore.setFilters({
     projet_id: selectedProjet.value,
-    lexique_id: selectedCategorie.value,
+    lexique_id: lexiqueId,
     search: searchText.value,
+    custom_filters: cf,
   })
   await pointsStore.fetchPoints()
   updateMarkers()
@@ -749,18 +889,23 @@ function updateMarkers() {
   points.value.forEach(point => {
     const lexiqueCode = point.lexique_code || point.lexique_id
     const category = lexiqueCode ? lexiqueStore.getByCode(lexiqueCode) : null
+    const bgColor = category?.couleur || point.couleur || '#1976D2'
+    const iconClass = category?.icone || point.icone || 'mdi-map-marker'
     const marker = L.marker([point.latitude, point.longitude], {
       icon: L.divIcon({
         className: 'custom-marker',
-        html: `<div class="marker-icon" style="background-color: ${category?.couleur || point.color_value || '#1976D2'}">
-          <i class="mdi ${category?.icone || point.icon_name || 'mdi-map-marker'}"></i>
+        iconSize: [36, 36],
+        iconAnchor: [18, 36],
+        popupAnchor: [0, -36],
+        html: `<div class="marker-icon" style="background-color: ${bgColor}">
+          <i class="mdi ${iconClass}"></i>
         </div>`,
       }),
     })
 
     marker.on('click', () => selectPoint(point))
     const pointName = point.name || point.nom || 'Point'
-    marker.bindTooltip(pointName, { direction: 'top', offset: [0, -20] })
+    marker.bindTooltip(pointName, { direction: 'top', offset: [0, -36] })
     markersLayer!.addLayer(marker)
   })
 
@@ -813,6 +958,44 @@ function openPhotoInNewTab(photo: any) {
   if (typeof url === 'string') {
     window.open(url, '_blank')
   }
+}
+
+function getPointHierarchy(point: Point): { famille: string | null, categorie: string | null, type: string | null } {
+  const lexiqueCode = point.lexique_code || point.lexique_id
+  if (!lexiqueCode) return { famille: null, categorie: null, type: null }
+
+  const entry = lexiqueStore.getByCode(lexiqueCode)
+  if (!entry) return { famille: null, categorie: null, type: null }
+
+  // Remonter la hiérarchie
+  const hierarchy: any[] = [entry]
+  let current = entry
+  while (current.parent_id) {
+    const parent = lexiqueStore.getByCode(current.parent_id) || lexiqueStore.getById(current.parent_id)
+    if (parent) {
+      hierarchy.unshift(parent)
+      current = parent
+    } else {
+      break
+    }
+  }
+
+  return {
+    famille: hierarchy.find((h: any) => h.niveau === 0)?.libelle || null,
+    categorie: hierarchy.find((h: any) => h.niveau === 1)?.libelle || null,
+    type: hierarchy.find((h: any) => h.niveau === 2)?.libelle || null,
+  }
+}
+
+function getPointProjet(point: Point): string {
+  const projetId = point.project_id || point.projet_id
+  if (!projetId) return '-'
+  const projet = projets.value.find((p: any) => p.id === projetId)
+  return projet?.nom || projet?.name || '-'
+}
+
+function isColorValue(value: string): boolean {
+  return /^#[0-9A-Fa-f]{3,8}$/.test(value)
 }
 
 function formatValue(value: any): string {
@@ -901,20 +1084,21 @@ onUnmounted(() => {
 }
 
 .marker-icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  border: 2px solid white;
 }
 
 .marker-icon i {
   transform: rotate(45deg);
   color: white;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .temp-marker-icon {
@@ -935,5 +1119,15 @@ onUnmounted(() => {
   0% { transform: scale(1); }
   50% { transform: scale(1.2); }
   100% { transform: scale(1); }
+}
+
+.color-swatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,0.2);
+  vertical-align: middle;
+  margin-right: 6px;
 }
 </style>

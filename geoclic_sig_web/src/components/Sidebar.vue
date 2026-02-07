@@ -58,8 +58,8 @@
 
     <div class="sidebar-footer">
       <div class="user-info">
-        <span class="user-name">{{ authStore.user?.name }}</span>
-        <span class="user-role">{{ authStore.user?.role }}</span>
+        <span class="user-name">{{ authStore.fullName }}</span>
+        <span class="user-role">{{ authStore.user?.is_super_admin ? 'Super Admin' : authStore.user?.role_sig }}</span>
       </div>
       <button @click="handleLogout" class="logout-btn">
         Déconnexion

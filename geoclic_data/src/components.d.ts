@@ -13,6 +13,10 @@ declare module 'vue' {
   export interface GlobalComponents {
     AppFooter: typeof import('./components/AppFooter.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
+    HelpButton: typeof import('./components/help/HelpButton.vue')['default']
+    HelpDrawer: typeof import('./components/help/HelpDrawer.vue')['default']
+    HelpTooltip: typeof import('./components/help/HelpTooltip.vue')['default']
+    OnboardingWizard: typeof import('./components/OnboardingWizard.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

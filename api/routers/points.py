@@ -159,6 +159,7 @@ async def list_points(
     type_filter: Optional[str] = None,
     lexique_code: Optional[str] = None,
     search: Optional[str] = Query(None, min_length=1, description="Recherche dans nom et commentaire"),
+    custom_filters: Optional[str] = Query(None, description="Filtres données techniques JSON: {\"Matériau\":\"Bois\"}"),
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
@@ -182,13 +183,35 @@ async def list_points(
         params["type_filter"] = type_filter
 
     if lexique_code:
-        where_clauses.append("lexique_code LIKE :lexique_code")
-        params["lexique_code"] = f"{lexique_code}%"
+        # Support comma-separated codes for hierarchical filtering
+        codes = [c.strip() for c in lexique_code.split(',') if c.strip()]
+        if len(codes) == 1:
+            where_clauses.append("lexique_code = :lexique_code")
+            params["lexique_code"] = codes[0]
+        else:
+            lc_placeholders = ", ".join([f":lc_{i}" for i in range(len(codes))])
+            where_clauses.append(f"lexique_code IN ({lc_placeholders})")
+            for i, c in enumerate(codes):
+                params[f"lc_{i}"] = c
 
     if search:
         # Recherche insensible à la casse dans nom et commentaire
         where_clauses.append("(LOWER(name) LIKE :search OR LOWER(comment) LIKE :search)")
         params["search"] = f"%{search.lower()}%"
+
+    if custom_filters:
+        try:
+            import json as json_mod
+            cf = json_mod.loads(custom_filters) if isinstance(custom_filters, str) else custom_filters
+            if isinstance(cf, dict):
+                # Use JSONB containment operator @> for safe parameterized filtering
+                # Each filter: custom_properties @> '{"key": "value"}'::jsonb
+                for i, (key, value) in enumerate(cf.items()):
+                    param_name = f"cf_{i}"
+                    where_clauses.append(f"custom_properties @> CAST(:{param_name} AS jsonb)")
+                    params[param_name] = json_mod.dumps({key: str(value)})
+        except (ValueError, TypeError):
+            pass  # Invalid JSON, ignore
 
     # Sécurité : les where_clauses ci-dessus sont toutes des littérales du code
     # avec valeurs paramétrées (:param). Aucune donnée utilisateur dans la structure SQL.
@@ -400,8 +423,16 @@ async def export_geojson(
         params["sync_status"] = sync_status.value
 
     if lexique_code:
-        where_clauses.append("lexique_code LIKE :lexique_code")
-        params["lexique_code"] = f"{lexique_code}%"
+        # Support comma-separated codes for hierarchical filtering
+        codes = [c.strip() for c in lexique_code.split(',') if c.strip()]
+        if len(codes) == 1:
+            where_clauses.append("lexique_code = :lexique_code")
+            params["lexique_code"] = codes[0]
+        else:
+            lc_placeholders = ", ".join([f":lc_{i}" for i in range(len(codes))])
+            where_clauses.append(f"lexique_code IN ({lc_placeholders})")
+            for i, c in enumerate(codes):
+                params[f"lc_{i}"] = c
 
     if date_start:
         where_clauses.append("created_at >= :date_start")
@@ -496,8 +527,16 @@ async def export_csv(
         params["sync_status"] = sync_status.value
 
     if lexique_code:
-        where_clauses.append("lexique_code LIKE :lexique_code")
-        params["lexique_code"] = f"{lexique_code}%"
+        # Support comma-separated codes for hierarchical filtering
+        codes = [c.strip() for c in lexique_code.split(',') if c.strip()]
+        if len(codes) == 1:
+            where_clauses.append("lexique_code = :lexique_code")
+            params["lexique_code"] = codes[0]
+        else:
+            lc_placeholders = ", ".join([f":lc_{i}" for i in range(len(codes))])
+            where_clauses.append(f"lexique_code IN ({lc_placeholders})")
+            for i, c in enumerate(codes):
+                params[f"lc_{i}"] = c
 
     if date_start:
         where_clauses.append("created_at >= :date_start")
@@ -647,8 +686,16 @@ async def export_zip_with_photos(
         params["sync_status"] = sync_status.value
 
     if lexique_code:
-        where_clauses.append("lexique_code LIKE :lexique_code")
-        params["lexique_code"] = f"{lexique_code}%"
+        # Support comma-separated codes for hierarchical filtering
+        codes = [c.strip() for c in lexique_code.split(',') if c.strip()]
+        if len(codes) == 1:
+            where_clauses.append("lexique_code = :lexique_code")
+            params["lexique_code"] = codes[0]
+        else:
+            lc_placeholders = ", ".join([f":lc_{i}" for i in range(len(codes))])
+            where_clauses.append(f"lexique_code IN ({lc_placeholders})")
+            for i, c in enumerate(codes):
+                params[f"lc_{i}"] = c
 
     if date_start:
         where_clauses.append("created_at >= :date_start")

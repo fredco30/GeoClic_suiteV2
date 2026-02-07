@@ -98,12 +98,20 @@ function mapLexiqueToBackend(l: any) {
 function mapPointFromBackend(p: any) {
   // Extraire latitude/longitude depuis coordinates
   const firstCoord = p.coordinates?.[0]
+  // Convertir color_value (int) en hex string pour le frontend
+  let couleur: string | null = null
+  if (p.color_value != null) {
+    couleur = '#' + (p.color_value & 0xFFFFFF).toString(16).padStart(6, '0')
+  }
   return {
     ...p,
     nom: p.name,
     projet_id: p.project_id,
     lexique_id: p.lexique_code,
     description: p.comment,
+    donnees_techniques: p.custom_properties || {},
+    icone: p.icon_name ? `mdi-${p.icon_name.replace(/^mdi-/, '')}` : null,
+    couleur,
     latitude: firstCoord?.latitude ?? p.latitude,
     longitude: firstCoord?.longitude ?? p.longitude,
   }

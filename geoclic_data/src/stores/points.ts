@@ -7,6 +7,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { pointsAPI } from '@/services/api'
+import { useLexiqueStore } from '@/stores/lexique'
 
 export interface Point {
   id: string
@@ -75,6 +76,7 @@ export const usePointsStore = defineStore('points', () => {
     projet_id: null as string | null,
     lexique_id: null as string | null,
     search: '',
+    custom_filters: {} as Record<string, string>,
   })
 
   // Pagination
@@ -107,17 +109,47 @@ export const usePointsStore = defineStore('points', () => {
     points.value.find(p => p.id === id)
   )
 
+  // Helpers
+
+  /**
+   * Résout tous les codes descendants d'un lexique_code
+   * Ex: PROPRETE → [PROPRETE, POUB_SIMPLE, BAC_TRI, ...]
+   */
+  function getDescendantCodes(code: string): string[] {
+    const lexiqueStore = useLexiqueStore()
+    const result = [code]
+    const children = lexiqueStore.entries.filter(e => e.parent_id === code)
+    for (const child of children) {
+      result.push(...getDescendantCodes(child.code))
+    }
+    return result
+  }
+
   // Actions
   async function fetchPoints(): Promise<void> {
     loading.value = true
     error.value = null
 
     try {
-      // Mapper les noms de paramètres frontend vers backend
+      // Résoudre les codes descendants pour le filtre catégorie
+      let lexiqueCode: string | undefined = filters.value.lexique_id || undefined
+      if (lexiqueCode) {
+        const allCodes = getDescendantCodes(lexiqueCode)
+        lexiqueCode = allCodes.join(',')
+      }
+
+      // Build custom_filters JSON if any tech filters are set
+      const cf = filters.value.custom_filters
+      const hasCustomFilters = cf && Object.keys(cf).some(k => cf[k])
+      const customFiltersJson = hasCustomFilters
+        ? JSON.stringify(Object.fromEntries(Object.entries(cf).filter(([, v]) => v)))
+        : undefined
+
       const params = {
         project_id: filters.value.projet_id || undefined,
-        lexique_code: filters.value.lexique_id || undefined,
+        lexique_code: lexiqueCode,
         search: filters.value.search || undefined,
+        custom_filters: customFiltersJson,
         page: pagination.value.page,
         page_size: pagination.value.page_size,
       }

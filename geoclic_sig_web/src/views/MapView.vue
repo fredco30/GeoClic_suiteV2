@@ -39,6 +39,79 @@
         </div>
       </div>
 
+      <!-- Barre de recherche -->
+      <div class="toolbar-section toolbar-section-search">
+        <span class="section-label">Recherche</span>
+        <div class="search-container">
+          <div class="search-input-wrapper">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input
+              ref="searchInput"
+              type="text"
+              v-model="searchQuery"
+              @input="onSearchInput"
+              @keydown.enter="onSearchEnter"
+              @keydown.escape="closeSearch"
+              @focus="showSearchResults = searchResults.length > 0 || featureSearchResults.length > 0"
+              class="search-input"
+              placeholder="Adresse, lieu ou élément..."
+            >
+            <button v-if="searchQuery" @click="clearSearch" class="search-clear">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+          <!-- Résultats de recherche -->
+          <div v-if="showSearchResults && (searchResults.length > 0 || featureSearchResults.length > 0 || searchLoading)" class="search-results">
+            <div v-if="searchLoading" class="search-loading">
+              <span>Recherche en cours...</span>
+            </div>
+            <!-- Résultats features locales -->
+            <div v-if="featureSearchResults.length > 0" class="search-group">
+              <div class="search-group-label">Éléments chargés</div>
+              <div
+                v-for="result in featureSearchResults"
+                :key="'feat-' + result.properties?.id"
+                class="search-result-item"
+                @click="goToFeature(result)"
+              >
+                <svg class="result-icon result-icon-feature" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <div class="result-info">
+                  <span class="result-name">{{ result.properties?.name || 'Sans nom' }}</span>
+                  <span class="result-detail">{{ result.properties?.categorie }} {{ result.properties?.type ? '› ' + result.properties.type : '' }}</span>
+                </div>
+              </div>
+            </div>
+            <!-- Résultats adresses (Nominatim) -->
+            <div v-if="searchResults.length > 0" class="search-group">
+              <div class="search-group-label">Adresses</div>
+              <div
+                v-for="(result, idx) in searchResults"
+                :key="'addr-' + idx"
+                class="search-result-item"
+                @click="goToAddress(result)"
+              >
+                <svg class="result-icon result-icon-address" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+                </svg>
+                <div class="result-info">
+                  <span class="result-name">{{ result.display_name?.split(',').slice(0, 2).join(',') }}</span>
+                  <span class="result-detail">{{ result.display_name?.split(',').slice(2, 4).join(',') }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Groupe: Navigation et dessin -->
       <div class="toolbar-section">
         <span class="section-label">Outils</span>
@@ -294,8 +367,22 @@
         </button>
       </div>
       <div class="panel-body">
+        <!-- Filtres cascade dynamiques -->
+        <div v-if="mapStore.layers.length > 0" class="layer-filters">
+          <template v-for="level in sigActiveLevels" :key="level">
+            <select
+              v-model="sigCascadeFilters[level]"
+              @change="onSigCascadeChange(level)"
+              class="layer-filter-select"
+              :disabled="level > 0 && !sigCascadeFilters[level - 1]"
+            >
+              <option value="">{{ sigLevelPlaceholders[level] || `Niveau ${level}` }}</option>
+              <option v-for="item in sigCascadeOptions(level)" :key="item.code" :value="item.code">{{ item.label }}</option>
+            </select>
+          </template>
+        </div>
         <div v-if="mapStore.layers.length > 0" class="layers-list">
-          <div v-for="layer in mapStore.layers" :key="layer.id" class="layer-item" :class="{ 'layer-hidden': !layer.visible }">
+          <div v-for="layer in filteredLayers" :key="layer.id" class="layer-item" :class="{ 'layer-hidden': !layer.visible }">
             <div class="layer-visibility">
               <input
                 type="checkbox"
@@ -314,7 +401,10 @@
                 </svg>
               </label>
             </div>
-            <span class="layer-color" :style="{ backgroundColor: layer.color }"></span>
+            <span v-if="layer.icon" class="layer-icon-mdi" :style="{ color: layer.color }">
+              <i :class="'mdi ' + layer.icon"></i>
+            </span>
+            <span v-else class="layer-color" :style="{ backgroundColor: layer.color }"></span>
             <span class="layer-name">{{ layer.name }}</span>
             <span class="layer-badge">{{ layer.data?.features?.length || 0 }}</span>
           </div>
@@ -772,12 +862,37 @@
           {{ getGeometryLabel(mapStore.selectedFeature.geometry.type) }}
         </div>
         <div class="feature-properties">
-          <div class="feature-property" v-for="(value, key) in mapStore.selectedFeature.properties" :key="key">
-            <span class="property-key">{{ formatPropertyKey(key) }}</span>
-            <span class="property-value">{{ value || '-' }}</span>
+          <div class="feature-property" v-for="prop in getDisplayProperties(mapStore.selectedFeature.properties)" :key="prop.key">
+            <span class="property-key">{{ prop.label }}</span>
+            <span class="property-value">{{ prop.value }}</span>
           </div>
-          <div v-if="Object.keys(mapStore.selectedFeature.properties || {}).length === 0" class="no-properties">
+          <div v-if="getDisplayProperties(mapStore.selectedFeature.properties).length === 0" class="no-properties">
             Aucune propriété définie
+          </div>
+        </div>
+        <!-- Données techniques -->
+        <div v-if="getCustomProperties(mapStore.selectedFeature.properties).length > 0" class="feature-custom-props">
+          <h4 class="custom-props-title">Données techniques</h4>
+          <div class="custom-props-list">
+            <div v-for="prop in getCustomProperties(mapStore.selectedFeature.properties)" :key="prop.key" class="custom-prop-item">
+              <span class="custom-prop-key">{{ prop.key }}</span>
+              <span class="custom-prop-value">{{ prop.value }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Photos -->
+        <div v-if="mapStore.selectedFeature.properties?.photos?.length" class="feature-photos">
+          <h4 class="photos-title">Photos</h4>
+          <div class="photos-grid">
+            <a
+              v-for="photo in mapStore.selectedFeature.properties.photos"
+              :key="photo.id"
+              :href="photo.url"
+              target="_blank"
+              class="photo-thumb"
+            >
+              <img :src="photo.thumbnail_url || photo.url" :alt="photo.filename" />
+            </a>
           </div>
         </div>
       </div>
@@ -981,6 +1096,32 @@ import { useMapStore } from '../stores/map'
 import L from 'leaflet'
 import 'leaflet-draw'
 
+// Patch Leaflet : protéger contre le bug _map=null sur les marqueurs DivIcon
+// Quand un marqueur est supprimé pendant une animation de zoom, Leaflet peut
+// encore appeler _animateZoom/_updatePosition sur le marqueur orphelin → crash
+const _origAnimateZoom = L.Marker.prototype._animateZoom
+if (_origAnimateZoom) {
+  L.Marker.prototype._animateZoom = function (opt: any) {
+    if (!this._map) return
+    _origAnimateZoom.call(this, opt)
+  }
+}
+const _origUpdatePosition = (L.Marker.prototype as any)._updatePosition
+if (_origUpdatePosition) {
+  ;(L.Marker.prototype as any)._updatePosition = function () {
+    if (!this._map) return
+    _origUpdatePosition.call(this)
+  }
+}
+// Idem pour Tooltip/Popup (DivOverlay) qui peuvent aussi avoir _map=null
+if ((L as any).DivOverlay?.prototype?._updatePosition) {
+  const _origDivOverlayUpdate = (L as any).DivOverlay.prototype._updatePosition
+  ;(L as any).DivOverlay.prototype._updatePosition = function () {
+    if (!this._map) return
+    _origDivOverlayUpdate.call(this)
+  }
+}
+
 const mapStore = useMapStore()
 
 // Refs
@@ -993,6 +1134,89 @@ const showCadastre = ref(false)
 const showLayerPanel = ref(false)
 const showStatsPanel = ref(false)
 const showProjectPanel = ref(false)
+
+// Recherche
+const searchInput = ref<HTMLInputElement | null>(null)
+const searchQuery = ref('')
+const searchResults = ref<any[]>([])
+const featureSearchResults = ref<GeoJSON.Feature[]>([])
+const showSearchResults = ref(false)
+const searchLoading = ref(false)
+let searchDebounceTimer: number | null = null
+let searchMarker: L.Marker | null = null
+
+// Dynamic cascade layer filters
+const sigCascadeFilters = ref<Record<number, string>>({})
+const sigLevelPlaceholders: Record<number, string> = {
+  0: 'Toutes les familles',
+  1: 'Tous les types',
+  2: 'Tous les sous-types',
+  3: 'Toutes les variantes',
+  4: 'Tous les détails',
+  5: 'Toutes les précisions',
+}
+
+const sigActiveLevels = computed(() => {
+  const entries = Array.from(mapStore.lexiqueMap.values())
+  const levelsWithEntries = new Set(entries.map(e => e.level))
+  return Array.from(levelsWithEntries).sort((a, b) => a - b)
+})
+
+function sigCascadeOptions(level: number) {
+  const entries = Array.from(mapStore.lexiqueMap.values())
+  if (level === 0) {
+    return entries.filter(e => e.level === 0).sort((a, b) => a.label.localeCompare(b.label))
+  }
+  const parentCode = sigCascadeFilters.value[level - 1]
+  if (!parentCode) return []
+  return entries.filter(e => e.level === level && e.parent_code === parentCode).sort((a, b) => a.label.localeCompare(b.label))
+}
+
+// Get all descendant codes of a given code
+function getDescendantCodes(code: string): string[] {
+  const result = [code]
+  const entries = Array.from(mapStore.lexiqueMap.values())
+  const children = entries.filter(e => e.parent_code === code)
+  for (const child of children) {
+    result.push(...getDescendantCodes(child.code))
+  }
+  return result
+}
+
+// Check if a lexique code belongs to a given ancestor (or is the ancestor itself)
+function isDescendantOf(code: string, ancestorCode: string): boolean {
+  if (code === ancestorCode) return true
+  let current = mapStore.lexiqueMap.get(code)
+  while (current && current.parent_code) {
+    if (current.parent_code === ancestorCode) return true
+    current = mapStore.lexiqueMap.get(current.parent_code)
+  }
+  return false
+}
+
+// Filtered layers based on cascade selection
+const filteredLayers = computed(() => {
+  // Find the deepest non-empty filter
+  let filterCode = ''
+  for (const lvl of [...sigActiveLevels.value].reverse()) {
+    if (sigCascadeFilters.value[lvl]) {
+      filterCode = sigCascadeFilters.value[lvl]
+      break
+    }
+  }
+  if (!filterCode) return mapStore.layers
+  return mapStore.layers.filter(layer => {
+    return isDescendantOf(layer.id, filterCode)
+  })
+})
+
+function onSigCascadeChange(level: number) {
+  for (const lvl of sigActiveLevels.value) {
+    if (lvl > level) {
+      sigCascadeFilters.value[lvl] = ''
+    }
+  }
+}
 const showPerimeterPanel = ref(false)
 const showHelp = ref(false)
 
@@ -1120,11 +1344,19 @@ onMounted(async () => {
     map.value.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 })
   }
 
+  // Afficher les couches déjà chargées dans le store
+  // (cas où le composant est remonté avec un projet déjà sélectionné)
+  if (mapStore.layers.length > 0) {
+    renderLayers()
+  }
+
   window.addEventListener('keydown', handleKeydown)
+  window.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('click', handleClickOutside)
   if (map.value) {
     map.value.remove()
   }
@@ -1464,26 +1696,40 @@ function toggleLayerPanel() {
 function zoomToData() {
   if (!map.value) return
 
-  const allBounds: L.LatLngBounds[] = []
+  try {
+    const allBounds: L.LatLngBounds[] = []
 
-  mapStore.visibleLayers.forEach(layer => {
-    if (layer.data?.features?.length) {
-      const geoJsonLayer = L.geoJSON(layer.data)
-      allBounds.push(geoJsonLayer.getBounds())
+    mapStore.visibleLayers.forEach(layer => {
+      if (layer.data?.features?.length) {
+        const geoJsonLayer = L.geoJSON(layer.data)
+        const bounds = geoJsonLayer.getBounds()
+        if (bounds.isValid()) {
+          allBounds.push(bounds)
+        }
+      }
+    })
+
+    if (allBounds.length > 0) {
+      const combinedBounds = allBounds.reduce((acc, bounds) => acc.extend(bounds))
+      map.value.fitBounds(combinedBounds, { padding: [50, 50] })
     }
-  })
-
-  if (allBounds.length > 0) {
-    const combinedBounds = allBounds.reduce((acc, bounds) => acc.extend(bounds))
-    map.value.fitBounds(combinedBounds, { padding: [50, 50] })
+  } catch (e) {
+    console.warn('zoomToData error:', e)
   }
 }
 
 function zoomToFeature() {
   if (!map.value || !mapStore.selectedFeature) return
 
-  const layer = L.geoJSON(mapStore.selectedFeature)
-  map.value.fitBounds(layer.getBounds(), { padding: [100, 100], maxZoom: 18 })
+  try {
+    const layer = L.geoJSON(mapStore.selectedFeature)
+    const bounds = layer.getBounds()
+    if (bounds.isValid()) {
+      map.value.fitBounds(bounds, { padding: [100, 100], maxZoom: 18 })
+    }
+  } catch (e) {
+    console.warn('zoomToFeature error:', e)
+  }
 }
 
 function editFeature() {
@@ -1628,6 +1874,39 @@ function getGeometryLabel(type: string): string {
   return labels[type] || type
 }
 
+// Propriétés à afficher dans le panneau détail avec labels français
+const PROPERTY_LABELS: Record<string, string> = {
+  name: 'Nom',
+  categorie: 'Catégorie',
+  type: 'Type',
+  condition_state: 'État',
+  point_status: 'Statut',
+  comment: 'Commentaire',
+}
+
+// Propriétés internes à masquer
+const HIDDEN_PROPERTIES = new Set(['id', 'color_value', 'icon_name', 'sync_status', 'lexique_code', 'photos', 'custom_properties', '_category_icon', '_category_color'])
+
+function getDisplayProperties(properties: Record<string, any> | null): { key: string; label: string; value: string }[] {
+  if (!properties) return []
+  return Object.entries(properties)
+    .filter(([key, value]) => !HIDDEN_PROPERTIES.has(key) && value != null && value !== '')
+    .map(([key, value]) => ({
+      key,
+      label: PROPERTY_LABELS[key] || formatPropertyKey(key),
+      value: String(value),
+    }))
+}
+
+function getCustomProperties(properties: Record<string, any> | null): { key: string; value: string }[] {
+  if (!properties?.custom_properties) return []
+  const cp = properties.custom_properties
+  if (typeof cp !== 'object' || Array.isArray(cp)) return []
+  return Object.entries(cp)
+    .filter(([, v]) => v != null && v !== '')
+    .map(([k, v]) => ({ key: k, value: String(v) }))
+}
+
 function formatPropertyKey(key: string): string {
   // Convertit snake_case ou camelCase en texte lisible
   return key
@@ -1665,10 +1944,12 @@ function toggleProjectPanel() {
   }
 }
 
-function selectProject(project: any) {
-  mapStore.selectProject(project)
+async function selectProject(project: any) {
+  await mapStore.selectProject(project)
   showProjectPanel.value = false
   showToast(`Projet "${project.name}" chargé`, 'success')
+  // Forcer le rendu des couches après le chargement des données
+  renderLayers()
 }
 
 // Périmètres
@@ -1907,10 +2188,147 @@ function getRandomColor(): string {
   return colors[Math.floor(Math.random() * colors.length)]
 }
 
+// =========================================
+// Recherche (geocoding Nominatim + features)
+// =========================================
+function onSearchInput() {
+  if (searchDebounceTimer) clearTimeout(searchDebounceTimer)
+  const query = searchQuery.value.trim()
+  if (!query) {
+    searchResults.value = []
+    featureSearchResults.value = []
+    showSearchResults.value = false
+    return
+  }
+  // Recherche locale immédiate dans les features chargées
+  searchFeaturesLocal(query)
+  // Recherche Nominatim avec debounce (300ms)
+  searchDebounceTimer = window.setTimeout(() => {
+    searchNominatim(query)
+  }, 300)
+}
+
+function searchFeaturesLocal(query: string) {
+  const q = query.toLowerCase()
+  const results: GeoJSON.Feature[] = []
+  mapStore.layers.forEach(layer => {
+    if (!layer.data?.features) return
+    layer.data.features.forEach(f => {
+      const name = (f.properties?.name || '').toLowerCase()
+      const cat = (f.properties?.categorie || '').toLowerCase()
+      const type = (f.properties?.type || '').toLowerCase()
+      const comment = (f.properties?.comment || '').toLowerCase()
+      if (name.includes(q) || cat.includes(q) || type.includes(q) || comment.includes(q)) {
+        results.push(f)
+      }
+    })
+  })
+  featureSearchResults.value = results.slice(0, 8)
+  showSearchResults.value = results.length > 0 || searchResults.value.length > 0
+}
+
+async function searchNominatim(query: string) {
+  searchLoading.value = true
+  try {
+    const params = new URLSearchParams({
+      q: query,
+      format: 'json',
+      limit: '5',
+      countrycodes: 'fr',
+      addressdetails: '1',
+    })
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
+      headers: { 'Accept-Language': 'fr' }
+    })
+    if (!response.ok) return
+    searchResults.value = await response.json()
+    showSearchResults.value = searchResults.value.length > 0 || featureSearchResults.value.length > 0
+  } catch (err) {
+    console.warn('Nominatim search error:', err)
+  } finally {
+    searchLoading.value = false
+  }
+}
+
+function onSearchEnter() {
+  // Si un seul résultat feature, y aller directement
+  if (featureSearchResults.value.length === 1) {
+    goToFeature(featureSearchResults.value[0])
+  } else if (searchResults.value.length > 0) {
+    goToAddress(searchResults.value[0])
+  }
+}
+
+function goToAddress(result: any) {
+  if (!map.value) return
+  const lat = parseFloat(result.lat)
+  const lng = parseFloat(result.lon)
+  // Supprimer l'ancien marqueur
+  if (searchMarker) {
+    map.value.removeLayer(searchMarker)
+  }
+  // Placer un marqueur temporaire
+  searchMarker = L.marker([lat, lng], {
+    icon: L.divIcon({
+      className: 'search-result-marker',
+      html: `<div class="search-pin"><svg viewBox="0 0 24 24" fill="#e74c3c" stroke="white" stroke-width="1"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg></div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+    })
+  }).addTo(map.value)
+  searchMarker.bindPopup(result.display_name?.split(',').slice(0, 3).join(',') || 'Lieu')
+  // Zoomer
+  if (result.boundingbox) {
+    const bounds: L.LatLngBoundsExpression = [
+      [parseFloat(result.boundingbox[0]), parseFloat(result.boundingbox[2])],
+      [parseFloat(result.boundingbox[1]), parseFloat(result.boundingbox[3])]
+    ]
+    map.value.fitBounds(bounds, { padding: [50, 50], maxZoom: 17 })
+  } else {
+    map.value.setView([lat, lng], 17)
+  }
+  closeSearch()
+}
+
+function goToFeature(feature: GeoJSON.Feature) {
+  if (!map.value) return
+  // Sélectionner la feature
+  mapStore.selectFeature(feature)
+  // Zoomer dessus
+  try {
+    const layer = L.geoJSON(feature)
+    const bounds = layer.getBounds()
+    if (bounds.isValid()) {
+      map.value.fitBounds(bounds, { padding: [100, 100], maxZoom: 18 })
+    }
+  } catch (e) {
+    console.warn('goToFeature error:', e)
+  }
+  closeSearch()
+}
+
+function clearSearch() {
+  searchQuery.value = ''
+  searchResults.value = []
+  featureSearchResults.value = []
+  showSearchResults.value = false
+  // Supprimer le marqueur de recherche
+  if (searchMarker && map.value) {
+    map.value.removeLayer(searchMarker)
+    searchMarker = null
+  }
+}
+
+function closeSearch() {
+  showSearchResults.value = false
+}
+
 // Raccourcis clavier
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
-    if (showHelp.value) {
+    if (showSearchResults.value) {
+      closeSearch()
+    } else if (showHelp.value) {
       showHelp.value = false
     } else if (toolMode.value !== 'navigation') {
       setToolMode('navigation')
@@ -1920,52 +2338,100 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
+function handleClickOutside(e: MouseEvent) {
+  const target = e.target as HTMLElement
+  if (!target.closest('.search-container')) {
+    showSearchResults.value = false
+  }
+}
+
+// Supprimer proprement un LayerGroup de la carte
+// IMPORTANT: NE PAS appeler clearLayers() avant map.removeLayer() !
+// Leaflet a besoin des layers dans le groupe pour les désabonner
+// de l'événement zoomanim lors du onRemove(). Si on clear avant,
+// les marqueurs restent abonnés avec _map=null → crash _animateZoom.
+function removeLayerGroupFromMap(group: L.LayerGroup, mapInstance: L.Map) {
+  try {
+    mapInstance.removeLayer(group)
+  } catch (_) { /* ignore removal errors */ }
+}
+
+// Créer un LayerGroup Leaflet à partir d'une couche du store
+function createLeafletLayerGroup(layer: { data: GeoJSON.FeatureCollection | null; color: string; icon?: string; id: string }) {
+  const group = L.layerGroup()
+  if (!layer.data) return group
+
+  L.geoJSON(layer.data, {
+    style: () => ({
+      color: layer.color,
+      weight: 2,
+      fillOpacity: 0.3
+    }),
+    pointToLayer: (feature, latlng) => {
+      const iconName = feature.properties?._category_icon || layer.icon || 'mdi-map-marker'
+      const iconColor = feature.properties?._category_color || layer.color || '#3498db'
+      return L.marker(latlng, {
+        icon: L.divIcon({
+          className: 'sig-marker',
+          html: `<div class="sig-marker-pin" style="background-color: ${iconColor}"><i class="mdi ${iconName}"></i></div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          tooltipAnchor: [0, -32],
+        })
+      })
+    },
+    onEachFeature: (feature, featureLayer) => {
+      featureLayer.on('click', () => {
+        mapStore.selectFeature(feature)
+      })
+
+      if (feature.properties?.name) {
+        featureLayer.bindTooltip(feature.properties.name)
+      }
+    }
+  }).addTo(group)
+
+  return group
+}
+
 // Watch pour les changements de couches
-watch(() => mapStore.visibleLayers, (layers) => {
+// Fingerprint = identité + visibilité + nombre de features (détecte les changements de données)
+// Note: pas de check _animatingZoom — le monkey-patch Leaflet protège contre les crash
+watch(
+  () => mapStore.layers.map(l => `${l.id}:${l.visible}:${l.data?.features?.length || 0}`).join(','),
+  () => {
+    if (!map.value) return
+    renderLayers()
+  }
+)
+
+// Watch pour les filtres cascade — quand le filtre change, re-rendre les couches
+watch(
+  () => filteredLayers.value.map(l => l.id).join(','),
+  () => {
+    if (!map.value) return
+    renderLayers()
+  }
+)
+
+function renderLayers() {
   if (!map.value) return
 
-  // Supprimer les couches existantes
-  layerGroups.value.forEach(group => {
-    map.value?.removeLayer(group)
+  // Supprimer les couches existantes de la carte (Leaflet gère le cleanup des events)
+  layerGroups.value.forEach((group) => {
+    removeLayerGroupFromMap(group, map.value!)
   })
   layerGroups.value.clear()
 
-  // Ajouter les couches visibles
-  layers.forEach(layer => {
-    if (!layer.data) return
+  // Utiliser filteredLayers (respecte le filtre cascade) au lieu de mapStore.layers
+  filteredLayers.value.forEach(layer => {
+    if (!layer.visible || !layer.data) return
 
-    const group = L.layerGroup()
-
-    L.geoJSON(layer.data, {
-      style: () => ({
-        color: layer.color,
-        weight: 2,
-        fillOpacity: 0.3
-      }),
-      pointToLayer: (feature, latlng) => {
-        return L.circleMarker(latlng, {
-          radius: 8,
-          fillColor: layer.color,
-          color: '#fff',
-          weight: 2,
-          fillOpacity: 0.8
-        })
-      },
-      onEachFeature: (feature, featureLayer) => {
-        featureLayer.on('click', () => {
-          mapStore.selectFeature(feature)
-        })
-
-        if (feature.properties?.name) {
-          featureLayer.bindTooltip(feature.properties.name)
-        }
-      }
-    }).addTo(group)
-
+    const group = createLeafletLayerGroup(layer)
     group.addTo(map.value!)
     layerGroups.value.set(layer.id, group)
   })
-}, { deep: true })
+}
 
 // Couche pour les zones API
 const apiZonesLayerGroup = ref<L.LayerGroup | null>(null)
@@ -1978,7 +2444,7 @@ watch(
 
     // Supprimer la couche existante
     if (apiZonesLayerGroup.value) {
-      map.value.removeLayer(apiZonesLayerGroup.value)
+      removeLayerGroupFromMap(apiZonesLayerGroup.value, map.value)
     }
 
     // Afficher les zones si visible globalement
@@ -2205,6 +2671,177 @@ watch(
 
 .tool-btn-help:hover {
   opacity: 1;
+}
+
+/* ============================================
+   Barre de recherche
+   ============================================ */
+.toolbar-section-search {
+  flex: 1;
+  min-width: 180px;
+  max-width: 360px;
+}
+
+.search-container {
+  position: relative;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #f5f7fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0 8px;
+  transition: all 0.2s;
+}
+
+.search-input-wrapper:focus-within {
+  background: white;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+}
+
+.search-icon {
+  width: 16px;
+  height: 16px;
+  color: #95a5a6;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  color: #2c3e50;
+  outline: none;
+  min-width: 0;
+}
+
+.search-input::placeholder {
+  color: #bdc3c7;
+}
+
+.search-clear {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.search-clear svg {
+  width: 14px;
+  height: 14px;
+  color: #95a5a6;
+}
+
+.search-clear:hover svg {
+  color: #e74c3c;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  max-height: 350px;
+  overflow-y: auto;
+  z-index: 2000;
+}
+
+.search-loading {
+  padding: 12px 16px;
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.search-group {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.search-group:last-child {
+  border-bottom: none;
+}
+
+.search-group-label {
+  padding: 8px 12px 4px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #95a5a6;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.search-result-item:hover {
+  background: #f5f7fa;
+}
+
+.result-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.result-icon-feature {
+  color: #27ae60;
+}
+
+.result-icon-address {
+  color: #3498db;
+}
+
+.result-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.result-name {
+  font-size: 0.85rem;
+  color: #2c3e50;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-detail {
+  font-size: 0.75rem;
+  color: #95a5a6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Marqueur de résultat de recherche */
+:deep(.search-result-marker) {
+  background: none !important;
+  border: none !important;
+}
+
+.search-pin svg {
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
 /* Sélecteur fond de carte */
@@ -2560,6 +3197,39 @@ watch(
 }
 
 /* Couches */
+.layer-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.layer-filter-select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #374151;
+  background: white;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.layer-filter-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.layer-filter-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f9fafb;
+}
+
 .layers-list {
   display: flex;
   flex-direction: column;
@@ -2622,6 +3292,13 @@ watch(
   height: 14px;
   border-radius: 4px;
   flex-shrink: 0;
+}
+
+.layer-icon-mdi {
+  flex-shrink: 0;
+  font-size: 18px;
+  width: 22px;
+  text-align: center;
 }
 
 .layer-name {
@@ -3440,6 +4117,84 @@ watch(
   font-size: 0.85rem;
 }
 
+/* Données techniques */
+.feature-custom-props {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.custom-props-title {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin: 0 0 8px 0;
+  font-weight: 500;
+}
+
+.custom-props-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.custom-prop-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.82rem;
+}
+
+.custom-prop-key {
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.custom-prop-value {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.feature-photos {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.photos-title {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin: 0 0 8px 0;
+  font-weight: 500;
+}
+
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.photo-thumb {
+  display: block;
+  border-radius: 6px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border: 1px solid #e0e0e0;
+}
+
+.photo-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-thumb:hover {
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
 .feature-actions {
   display: flex;
   gap: 8px;
@@ -3974,5 +4729,31 @@ watch(
     padding-left: 0;
     margin-top: 4px;
   }
+}
+</style>
+
+<!-- CSS non-scoped pour les marqueurs Leaflet DivIcon (créés hors du scope Vue) -->
+<style>
+.sig-marker {
+  background: none !important;
+  border: none !important;
+}
+
+.sig-marker-pin {
+  width: 32px;
+  height: 32px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  border: 2px solid #fff;
+}
+
+.sig-marker-pin .mdi {
+  transform: rotate(45deg);
+  color: #fff;
+  font-size: 16px;
 }
 </style>

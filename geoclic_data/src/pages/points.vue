@@ -21,7 +21,7 @@
     <v-card class="mb-4">
       <v-card-text>
         <v-row align="center">
-          <v-col cols="12" md="3">
+          <v-col cols="12" md="2">
             <v-text-field
               v-model="search"
               prepend-inner-icon="mdi-magnify"
@@ -31,7 +31,7 @@
               @update:model-value="debouncedSearch"
             />
           </v-col>
-          <v-col cols="12" md="3">
+          <v-col v-if="projets.length > 1" cols="12" md="2">
             <v-select
               v-model="filterProjet"
               label="Projet"
@@ -43,31 +43,50 @@
               @update:model-value="applyFilters"
             />
           </v-col>
-          <v-col cols="12" md="3">
-            <v-select
-              v-model="filterCategorie"
-              label="Catégorie"
-              :items="categories"
-              item-title="displayLabel"
+          <v-col v-for="level in activeLevels" :key="level" cols="12" md="2">
+            <v-autocomplete
+              v-model="cascadeFilters[level]"
+              :label="levelNames[level]"
+              :items="cascadeOptions(level)"
+              item-title="libelle"
               item-value="code"
               clearable
               hide-details
-              @update:model-value="applyFilters"
+              auto-select-first
+              :disabled="level > 0 && !cascadeFilters[level - 1]"
+              @update:model-value="onCascadeChange(level)"
             />
           </v-col>
-          <v-col cols="12" md="3" class="d-flex gap-2 justify-end flex-wrap">
-            <v-btn variant="outlined" @click="exportCSV">
+          <v-col cols="12" md="2" class="d-flex gap-2 justify-end flex-wrap">
+            <v-btn variant="outlined" size="small" @click="exportCSV">
               <v-icon start>mdi-file-excel</v-icon>
               CSV
             </v-btn>
-            <v-btn variant="outlined" @click="exportGeoJSON">
+            <v-btn variant="outlined" size="small" @click="exportGeoJSON">
               <v-icon start>mdi-code-json</v-icon>
               GeoJSON
             </v-btn>
-            <v-btn variant="outlined" color="secondary" @click="openPhotoExport">
+            <v-btn variant="outlined" size="small" color="secondary" @click="openPhotoExport">
               <v-icon start>mdi-image-multiple</v-icon>
               Photos
             </v-btn>
+          </v-col>
+        </v-row>
+        <v-row v-if="selectChamps.length > 0" align="center" class="mt-1">
+          <v-col cols="12" md="2" class="text-caption text-grey py-0">
+            Données techniques :
+          </v-col>
+          <v-col v-for="champ in selectChamps" :key="champ.id" cols="12" md="2">
+            <v-autocomplete
+              v-model="techFilters[champ.nom]"
+              :label="champ.nom"
+              :items="champ.options || []"
+              clearable
+              hide-details
+              density="compact"
+              auto-select-first
+              @update:model-value="applyFilters"
+            />
           </v-col>
         </v-row>
       </v-card-text>
@@ -364,9 +383,9 @@
               <p><strong>Filtres actuels:</strong></p>
               <ul class="ml-4">
                 <li v-if="filterProjet">Projet: {{ getProjet(filterProjet)?.nom }}</li>
-                <li v-if="filterCategorie">Catégorie: {{ getCategory(filterCategorie)?.libelle }}</li>
+                <li v-if="activeFilterCode">Catégorie: {{ getCategory(activeFilterCode)?.libelle }}</li>
                 <li v-if="search">Recherche: "{{ search }}"</li>
-                <li v-if="!filterProjet && !filterCategorie && !search">Aucun filtre (tous les points)</li>
+                <li v-if="!filterProjet && !activeFilterCode && !search">Aucun filtre (tous les points)</li>
               </ul>
             </div>
 
@@ -406,12 +425,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import HelpButton from '@/components/help/HelpButton.vue'
 import { usePointsStore, type Point } from '@/stores/points'
-import { useLexiqueStore } from '@/stores/lexique'
-import { projetsAPI } from '@/services/api'
+import { useLexiqueStore, type ChampDynamique } from '@/stores/lexique'
+import { projetsAPI, champsAPI } from '@/services/api'
 
 defineOptions({
   meta: {
@@ -426,7 +445,12 @@ const lexiqueStore = useLexiqueStore()
 // State
 const search = ref('')
 const filterProjet = ref<string | null>(null)
-const filterCategorie = ref<string | null>(null)
+// Dynamic cascade filters: one ref per level (0=Famille, 1=Type, 2=Sous-type, etc.)
+const cascadeFilters = ref<Record<number, string | null>>({})
+const levelNames = ['Famille', 'Type', 'Sous-type', 'Variante', 'Détail', 'Précision']
+// Technical data filters (contextual based on selected category)
+const techFilters = ref<Record<string, string | null>>({})
+const loadedChamps = ref<ChampDynamique[]>([])
 const showEditDialog = ref(false)
 const showDeleteDialog = ref(false)
 const showDeletePhotoDialog = ref(false)
@@ -472,21 +496,68 @@ const loading = computed(() => pointsStore.loading)
 const points = computed(() => pointsStore.points)
 const total = computed(() => pointsStore.total)
 const pagination = computed(() => pointsStore.pagination)
-// Toutes les catégories triées par niveau et libellé pour le filtre
-const categories = computed(() => {
-  return lexiqueStore.entries
-    .slice()
-    .sort((a, b) => {
-      if (a.niveau !== b.niveau) return a.niveau - b.niveau
-      return (a.libelle || '').localeCompare(b.libelle || '')
-    })
-    .map(e => ({
-      ...e,
-      // Préfixe visuel selon le niveau
-      displayLabel: e.niveau === 0 ? e.libelle : `${'  '.repeat(e.niveau)}└ ${e.libelle}`
-    }))
+// Dynamic cascade: detect which levels have entries
+const activeLevels = computed(() => {
+  const levelsWithEntries = new Set(lexiqueStore.entries.map(e => e.niveau))
+  return Array.from(levelsWithEntries).sort((a, b) => a - b)
 })
+
+// Options for each cascade level
+function cascadeOptions(level: number) {
+  if (level === 0) {
+    return lexiqueStore.entries.filter(e => e.niveau === 0).sort((a, b) => a.libelle.localeCompare(b.libelle))
+  }
+  const parentCode = cascadeFilters.value[level - 1]
+  if (!parentCode) return []
+  return lexiqueStore.entries
+    .filter(e => e.niveau === level && e.parent_id === parentCode)
+    .sort((a, b) => a.libelle.localeCompare(b.libelle))
+}
+
 const allCategories = computed(() => lexiqueStore.entries)
+
+// The deepest non-null cascade filter code (used for photo export + display)
+const activeFilterCode = computed(() => {
+  for (const lvl of [...activeLevels.value].reverse()) {
+    if (cascadeFilters.value[lvl]) return cascadeFilters.value[lvl]
+  }
+  return null
+})
+
+// Contextual champs: only select/multiselect fields
+const selectChamps = computed(() =>
+  loadedChamps.value.filter(c => c.type === 'select' || c.type === 'multiselect')
+)
+
+// Watch the deepest cascade filter: load champs with inheritance
+watch(activeFilterCode, async (code) => {
+  techFilters.value = {}
+  loadedChamps.value = []
+  if (!code) return
+
+  // Load champs for selected code + all ancestors
+  const codesToLoad = [code]
+  let entry = lexiqueStore.getByCode(code)
+  while (entry?.parent_id) {
+    codesToLoad.push(entry.parent_id)
+    entry = lexiqueStore.getByCode(entry.parent_id) || lexiqueStore.getById(entry.parent_id)
+  }
+
+  const allChamps: ChampDynamique[] = []
+  const seenNames = new Set<string>()
+  for (const c of codesToLoad) {
+    try {
+      const champs = await champsAPI.getByLexique(c)
+      for (const ch of champs) {
+        if (!seenNames.has(ch.nom)) {
+          seenNames.add(ch.nom)
+          allChamps.push(ch)
+        }
+      }
+    } catch { /* ignore */ }
+  }
+  loadedChamps.value = allChamps.sort((a: ChampDynamique, b: ChampDynamique) => a.ordre - b.ordre)
+})
 
 // Methods
 
@@ -567,11 +638,35 @@ function debouncedSearch() {
   }, 300)
 }
 
+function onCascadeChange(level: number) {
+  // Clear all levels below the changed one
+  for (const lvl of activeLevels.value) {
+    if (lvl > level) {
+      cascadeFilters.value[lvl] = null
+    }
+  }
+  applyFilters()
+}
+
 async function applyFilters() {
+  // Use the most specific filter (deepest non-null level)
+  let lexiqueId: string | null = null
+  for (const lvl of [...activeLevels.value].reverse()) {
+    if (cascadeFilters.value[lvl]) {
+      lexiqueId = cascadeFilters.value[lvl]
+      break
+    }
+  }
+  // Build custom_filters from tech filter dropdowns
+  const cf: Record<string, string> = {}
+  for (const [key, value] of Object.entries(techFilters.value)) {
+    if (value) cf[key] = value
+  }
   pointsStore.setFilters({
     projet_id: filterProjet.value,
-    lexique_id: filterCategorie.value,
+    lexique_id: lexiqueId,
     search: search.value,
+    custom_filters: cf,
   })
   await pointsStore.fetchPoints()
 }
@@ -704,7 +799,7 @@ async function openPhotoExport() {
       },
       body: JSON.stringify({
         project_id: filterProjet.value || undefined,
-        lexique_code: filterCategorie.value || undefined,
+        lexique_code: activeFilterCode.value || undefined,
       }),
     })
 
@@ -738,7 +833,7 @@ async function downloadPhotosExport() {
       },
       body: JSON.stringify({
         project_id: filterProjet.value || undefined,
-        lexique_code: filterCategorie.value || undefined,
+        lexique_code: activeFilterCode.value || undefined,
       }),
     })
 

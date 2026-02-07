@@ -8,6 +8,7 @@ export interface Layer {
   type: 'points' | 'lines' | 'polygons'
   visible: boolean
   color: string
+  icon?: string  // MDI icon name (ex: "mdi-bench")
   data: GeoJSON.FeatureCollection | null
   projectId?: string
 }
@@ -17,6 +18,15 @@ export interface Project {
   name: string
   description?: string
   created_at: string
+}
+
+export interface LexiqueEntry {
+  code: string
+  label: string
+  parent_code: string | null
+  level: number
+  icon_name: string | null
+  color_value: number | null
 }
 
 export interface ApiZone {
@@ -52,6 +62,12 @@ const ZONE_COLORS = [
   '#1abc9c', '#e67e22', '#34495e', '#16a085', '#c0392b'
 ]
 
+// Couleurs de fallback pour les couches
+const LAYER_COLORS = [
+  '#3498db', '#e74c3c', '#2ecc71', '#9b59b6', '#f39c12',
+  '#1abc9c', '#e67e22', '#2980b9', '#c0392b', '#27ae60'
+]
+
 // Labels pour les niveaux
 export const LEVEL_LABELS: Record<number, string> = {
   1: 'Commune',
@@ -66,6 +82,13 @@ export const LEVEL_ICONS: Record<number, string> = {
   3: '📍',
 }
 
+// Convertir ARGB int en couleur hex CSS
+function argbToHex(argb: number): string {
+  if (!argb || argb === 0) return ''
+  const hex = (argb & 0x00FFFFFF).toString(16).padStart(6, '0')
+  return `#${hex}`
+}
+
 export const useMapStore = defineStore('map', () => {
   const layers = ref<Layer[]>([])
   const projects = ref<Project[]>([])
@@ -74,6 +97,9 @@ export const useMapStore = defineStore('map', () => {
   const loading = ref(false)
   const mapCenter = ref<[number, number]>([46.603354, 1.888334]) // France center
   const mapZoom = ref(6)
+
+  // Lexique (code → entrée)
+  const lexiqueMap = ref<Map<string, LexiqueEntry>>(new Map())
 
   // Zones API
   const apiZones = ref<ApiZone[]>([])
@@ -112,6 +138,72 @@ export const useMapStore = defineStore('map', () => {
       console.error('Erreur chargement projets:', error)
     } finally {
       loading.value = false
+    }
+  }
+
+  // Charger le lexique pour un projet et construire le mapping code → entrée
+  async function loadLexique(projectId: string) {
+    try {
+      const response = await axios.get(`/api/lexique?project_id=${projectId}`)
+      const entries: LexiqueEntry[] = response.data
+      const map = new Map<string, LexiqueEntry>()
+      entries.forEach((e: any) => {
+        map.set(e.code, {
+          code: e.code,
+          label: e.label,
+          parent_code: e.parent_code,
+          level: e.level,
+          icon_name: e.icon_name,
+          color_value: e.color_value,
+        })
+      })
+      lexiqueMap.value = map
+    } catch (error) {
+      console.error('Erreur chargement lexique:', error)
+    }
+  }
+
+  // Remonter la hiérarchie du lexique pour trouver l'ancêtre à un niveau donné
+  function getLexiqueAncestor(code: string, targetLevel: number): LexiqueEntry | null {
+    let current = lexiqueMap.value.get(code)
+    if (!current) return null
+
+    // Si on est déjà au bon niveau ou en dessous
+    while (current && current.level > targetLevel) {
+      if (!current.parent_code) break
+      const parent = lexiqueMap.value.get(current.parent_code)
+      if (!parent) break
+      current = parent
+    }
+
+    return current?.level === targetLevel ? current : null
+  }
+
+  // Obtenir l'icône et la couleur pour un code lexique
+  // Cherche d'abord sur l'entrée elle-même, puis remonte vers les parents
+  function getLexiqueDisplay(code: string): { label: string; icon: string; color: string } {
+    const entry = lexiqueMap.value.get(code)
+    if (!entry) return { label: code, icon: 'mdi-map-marker', color: '#3498db' }
+
+    // Chercher l'icône : d'abord sur l'entrée, puis remonter
+    let icon = entry.icon_name || ''
+    let color = entry.color_value ? argbToHex(entry.color_value) : ''
+
+    if (!icon || !color) {
+      let current: LexiqueEntry | undefined = entry
+      while (current?.parent_code) {
+        current = lexiqueMap.value.get(current.parent_code)
+        if (current) {
+          if (!icon && current.icon_name) icon = current.icon_name
+          if (!color && current.color_value) color = argbToHex(current.color_value)
+        }
+      }
+    }
+
+    return {
+      label: entry.label,
+      icon: icon || 'mdi-map-marker',
+      color: color || '#3498db',
     }
   }
 
@@ -299,64 +391,162 @@ export const useMapStore = defineStore('map', () => {
   async function loadProjectData(projectId: string) {
     loading.value = true
     try {
-      const response = await axios.get(`/api/points?project_id=${projectId}`)
+      // Charger le lexique et les points en parallèle
+      const [pointsResponse] = await Promise.allSettled([
+        axios.get(`/api/points?project_id=${projectId}&page_size=500`),
+        loadLexique(projectId),
+      ])
 
-      // Grouper par type de géométrie
-      const points: GeoJSON.Feature[] = []
-      const lines: GeoJSON.Feature[] = []
-      const polygons: GeoJSON.Feature[] = []
+      if (pointsResponse.status !== 'fulfilled') {
+        console.error('Erreur chargement points:', pointsResponse.reason)
+        layers.value = []
+        return
+      }
 
-      response.data.forEach((point: any) => {
-        const feature: GeoJSON.Feature = {
-          type: 'Feature',
-          geometry: point.geom,
-          properties: {
-            id: point.id,
-            name: point.name,
-            type: point.type,
-            ...point
+      const response = pointsResponse.value
+
+      // L'API retourne { total, page, page_size, items: [...] }
+      const items = Array.isArray(response.data) ? response.data : (response.data.items || [])
+
+      // Grouper les features par catégorie (level 2 du lexique)
+      const categoryGroups = new Map<string, {
+        features: GeoJSON.Feature[]
+        label: string
+        icon: string
+        color: string
+      }>()
+
+      items.forEach((point: any) => {
+        // Construire la géométrie GeoJSON depuis geom_type + coordinates
+        let geometry: GeoJSON.Geometry | null = null
+        if (point.coordinates && point.coordinates.length > 0) {
+          const geomType = (point.geom_type || 'POINT').toUpperCase()
+          if (geomType === 'POINT') {
+            geometry = {
+              type: 'Point',
+              coordinates: [point.coordinates[0].longitude, point.coordinates[0].latitude]
+            }
+          } else if (geomType === 'LINESTRING') {
+            geometry = {
+              type: 'LineString',
+              coordinates: point.coordinates.map((c: any) => [c.longitude, c.latitude])
+            }
+          } else if (geomType === 'POLYGON') {
+            geometry = {
+              type: 'Polygon',
+              coordinates: [point.coordinates.map((c: any) => [c.longitude, c.latitude])]
+            }
           }
         }
 
-        if (point.geom?.type === 'Point') {
-          points.push(feature)
-        } else if (point.geom?.type === 'LineString' || point.geom?.type === 'MultiLineString') {
-          lines.push(feature)
-        } else if (point.geom?.type === 'Polygon' || point.geom?.type === 'MultiPolygon') {
-          polygons.push(feature)
+        if (!geometry) return
+
+        // Déterminer la catégorie (level 2) pour le groupement
+        const lexiqueCode = point.lexique_code || ''
+        let categoryCode = 'other'
+        let categoryDisplay = { label: 'Autres', icon: 'mdi-map-marker', color: '#95a5a6' }
+
+        if (lexiqueCode && lexiqueMap.value.size > 0) {
+          // Chercher l'ancêtre level 2 (catégorie) pour le groupement
+          let cat = getLexiqueAncestor(lexiqueCode, 2)
+
+          // Si pas trouvé, essayer level 1 (peut-être seulement 2 niveaux)
+          if (!cat) cat = getLexiqueAncestor(lexiqueCode, 1)
+
+          // Fallback : essayer point.type comme code lexique direct
+          if (!cat && point.type) {
+            const typeEntry = lexiqueMap.value.get(point.type)
+            if (typeEntry) cat = typeEntry
+          }
+
+          if (cat) {
+            categoryCode = cat.code
+            categoryDisplay = getLexiqueDisplay(cat.code)
+          } else {
+            // Peut-être que le point est directement au level 1 ou 2
+            const direct = lexiqueMap.value.get(lexiqueCode)
+            if (direct) {
+              categoryCode = direct.code
+              categoryDisplay = getLexiqueDisplay(direct.code)
+            }
+          }
+        } else if (point.type) {
+          // Fallback sans lexique : grouper par type brut
+          categoryCode = point.type
+          categoryDisplay = { label: point.type, icon: 'mdi-map-marker', color: '#3498db' }
         }
+
+        // Résoudre les labels depuis le lexique pour l'affichage dans le détail
+        const pointEntry = lexiqueCode && lexiqueMap.value.size > 0
+          ? lexiqueMap.value.get(lexiqueCode)
+          : null
+        const pointDisplay = pointEntry
+          ? getLexiqueDisplay(lexiqueCode)
+          : { label: '', icon: '', color: '' }
+
+        // Résoudre la catégorie (level 2) pour le label "Catégorie" dans le détail
+        const catEntry = lexiqueCode && lexiqueMap.value.size > 0
+          ? (getLexiqueAncestor(lexiqueCode, 2) || getLexiqueAncestor(lexiqueCode, 1))
+          : null
+
+        const feature: GeoJSON.Feature = {
+          type: 'Feature',
+          geometry: geometry,
+          properties: {
+            id: point.id,
+            name: point.name,
+            categorie: catEntry?.label || point.type || '',
+            type: pointDisplay.label || point.subtype || '',
+            lexique_code: point.lexique_code,
+            condition_state: point.condition_state,
+            point_status: point.point_status,
+            sync_status: point.sync_status,
+            comment: point.comment,
+            color_value: point.color_value,
+            icon_name: pointDisplay.icon || point.icon_name,
+            photos: point.photos || [],
+            custom_properties: point.custom_properties || {},
+            // Info catégorie pour le rendu carte
+            _category_icon: categoryDisplay.icon,
+            _category_color: categoryDisplay.color,
+          }
+        }
+
+        if (!categoryGroups.has(categoryCode)) {
+          categoryGroups.set(categoryCode, {
+            features: [],
+            ...categoryDisplay,
+          })
+        }
+        categoryGroups.get(categoryCode)!.features.push(feature)
       })
 
-      // Créer les couches
-      layers.value = [
-        {
-          id: 'points',
-          name: 'Points',
-          type: 'points',
+      // Créer une couche par catégorie
+      const newLayers: Layer[] = []
+      let colorIdx = 0
+      categoryGroups.forEach((group, code) => {
+        const geomType = group.features[0]?.geometry?.type || 'Point'
+        let layerType: 'points' | 'lines' | 'polygons' = 'points'
+        if (geomType === 'LineString' || geomType === 'MultiLineString') layerType = 'lines'
+        if (geomType === 'Polygon' || geomType === 'MultiPolygon') layerType = 'polygons'
+
+        newLayers.push({
+          id: code,
+          name: group.label,
+          type: layerType,
           visible: true,
-          color: '#3388ff',
-          data: { type: 'FeatureCollection', features: points },
-          projectId
-        },
-        {
-          id: 'lines',
-          name: 'Lignes',
-          type: 'lines',
-          visible: true,
-          color: '#ff7800',
-          data: { type: 'FeatureCollection', features: lines },
-          projectId
-        },
-        {
-          id: 'polygons',
-          name: 'Polygones',
-          type: 'polygons',
-          visible: true,
-          color: '#00ff00',
-          data: { type: 'FeatureCollection', features: polygons },
-          projectId
-        }
-      ]
+          color: group.color || LAYER_COLORS[colorIdx % LAYER_COLORS.length],
+          icon: group.icon,
+          data: { type: 'FeatureCollection', features: group.features },
+          projectId,
+        })
+        colorIdx++
+      })
+
+      // Trier par nom
+      newLayers.sort((a, b) => a.name.localeCompare(b.name))
+      layers.value = newLayers
+
     } catch (error) {
       console.error('Erreur chargement données:', error)
     } finally {
@@ -385,6 +575,7 @@ export const useMapStore = defineStore('map', () => {
       type: layer.type || 'points',
       visible: layer.visible ?? true,
       color: layer.color || '#3388ff',
+      icon: layer.icon,
       data: layer.data,
       projectId: layer.projectId
     }
@@ -423,6 +614,7 @@ export const useMapStore = defineStore('map', () => {
     mapCenter,
     mapZoom,
     visibleLayers,
+    lexiqueMap,
     // Zones API
     apiZones,
     apiZonesTree,
@@ -434,6 +626,8 @@ export const useMapStore = defineStore('map', () => {
     loadProjects,
     selectProject,
     loadProjectData,
+    loadLexique,
+    getLexiqueDisplay,
     addImportedLayer,
     addLayer,
     toggleLayerVisibility,
