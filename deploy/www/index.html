@@ -256,33 +256,107 @@
             color: white;
         }
 
-        /* Visual blocks */
-        .visual-block {
-            padding: 50px 20px 0;
-            text-align: center;
-            background: var(--background);
+        /* Hero SIG - texte gauche / devices droite */
+        .hero-sig {
+            background: linear-gradient(180deg, #FAFAFA 0%, #EDF2F7 100%);
+            padding: 60px 20px;
         }
 
-        .visual-block img {
-            max-width: 900px;
-            width: 100%;
-            display: block;
+        .hero-sig-grid {
+            max-width: 1200px;
             margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 40px;
+            align-items: center;
         }
 
-        .visual-block-caption {
-            text-align: center;
-            padding: 18px 20px;
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .visual-block-caption p {
-            font-size: 1.15em;
-            font-weight: 700;
+        .hero-sig-text h2 {
+            font-size: 2.2em;
+            font-weight: 800;
+            line-height: 1.15;
             color: var(--secondary);
-            max-width: 700px;
+            margin-bottom: 18px;
+        }
+
+        .hero-sig-text h2 span {
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+        .hero-sig-text .sig-desc {
+            font-size: 1.05em;
+            color: var(--text-light);
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .hero-sig-text .sig-badge {
+            font-size: 0.85em;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        /* Desktop + Tablet mockup */
+        .sig-devices {
+            position: relative;
+            min-height: 320px;
+        }
+
+        .device-desktop {
+            position: relative;
+            width: 85%;
+        }
+
+        .desktop-screen {
+            background: #e8e8ec;
+            border-radius: 10px 10px 0 0;
+            padding: 8px 8px 0;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.12);
+        }
+
+        .desktop-screen img {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            display: block;
+        }
+
+        .desktop-stand {
+            width: 40%;
+            height: 30px;
             margin: 0 auto;
+            background: linear-gradient(180deg, #d4d4d8, #c0c0c4);
+            clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+        }
+
+        .desktop-base {
+            width: 55%;
+            height: 6px;
+            margin: 0 auto;
+            background: #b8b8bc;
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* Tablet mockup */
+        .device-tablet {
+            position: absolute;
+            bottom: 10px;
+            right: 0;
+            width: 160px;
+            z-index: 10;
+        }
+
+        .tablet-frame {
+            background: #2a2a3e;
+            border-radius: 12px;
+            padding: 8px 6px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+        }
+
+        .tablet-frame img {
+            width: 100%;
+            border-radius: 6px;
+            display: block;
         }
 
         /* Sections */
@@ -435,6 +509,10 @@
             .hero-devices { min-height: 300px; max-width: 500px; margin: 0 auto; }
             .device-phone { width: 100px; right: -5px; }
             .hero-text h1 { font-size: 2em; }
+            .hero-sig-grid { grid-template-columns: 1fr; text-align: center; }
+            .hero-sig-text h2 { font-size: 1.8em; }
+            .sig-devices { max-width: 500px; margin: 0 auto; }
+            .device-tablet { width: 120px; }
         }
         @media (max-width: 768px) {
             .nav-links { display: none; }
@@ -494,19 +572,29 @@
         </div>
     </section>
 
-    <!-- Bloc visuel SIG - Patrimoine -->
-    <section class="visual-block">
-        <img src="screenshots/sig-patrimoine.png" alt="Maîtrisez votre patrimoine communal, du bureau au terrain - SIG GéoClic avec desktop et tablette">
-        <div class="visual-block-caption">
-            <p>Une solution complète pour une fraction du prix des logiciels SIG traditionnels.</p>
-        </div>
-    </section>
+    <!-- Hero SIG - Patrimoine -->
+    <section class="hero-sig">
+        <div class="hero-sig-grid">
+            <div class="hero-sig-text">
+                <h2>Maîtrisez votre patrimoine communal,<br><span>du bureau au terrain.</span></h2>
+                <p class="sig-desc">Fini les fichiers Excel dispersés et les plans papier. Centralisez la gestion de votre voirie, de votre mobilier urbain et de vos espaces verts sur une carte unique, toujours à jour.</p>
+                <div class="sig-badge">Données hébergées en France, sur votre serveur dédié</div>
+            </div>
 
-    <!-- Bloc visuel Terrain - Synchronisation -->
-    <section class="visual-block">
-        <img src="screenshots/terrain-sync.png" alt="L'inventaire terrain synchronisé en temps réel - Agent sur le terrain vers le bureau technique">
-        <div class="visual-block-caption">
-            <p>Fonctionne sur tous les appareils, sans installation complexe (PWA).</p>
+            <div class="sig-devices">
+                <div class="device-desktop">
+                    <div class="desktop-screen">
+                        <img src="screenshots/sig-web.png" alt="SIG Web GéoClic - Cartographie du patrimoine communal">
+                    </div>
+                    <div class="desktop-stand"></div>
+                    <div class="desktop-base"></div>
+                </div>
+                <div class="device-tablet">
+                    <div class="tablet-frame">
+                        <img src="screenshots/mobile-pwa.png" alt="Relevé terrain mobile GéoClic - Inventaire sur smartphone">
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
