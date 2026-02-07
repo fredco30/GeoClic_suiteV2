@@ -999,6 +999,32 @@ import { useMapStore } from '../stores/map'
 import L from 'leaflet'
 import 'leaflet-draw'
 
+// Patch Leaflet : protéger contre le bug _map=null sur les marqueurs DivIcon
+// Quand un marqueur est supprimé pendant une animation de zoom, Leaflet peut
+// encore appeler _animateZoom/_updatePosition sur le marqueur orphelin → crash
+const _origAnimateZoom = L.Marker.prototype._animateZoom
+if (_origAnimateZoom) {
+  L.Marker.prototype._animateZoom = function (opt: any) {
+    if (!this._map) return
+    _origAnimateZoom.call(this, opt)
+  }
+}
+const _origUpdatePosition = (L.Marker.prototype as any)._updatePosition
+if (_origUpdatePosition) {
+  ;(L.Marker.prototype as any)._updatePosition = function () {
+    if (!this._map) return
+    _origUpdatePosition.call(this)
+  }
+}
+// Idem pour Tooltip/Popup (DivOverlay) qui peuvent aussi avoir _map=null
+if ((L as any).DivOverlay?.prototype?._updatePosition) {
+  const _origDivOverlayUpdate = (L as any).DivOverlay.prototype._updatePosition
+  ;(L as any).DivOverlay.prototype._updatePosition = function () {
+    if (!this._map) return
+    _origDivOverlayUpdate.call(this)
+  }
+}
+
 const mapStore = useMapStore()
 
 // Refs
