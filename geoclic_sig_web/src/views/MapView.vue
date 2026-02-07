@@ -1168,7 +1168,6 @@ onMounted(async () => {
   // (cas où le composant est remonté avec un projet déjà sélectionné)
   if (mapStore.layers.length > 0) {
     renderLayers()
-    zoomToData()
   }
 
   window.addEventListener('keydown', handleKeydown)
@@ -1760,8 +1759,6 @@ async function selectProject(project: any) {
   showToast(`Projet "${project.name}" chargé`, 'success')
   // Forcer le rendu des couches après le chargement des données
   renderLayers()
-  // Centrer la carte sur les données chargées
-  zoomToData()
 }
 
 // Périmètres
