@@ -70,14 +70,30 @@ GeoClic_Suite/
 ├── database/
 │   └── migrations/         # Migrations SQL
 ├── deploy/
-│   └── docker-compose.yml  # Configuration Docker
+│   ├── docker-compose.yml  # Configuration Docker
+│   └── www/                # Site commercial (servi par nginx)
+│       ├── index.html      # Landing page
+│       ├── fonctionnalites.html
+│       ├── comparatif.html
+│       ├── tarifs.html
+│       └── screenshots/    # Images du site
+├── fleet/                  # Fleet Manager multi-serveurs
+│   ├── geoclic-fleet.sh    # CLI principal
+│   └── clients.conf        # Registre serveurs
+├── marketing/              # Sources site commercial (dev)
+│   ├── index.html
+│   ├── fonctionnalites.html
+│   ├── comparatif.html
+│   └── tarifs.html
 ├── geoclic_data/           # Admin (GéoClic Data)
 ├── geoclic_demandes/       # Back-office demandes
 ├── geoclic_services/       # App services terrain (desktop)
 ├── geoclic_services_pwa/   # PWA services terrain (mobile)
 ├── geoclic_mobile_pwa/     # PWA Mobile (relevé terrain)
 ├── geoclic_sig_web/        # SIG Web
-└── portail_citoyen/        # Portail citoyen public
+├── portail_citoyen/        # Portail citoyen public
+├── scripts/                # Scripts production (backup, monitor)
+└── docs/                   # Documentation technique
 ```
 
 ## État d'Avancement - GeoClic Demandes V2
@@ -483,6 +499,8 @@ GeoClic_Suite/
 - Merger vers main après validation
 - Configurer renouvellement auto certificats SSL
 - Phase 15 (Scale) - après premiers clients payants
+- Finaliser site commercial marketing (responsive, mentions légales, formulaire contact)
+- Ajouter images visuels (sig-patrimoine.png, terrain-sync.png, dashboard.png) dans le repo git
 
 ## Technologies
 
@@ -985,7 +1003,140 @@ sudo docker exec geoclic_api ls -la /app/tests/
 
 ---
 
-## Audit de Commercialisation (février 2026)
+## Fleet Manager - Gestion Multi-Serveurs (TERMINÉ - février 2026)
+
+### Description
+Outil CLI unifié (`fleet/geoclic-fleet.sh`) pour gérer le déploiement de GéoClic sur plusieurs serveurs clients. Utilise rsync (pas git) pour pousser le code depuis la machine locale vers les serveurs.
+
+### Fichiers principaux
+```
+fleet/
+├── geoclic-fleet.sh       # CLI principal (register, push, deploy, status, ssh, logs)
+├── clients.conf           # Registre des serveurs (format pipe-delimited)
+└── fleet-config/
+    └── docker-compose.tpl # Template docker-compose pour nouveaux clients
+```
+
+### Serveurs enregistrés
+- **geoclic-prod** : geoclic.fr (51.210.8.158), user: ubuntu, branche: claude/hierarchical-zones-S5XGp
+- **Nouveau VPS** : 51.210.8.158, user: ubuntu, Ubuntu 24.10
+
+### Commandes principales
+```bash
+# Lister les clients
+./fleet/geoclic-fleet.sh list
+
+# Pousser le code vers un serveur
+./fleet/geoclic-fleet.sh push geoclic-prod
+
+# Déployer (push + rebuild Docker)
+./fleet/geoclic-fleet.sh deploy geoclic-prod
+
+# Vérifier l'état
+./fleet/geoclic-fleet.sh status geoclic-prod
+
+# Accéder en SSH
+./fleet/geoclic-fleet.sh ssh geoclic-prod
+```
+
+### Patterns importants
+- SSH user: `ubuntu` (pas root) - toujours utiliser sudo
+- rsync excludes: `node_modules`, `.git`, `deploy/.env`, `nginx/ssl`, `backups`
+- `--rsync-path="sudo rsync"` obligatoire pour écrire dans `/opt/geoclic/`
+- Line endings: toujours fixer avec `sed -i 's/\r$//'` après écriture de scripts bash
+- Documentation complète: `docs/GUIDE_FLEET.md`
+
+---
+
+## Site Commercial Marketing (EN COURS - février 2026)
+
+### Description
+Site vitrine statique pour vendre GéoClic Suite aux collectivités françaises. Servi par nginx sur geoclic.fr. HTML/CSS inline, pas de framework.
+
+### Structure des fichiers
+```
+marketing/                    # Sources (développement)
+├── index.html               # Page d'accueil (landing page)
+├── fonctionnalites.html     # Détail des 7 applications
+├── comparatif.html          # Comparatif concurrence
+└── tarifs.html              # Grille tarifaire
+
+deploy/www/                   # Copie de production (montée par nginx)
+├── index.html               # Copie synchro de marketing/
+├── fonctionnalites.html
+├── comparatif.html
+├── tarifs.html
+├── style.css
+├── screenshots/             # Images du site
+│   ├── logo.png             # Logo GéoClic
+│   ├── logo_redim.png       # Logo redimensionné (nav)
+│   ├── sig-web.png          # Screenshot SIG Web (385K)
+│   ├── geoclic-data.png     # Screenshot GéoClic Data (153K)
+│   ├── portail.png          # Screenshot portail citoyen (118K)
+│   ├── mobile-pwa.png       # Screenshot mobile terrain (42K)
+│   ├── demandes.png         # Screenshot back-office demandes (115K)
+│   ├── dashboard.png        # Screenshot dashboard KPI (190K) - NOUVEAU
+│   ├── sig-patrimoine.png   # Visuel bureau ancien vs GéoClic (109K) - NOUVEAU
+│   └── terrain-sync.png     # Visuel sync terrain→bureau (83K) - NOUVEAU
+│   └── README.md
+└── assets/
+    └── README.md
+```
+
+### Pages terminées
+
+#### index.html (Landing page)
+- **Hero 1** : Texte gauche + mockup CSS laptop (dashboard.png) + phone (portail.png) droite
+  - Background: gradient gris `#EDF2F7 → #FAFAFA`
+  - Titre: "Une ville mieux gérée, des citoyens écoutés."
+- **Hero 2 (SIG)** : Texte gauche + mockup CSS desktop iMac (sig-web.png) + tablet (mobile-pwa.png) droite
+  - Titre: "Maîtrisez votre patrimoine communal, du bureau au terrain."
+- **Boutons CTA** : "Demander une démo" + "Voir les tarifs" (entre les 2 heros et la barre stats)
+- **Barre stats + ancres** : 4 stats clés + liens ancre vers sections
+- **3 Piliers** : Participation citoyenne, Gestion technique, Pilotage dirigeant
+- **Section coûts** : Argument prix vs solutions séparées
+- **Section avantages** : 6 cartes (Souveraineté, PWA, Illimité, etc.)
+- **Grille tarifs** : 5 formules de 199 à 799/mois
+- **CTA final** + Footer
+
+#### fonctionnalites.html (Détail fonctionnalités)
+- Header "7 applications intégrées"
+- Bloc visuel sig-patrimoine.png (bureau ancien vs GéoClic)
+- **7 blocs fonctionnalités** en grille alternée (texte/image) :
+  1. SIG Web - screenshot dans mockup laptop
+  2. GéoClic Data - screenshot dans mockup laptop
+  3. Bloc visuel terrain-sync.png (sync terrain→bureau)
+  4. Relevé Terrain Mobile - screenshot dans mockup phone (180px)
+  5. Portail Citoyen - screenshot dans mockup phone (180px)
+  6. Gestion des Demandes - screenshot dans mockup laptop
+  7. Services Terrain & PWA Agent - screenshot dans mockup laptop
+- Templates métiers (7 cartes : Éclairage, Mobilier, Espaces verts, etc.)
+- Table comparatif (GéoClic vs solutions traditionnelles + GeoContrib)
+- CTA + Footer
+
+#### comparatif.html
+- Comparaison détaillée GéoClic vs concurrents (Neocity, GeoContrib, etc.)
+- Tableau fonctionnalités côte à côte
+
+#### tarifs.html
+- 5 formules : Essentiel (199), Confort (299), Premium (399), Intégral (549), Excellence (799)
+- Positionnement premium vs Neocity (SIG inclus, users illimités)
+
+### Patterns techniques
+- **CSS device mockups** : laptop (border + base grise), phone (border-radius 24px), desktop iMac (stand + base), tablet
+- **Workflow de déploiement** : Éditer `marketing/*.html` → copier dans `deploy/www/` → commit → push → `git pull` sur serveur
+- **Images** : Toujours `max-width` contraint (850px pour visuels pleine largeur, 480px pour laptops, 180px pour phones)
+- **Nginx** : `deploy/www/` monté en lecture seule (`/var/www:ro`) dans le conteneur nginx
+- **Nav fixe** avec liens : Fonctionnalités, Comparatif, Tarifs, Demander une démo
+
+### À faire
+- [ ] Intégrer les 2 images visuels (sig-patrimoine, terrain-sync) dans le repo git (actuellement sur serveur seulement)
+- [ ] Page de mentions légales / CGU
+- [ ] Formulaire de contact (actuellement mailto:)
+- [ ] Responsive mobile amélioré
+- [ ] Favicon
+
+---
 
 ### Scoring Global du Projet
 
