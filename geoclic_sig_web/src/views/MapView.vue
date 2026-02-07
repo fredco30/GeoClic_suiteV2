@@ -1025,8 +1025,6 @@ if ((L as any).DivOverlay?.prototype?._updatePosition) {
   }
 }
 
-console.log('[SIG] ===== MapView module loaded =====')
-
 const mapStore = useMapStore()
 
 // Refs
@@ -1164,6 +1162,13 @@ onMounted(async () => {
   const bounds = mapStore.getApiZonesBounds()
   if (bounds && map.value) {
     map.value.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 })
+  }
+
+  // Afficher les couches déjà chargées dans le store
+  // (cas où le composant est remonté avec un projet déjà sélectionné)
+  if (mapStore.layers.length > 0) {
+    renderLayers()
+    zoomToData()
   }
 
   window.addEventListener('keydown', handleKeydown)
@@ -1750,9 +1755,7 @@ function toggleProjectPanel() {
 }
 
 async function selectProject(project: any) {
-  console.log('[SIG] selectProject called:', project.name)
   await mapStore.selectProject(project)
-  console.log('[SIG] selectProject done, layers:', mapStore.layers.length, 'map:', !!map.value)
   showProjectPanel.value = false
   showToast(`Projet "${project.name}" chargé`, 'success')
   // Forcer le rendu des couches après le chargement des données
@@ -2064,15 +2067,13 @@ function createLeafletLayerGroup(layer: { data: GeoJSON.FeatureCollection | null
 // Note: pas de check _animatingZoom — le monkey-patch Leaflet protège contre les crash
 watch(
   () => mapStore.layers.map(l => `${l.id}:${l.visible}:${l.data?.features?.length || 0}`).join(','),
-  (newVal, oldVal) => {
-    console.log('[SIG] Watch fired! fingerprint:', oldVal, '→', newVal, 'map:', !!map.value)
+  () => {
     if (!map.value) return
     renderLayers()
   }
 )
 
 function renderLayers() {
-  console.log('[SIG] renderLayers called, map:', !!map.value, 'layers:', mapStore.layers.length)
   if (!map.value) return
 
   // Supprimer les couches existantes de la carte (Leaflet gère le cleanup des events)
@@ -2085,15 +2086,9 @@ function renderLayers() {
   mapStore.layers.forEach(layer => {
     if (!layer.visible || !layer.data) return
 
-    console.log('[SIG] Adding layer:', layer.id, layer.name, 'features:', layer.data.features.length)
-    layer.data.features.forEach((f, i) => {
-      console.log(`[SIG]   Feature ${i}:`, f.geometry?.type, f.geometry?.coordinates, f.properties?.name)
-    })
-
     const group = createLeafletLayerGroup(layer)
     group.addTo(map.value!)
     layerGroups.value.set(layer.id, group)
-    console.log('[SIG] Layer added to map, group layers count:', group.getLayers().length)
   })
 }
 
