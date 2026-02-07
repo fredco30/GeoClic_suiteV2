@@ -994,7 +994,11 @@
             <div class="custom-props-list">
               <div v-for="prop in getCustomProperties(mapStore.selectedFeature.properties)" :key="prop.key" class="custom-prop-item">
                 <span class="custom-prop-key">{{ prop.key }}</span>
-                <span class="custom-prop-value">{{ prop.value }}</span>
+                <span v-if="prop.isColor" class="custom-prop-value color-value">
+                  <span class="color-swatch" :style="{ backgroundColor: prop.value }"></span>
+                  {{ prop.value }}
+                </span>
+                <span v-else class="custom-prop-value">{{ prop.value }}</span>
               </div>
             </div>
           </div>
@@ -2225,13 +2229,20 @@ function getDisplayProperties(properties: Record<string, any> | null): { key: st
     }))
 }
 
-function getCustomProperties(properties: Record<string, any> | null): { key: string; value: string }[] {
+function isColorValue(value: string): boolean {
+  return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(value)
+}
+
+function getCustomProperties(properties: Record<string, any> | null): { key: string; value: string; isColor: boolean }[] {
   if (!properties?.custom_properties) return []
   const cp = properties.custom_properties
   if (typeof cp !== 'object' || Array.isArray(cp)) return []
   return Object.entries(cp)
     .filter(([, v]) => v != null && v !== '')
-    .map(([k, v]) => ({ key: k, value: String(v) }))
+    .map(([k, v]) => {
+      const strVal = String(v)
+      return { key: k, value: strVal, isColor: isColorValue(strVal) }
+    })
 }
 
 function formatPropertyKey(key: string): string {
@@ -5024,6 +5035,21 @@ watch(
 .custom-prop-value {
   color: #2c3e50;
   font-weight: 600;
+}
+
+.custom-prop-value.color-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.color-swatch {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
 }
 
 .feature-photos {
