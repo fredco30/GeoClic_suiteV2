@@ -1337,18 +1337,18 @@ deploy/www/                   # Copie de production (montée par nginx)
 - Vite : mix 5.x et 7.x
 - Pinia : mix 2.x et 3.x
 
-#### Manques pour la commercialisation
+#### Manques restants pour la commercialisation
 - Pas de multi-tenancy (1 instance Docker = 1 client)
-- Pas de white-labeling (logo, couleurs, nom configurables)
-- Pas de CI/CD (pas de GitHub Actions)
-- Pas de monitoring applicatif (Sentry, Prometheus)
-- Pas de documentation utilisateur (guides par rôle)
-- Pas d'onboarding wizard pour nouveaux clients
-- Pas de tableau de bord dirigeant avec KPI visuels
-- Email synchrone (smtplib bloque le thread)
-- Uvicorn mono-worker (~50 requêtes concurrentes max)
 - Pas de cache Redis
 - Photos stockées localement (pas de S3/CDN)
+- Email synchrone (smtplib bloque le thread)
+- ~~Pas de white-labeling~~ → FAIT (Phase 14.1)
+- ~~Pas de CI/CD~~ → FAIT (Phase 13.2)
+- ~~Pas de monitoring applicatif~~ → FAIT (Sentry intégré)
+- ~~Pas de documentation utilisateur~~ → FAIT (Phase 14.4)
+- ~~Pas d'onboarding wizard~~ → FAIT (Phase 14.2)
+- ~~Pas de tableau de bord dirigeant~~ → FAIT (Phase 14.3)
+- ~~Uvicorn mono-worker~~ → FAIT (4 workers, Phase 13.1)
 
 ---
 
@@ -1628,7 +1628,7 @@ Pour chaque phase, vérifier avant de passer à la suivante :
 - [x] Pipeline CI/CD GitHub Actions (.github/workflows/ci.yml: tests API, builds frontend, build Docker)
 - [x] Tests corrigés (conftest.py: geoclic_users + /api/auth/login, test_auth.py idem)
 - [x] Backup amélioré (DB format custom + SQL, photos via tar, vérification intégrité pg_restore --list, rotation hebdo 28j)
-- [ ] Sentry (à configurer sur l'instance de production)
+- [x] Sentry intégré (sentry-sdk[fastapi], config via SENTRY_DSN env var, guide: docs/GUIDE_SENTRY.md)
 - [ ] Table agents unifiée (reporté: risque de régression élevé, nécessite migration complexe)
 - [ ] Unification frontend versions (reporté: nécessite tests manuels sur chaque app, Pinia 2→3 breaking changes)
 - **Duplication documentée:** MiniMap.vue (2 copies, diff=height), useTheme.ts (4 copies identiques), fix icônes Leaflet (3 copies)

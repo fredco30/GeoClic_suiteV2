@@ -55,6 +55,12 @@ class Settings(BaseSettings):
     # Debug - TOUJOURS False en production
     debug: bool = os.environ.get("DEBUG", "false").lower() == "true"
 
+    # Monitoring Sentry (optionnel)
+    # Définir SENTRY_DSN via variable d'environnement pour activer le tracking d'erreurs
+    sentry_dsn: str = os.environ.get("SENTRY_DSN", "")
+    sentry_environment: str = os.environ.get("SENTRY_ENVIRONMENT", "production")
+    sentry_traces_sample_rate: float = float(os.environ.get("SENTRY_TRACES_RATE", "0.1"))
+
     # Stockage photos
     photo_storage_path: str = "/app/storage/photos"
     max_photo_size_mb: int = 10
