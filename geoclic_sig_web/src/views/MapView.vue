@@ -314,7 +314,10 @@
                 </svg>
               </label>
             </div>
-            <span class="layer-color" :style="{ backgroundColor: layer.color }"></span>
+            <span v-if="layer.icon" class="layer-icon-mdi" :style="{ color: layer.color }">
+              <i :class="'mdi ' + layer.icon"></i>
+            </span>
+            <span v-else class="layer-color" :style="{ backgroundColor: layer.color }"></span>
             <span class="layer-name">{{ layer.name }}</span>
             <span class="layer-badge">{{ layer.data?.features?.length || 0 }}</span>
           </div>
@@ -2000,12 +2003,16 @@ watch(() => mapStore.visibleLayers, (layers) => {
         fillOpacity: 0.3
       }),
       pointToLayer: (feature, latlng) => {
-        return L.circleMarker(latlng, {
-          radius: 8,
-          fillColor: layer.color,
-          color: '#fff',
-          weight: 2,
-          fillOpacity: 0.8
+        const iconName = feature.properties?._category_icon || layer.icon || 'mdi-map-marker'
+        const iconColor = feature.properties?._category_color || layer.color || '#3498db'
+        return L.marker(latlng, {
+          icon: L.divIcon({
+            className: 'sig-marker',
+            html: `<div class="sig-marker-pin" style="background-color: ${iconColor}"><i class="mdi ${iconName}"></i></div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            tooltipAnchor: [0, -32],
+          })
         })
       },
       onEachFeature: (feature, featureLayer) => {
@@ -2679,6 +2686,13 @@ watch(
   height: 14px;
   border-radius: 4px;
   flex-shrink: 0;
+}
+
+.layer-icon-mdi {
+  flex-shrink: 0;
+  font-size: 18px;
+  width: 22px;
+  text-align: center;
 }
 
 .layer-name {
@@ -4069,5 +4083,31 @@ watch(
     padding-left: 0;
     margin-top: 4px;
   }
+}
+</style>
+
+<!-- CSS non-scoped pour les marqueurs Leaflet DivIcon (créés hors du scope Vue) -->
+<style>
+.sig-marker {
+  background: none !important;
+  border: none !important;
+}
+
+.sig-marker-pin {
+  width: 32px;
+  height: 32px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  border: 2px solid #fff;
+}
+
+.sig-marker-pin .mdi {
+  transform: rotate(45deg);
+  color: #fff;
+  font-size: 16px;
 }
 </style>
