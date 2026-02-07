@@ -584,11 +584,46 @@ GeoClic_Suite/
 - **Aperçu couleur dans propriétés** : Les valeurs hexadécimales (#RGB, #RRGGBB, #RRGGBBAA) dans les données techniques s'affichent avec un carré coloré au lieu du code brut. Fonction `isColorValue()` + template conditionnel avec `.color-swatch`.
 - **Fichiers modifiés :** `geoclic_sig_web/src/stores/map.ts`, `geoclic_sig_web/src/views/MapView.vue`
 
+### Phase 14 quater : Améliorations finales (TERMINÉ - février 2026)
+
+#### Carte thermique (heatmap) dans geoclic_demandes
+- **Plugin leaflet.heat** intégré dans `CarteView.vue`
+- Toggle dans la sidebar carte (boutons Marqueurs / Carte thermique)
+- Intensité pondérée par priorité : urgente=1.0, haute=0.8, normale=0.5, basse=0.3
+- Gradient personnalisé : bleu → vert → jaune → orange → rouge
+- Légende gradient visible quand le mode heatmap est actif
+- **Fichiers:** `geoclic_demandes/src/views/CarteView.vue`, `geoclic_demandes/src/leaflet-heat.d.ts`
+
+#### Notifications push PWA pour les agents terrain
+- **Backend:** `api/routers/push.py` - Router complet (subscribe, unsubscribe, send, VAPID key)
+- **Migration 023:** Table `push_subscriptions` (endpoint unique, clés p256dh/auth, cleanup 90 jours)
+- **Service Worker:** `geoclic_services_pwa/public/sw.js` - Event listeners push + notificationclick
+- **Frontend:** `geoclic_services_pwa/src/stores/auth.ts` - Souscription auto après login
+- **Auto-notification:** `api/routers/services.py` - Push envoyé quand agent assigné à une demande
+- **Config:** Variables env `VAPID_PRIVATE_KEY`, `VAPID_PUBLIC_KEY`, `VAPID_CONTACT_EMAIL`
+- **Dépendance:** `pywebpush>=2.0.0` dans requirements.txt
+
+#### Site commercial finalisé
+- **mentions-legales.html:** Page complète (éditeur, hébergement OVH, RGPD, cookies, CGU, durées conservation)
+- **contact.html:** Formulaire de contact (nom, email, collectivité, objet, message) avec fallback mailto:
+- **API endpoint:** `POST /api/public/contact` - Stocke en base + notification email SMTP
+- **Migration 024:** Table `contact_messages` (nom, email, collectivite, objet, message, lu)
+- **index.html:** Liens mailto: remplacés par liens vers page contact, lien "Tester gratuitement" dans nav
+
+#### Mode démo / sandbox
+- **database/demo_data.sql:** Données fictives réalistes prêtes à charger
+  - 3 comptes : admin@demo.geoclic.fr, voirie@demo.geoclic.fr, espacesverts@demo.geoclic.fr (mdp: demo2026!)
+  - 4 services municipaux (Voirie, Espaces Verts, Propreté, Éclairage)
+  - 4 catégories + 11 sous-catégories avec auto-affectation service
+  - 12 signalements citoyens autour de Montpellier (statuts variés)
+- **scripts/reset_demo.sh:** Script de nettoyage + rechargement des données démo
+- **Section marketing "Tester gratuitement":** Cartes avec identifiants démo sur la landing page
+- **Usage:** `sudo docker exec -i geoclic_db psql -U geoclic -d geoclic_db < /opt/geoclic/database/demo_data.sql`
+
 ### Autres tâches en attente
 - Merger vers main après validation
 - Configurer renouvellement auto certificats SSL
 - Phase 15 (Scale) - après premiers clients payants
-- Finaliser site commercial marketing (responsive, mentions légales, formulaire contact)
 - Ajouter images visuels (sig-patrimoine.png, terrain-sync.png, dashboard.png) dans le repo git
 
 ## Technologies
@@ -961,6 +996,10 @@ async def get_demande(): ...
 - **SIG Turf.js**: La dépendance `@turf/turf` est installée dans geoclic_sig_web. Utilisée pour calculer le linéaire total (`turf.length()` en mètres) et la surface totale (`turf.area()` en m²) dans le cockpit Stats.
 - **SIG dashboard panel**: Le panneau droit du SIG est un composant unique avec 3 onglets (Stats/Propriétés/Export) géré par `dashboardTab` ref. Le watch sur `selectedFeature` ouvre automatiquement l'onglet Propriétés. Pas de panneaux séparés stats-panel/feature-panel. Le panneau s'ouvre par défaut (`showStatsPanel = ref(true)`).
 - **SIG aperçu couleurs**: Les valeurs hex (#RGB, #RRGGBB, #RRGGBBAA) dans les données techniques (custom_properties) sont détectées par `isColorValue()` et affichées avec un carré coloré `.color-swatch` au lieu du code brut. Le type de retour de `getCustomProperties()` inclut un flag `isColor: boolean`.
+- **Heatmap leaflet.heat**: Le plugin `leaflet.heat` est installé dans geoclic_demandes. Le mode heatmap alterne avec le mode marqueurs dans CarteView.vue. Intensité pondérée par priorité (urgente=1.0). Type declarations dans `leaflet-heat.d.ts`.
+- **Push notifications VAPID**: Les clés VAPID doivent être générées via `npx web-push generate-vapid-keys` et configurées dans les env vars. Sans VAPID keys, le endpoint `/api/push/vapid-public-key` retourne 503. La souscription est automatique après login terrain.
+- **Demo data**: Le fichier `database/demo_data.sql` utilise des UUIDs déterministes (`a0000000-...`, `b0000000-...`, etc.) pour permettre le reset via `scripts/reset_demo.sh`. Les mots de passe sont hashés en bcrypt. Le script utilise `ON CONFLICT DO NOTHING` pour être idempotent.
+- **Site commercial marketing → deploy/www**: Les fichiers HTML source sont dans `marketing/` et doivent être copiés manuellement dans `deploy/www/` avant déploiement. Nginx sert `deploy/www/` en statique.
 
 ## Liste des Migrations
 
@@ -980,6 +1019,8 @@ async def get_demande(): ...
 | 018 | `018_fix_system_settings_fk.sql` | Corrige FK system_settings.updated_by → geoclic_users |
 | 019 | `019_fix_geoclic_staging_fk.sql` | Corrige FK geoclic_staging (created_by, updated_by, validated_by) → geoclic_users |
 | 022 | `022_apply_project_id_type_field_configs.sql` | Ajoute project_id à type_field_configs + peuple depuis lexique |
+| 023 | `023_push_subscriptions.sql` | Table push_subscriptions pour notifications Web Push (VAPID) |
+| 024 | `024_contact_messages.sql` | Table contact_messages pour le formulaire de contact commercial |
 
 ---
 
@@ -1253,10 +1294,24 @@ deploy/www/                   # Copie de production (montée par nginx)
 - **Nginx** : `deploy/www/` monté en lecture seule (`/var/www:ro`) dans le conteneur nginx
 - **Nav fixe** avec liens : Fonctionnalités, Comparatif, Tarifs, Demander une démo
 
+#### mentions-legales.html (Mentions légales)
+- Page complète RGPD : éditeur, hébergement OVH, propriété intellectuelle, droits RGPD
+- Données collectées (formulaire + plateforme), cookies, durées conservation, CGU, responsabilité
+
+#### contact.html (Formulaire de contact)
+- Formulaire : nom, email, collectivité, objet (select), message
+- JavaScript : POST `/api/public/contact` avec fallback mailto: si API indisponible
+- Sidebar : infos contact, temps de réponse, CTA démo
+
+#### Section "Tester gratuitement" (index.html)
+- 3 cartes avec identifiants démo (admin, back-office, agent terrain)
+- Description des données fictives (12 signalements, 4 services, Montpellier)
+- Lien "Tester gratuitement" ajouté dans la navigation
+
 ### À faire
 - [ ] Intégrer les 2 images visuels (sig-patrimoine, terrain-sync) dans le repo git (actuellement sur serveur seulement)
-- [ ] Page de mentions légales / CGU
-- [ ] Formulaire de contact (actuellement mailto:)
+- [x] Page de mentions légales / CGU
+- [x] Formulaire de contact
 - [ ] Responsive mobile amélioré
 - [ ] Favicon
 
@@ -1266,15 +1321,15 @@ deploy/www/                   # Copie de production (montée par nginx)
 
 | Critère | Note initiale | Note actuelle | Commentaire |
 |---|---|---|---|
-| Richesse fonctionnelle | 9/10 | 9.5/10 | +Dashboard dirigeant, onboarding, FAQ, guides, toast, breadcrumbs, SIG multi-projets + cockpit |
-| Architecture technique | 7/10 | 7.5/10 | +Multi-workers, logging structuré, CI/CD, health endpoint |
+| Richesse fonctionnelle | 9/10 | 9.5/10 | +Heatmap, push notifications, mode démo, site commercial complet |
+| Architecture technique | 7/10 | 7.5/10 | +Multi-workers, logging structuré, CI/CD, health endpoint, Sentry |
 | Sécurité | 4/10 | 8/10 | Injections SQL corrigées, secrets externalisés, rate limiting, uploads validés |
 | Qualité du code | 6/10 | 7/10 | +CI/CD, tests corrigés, linting pipeline |
 | Scalabilité | 4/10 | 6/10 | +4 workers (~200 req), backup amélioré (manque Redis, S3) |
-| UX/Design | 5/10 | 7.5/10 | +White-labeling, toast, breadcrumbs, onboarding, SIG cockpit 3 onglets, aperçu couleurs |
-| Documentation | 8/10 | 9/10 | +Guides par rôle, FAQ citoyen, doc production, doc tests |
-| Prêt pour la production | 5/10 | 7.5/10 | White-label, onboarding, sécurisé, backups (manque multi-tenant) |
-| **Note globale** | **5.7/10** | **7.8/10** | **Produit commercial viable pour déploiement mono-client** |
+| UX/Design | 5/10 | 7.5/10 | +White-labeling, toast, breadcrumbs, onboarding, SIG cockpit, heatmap |
+| Documentation | 8/10 | 9/10 | +Guides par rôle, FAQ citoyen, doc production, doc Sentry, mentions légales |
+| Prêt pour la production | 5/10 | 8/10 | +Site commercial, démo sandbox, mentions légales, push PWA |
+| **Note globale** | **5.7/10** | **7.9/10** | **Produit commercial viable - site vitrine et démo prêts** |
 
 ### Qualité Code par Application Frontend
 
@@ -1640,8 +1695,11 @@ Pour chaque phase, vérifier avant de passer à la suivante :
 - [x] Documentation: 4 guides par rôle dans le système d'aide, FAQ portail citoyen (13 questions, 4 catégories)
 - [x] Toast notifications + Breadcrumbs intégrés dans geoclic_demandes
 - [ ] Export PDF du rapport mensuel (reporté: nécessite librairie PDF côté serveur)
-- [ ] Carte thermique heatmap (reporté: fonctionnalité avancée Phase 15)
+- [x] Carte thermique heatmap (leaflet.heat dans CarteView.vue, toggle sidebar, pondération par priorité)
 - [ ] Responsive mobile geoclic_demandes (reporté: desktop-first suffisant pour le lancement)
+- [x] Notifications push PWA (pywebpush, VAPID, auto-notification assignation agent)
+- [x] Site commercial finalisé (mentions légales, contact form, liens corrigés)
+- [x] Mode démo sandbox (demo_data.sql, reset_demo.sh, section marketing)
 
 **Phase 15 (Scale) - Critères de validation :**
 - [ ] Multi-tenant fonctionnel (2+ clients sur même instance)
