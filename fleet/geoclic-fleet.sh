@@ -928,6 +928,36 @@ cmd_ssh_key() {
     esac
 }
 
+# ─── Commande: aide ──────────────────────────────────────────────────────────
+# Ouvre le guide interactif HTML dans le navigateur
+cmd_aide() {
+    local aide_file="$FLEET_DIR/aide.html"
+
+    if [[ ! -f "$aide_file" ]]; then
+        log_error "Fichier aide non trouvé: $aide_file"
+        return 1
+    fi
+
+    log_info "Ouverture du guide interactif Fleet..."
+
+    # Essayer d'ouvrir dans le navigateur
+    if command -v xdg-open &>/dev/null; then
+        xdg-open "$aide_file" 2>/dev/null &
+    elif command -v open &>/dev/null; then
+        open "$aide_file" 2>/dev/null &
+    elif command -v python3 &>/dev/null; then
+        # Fallback: serveur HTTP temporaire
+        local port=8888
+        log_info "Serveur local: http://localhost:$port/aide.html"
+        log_info "Appuyez sur Ctrl+C pour arrêter"
+        cd "$FLEET_DIR" && python3 -m http.server "$port"
+    else
+        log_warn "Impossible d'ouvrir le navigateur automatiquement."
+        log_info "Ouvrez manuellement ce fichier dans votre navigateur:"
+        echo "  $aide_file"
+    fi
+}
+
 # ─── Commande: help ──────────────────────────────────────────────────────────
 cmd_help() {
     cat <<EOF
@@ -951,6 +981,7 @@ ${BOLD}Commandes:${NC}
   ${CYAN}test-ssh${NC}     Tester la connexion SSH (IP [USER] [PORT])
   ${CYAN}task-status${NC}  Statut d'une tâche en cours (TASK_ID)
   ${CYAN}task-log${NC}     Logs d'une tâche (TASK_ID [LINES])
+  ${CYAN}aide${NC}         Ouvrir le guide interactif HTML (navigateur)
 
 ${BOLD}Exemples:${NC}
   # Provisionner un nouveau client
@@ -997,6 +1028,7 @@ main() {
         test-ssh)      cmd_test_ssh "$@" ;;
         task-status)   cmd_task_status "$@" ;;
         task-log)      cmd_task_log "$@" ;;
+        aide)          cmd_aide ;;
         help|--help|-h) cmd_help ;;
         *)             log_error "Commande inconnue: $command"; cmd_help; exit 1 ;;
     esac
