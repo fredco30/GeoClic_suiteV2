@@ -235,7 +235,7 @@ async def import_iris(
 
     Pour les communes < 5000 habitants (sans IRIS), crée uniquement la commune.
     """
-    if current_user.get("role") not in ["admin", "moderator"]:
+    if not current_user.get("is_super_admin") and current_user.get("role_data") != "admin":
         raise HTTPException(status_code=403, detail="Droits insuffisants")
 
     code_commune = request.code_commune
@@ -688,7 +688,7 @@ async def create_zone(
 ):
     """Crée une nouvelle zone avec sa géométrie GeoJSON."""
 
-    if current_user.get("role") not in ["admin", "moderator"]:
+    if not current_user.get("is_super_admin") and current_user.get("role_data") != "admin":
         raise HTTPException(status_code=403, detail="Droits insuffisants")
 
     # Vérifier le format GeoJSON
@@ -758,7 +758,7 @@ async def update_zone(
 ):
     """Met à jour une zone existante."""
 
-    if current_user.get("role") not in ["admin", "moderator"]:
+    if not current_user.get("is_super_admin") and current_user.get("role_data") != "admin":
         raise HTTPException(status_code=403, detail="Droits insuffisants")
 
     # Vérifier que la zone existe
@@ -852,7 +852,7 @@ async def delete_zone(
 ):
     """Supprime une zone."""
 
-    if current_user.get("role") not in ["admin", "moderator"]:
+    if not current_user.get("is_super_admin") and current_user.get("role_data") != "admin":
         raise HTTPException(status_code=403, detail="Droits insuffisants")
 
     # Vérifier si la zone a des enfants
