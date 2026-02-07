@@ -48,26 +48,50 @@
             class="mb-3"
           />
 
+          <!-- Parent: auto-assigned (single option) -->
+          <v-alert
+            v-if="zoneLevel > 1 && parentAutoAssigned"
+            type="info"
+            variant="tonal"
+            density="compact"
+            class="mb-3"
+          >
+            {{ zoneLevel === 2 ? 'Commune parente' : 'Quartier parent' }} :
+            <strong>{{ parentAutoName }}</strong>
+          </v-alert>
+
+          <!-- Parent: dropdown (multiple options) -->
           <v-select
+            v-if="zoneLevel > 1 && !parentAutoAssigned && parentOptions.length > 0"
             v-model="zoneParentId"
             :items="parentOptions"
-            label="Zone parente"
+            :label="zoneLevel === 2 ? 'Commune parente *' : 'Quartier parent *'"
             variant="outlined"
             density="compact"
             class="mb-3"
-            clearable
+            :rules="[v => !!v || 'La zone parente est requise']"
             :hint="parentHint"
             persistent-hint
           />
 
-          <v-select
-            v-model="zoneType"
-            :items="zoneTypes"
-            label="Type de zone"
-            variant="outlined"
+          <!-- Parent: no options available -->
+          <v-alert
+            v-if="zoneLevel > 1 && parentOptions.length === 0"
+            type="warning"
+            variant="tonal"
             density="compact"
             class="mb-3"
-          />
+          >
+            <span v-if="zoneLevel === 2">
+              Aucune commune disponible. Créez d'abord une zone de niveau 1 (Commune).
+            </span>
+            <span v-else>
+              Aucun quartier disponible. Créez d'abord une zone de niveau 2 (Quartier).
+            </span>
+          </v-alert>
+
+          <!-- Type auto-synced with level, hidden for simplicity -->
+          <input type="hidden" :value="zoneType" />
 
           <v-text-field
             v-model="zoneCode"
@@ -92,7 +116,7 @@
           <v-btn
             color="primary"
             :loading="saving"
-            :disabled="!zoneName.trim()"
+            :disabled="!zoneName.trim() || (zoneLevel > 1 && !zoneParentId)"
             @click="saveZone"
           >
             {{ isEditMode ? 'Enregistrer' : 'Créer la zone' }}
@@ -244,13 +268,23 @@ const parentOptions = computed(() => {
 })
 
 const parentHint = computed(() => {
-  if (zoneLevel.value === 1) {
-    return 'Les communes n\'ont pas de parent'
-  } else if (zoneLevel.value === 2) {
+  if (zoneLevel.value === 2) {
     return 'Sélectionnez la commune parente'
   } else {
     return 'Sélectionnez le quartier parent'
   }
+})
+
+// Parent auto-assigned when exactly one option exists
+const parentAutoAssigned = computed(() => {
+  if (zoneLevel.value === 1) return false
+  return parentOptions.value.length === 1
+})
+
+// Name of auto-assigned parent (for display)
+const parentAutoName = computed(() => {
+  if (!parentAutoAssigned.value) return ''
+  return parentOptions.value[0]?.title || ''
 })
 
 // Basemap layers
@@ -592,10 +626,23 @@ watch(currentBasemap, (newValue, oldValue) => {
   basemaps[newValue]?.addTo(map)
 })
 
-// Clear parent when level changes to 1 (communes have no parent)
+// Auto-assign parent and sync type when level changes
 watch(zoneLevel, (newLevel) => {
+  // Sync zone type with level
+  const levelTypeMap: Record<number, string> = { 1: 'commune', 2: 'quartier', 3: 'secteur' }
+  zoneType.value = levelTypeMap[newLevel] || 'quartier'
+
   if (newLevel === 1) {
+    // Communes have no parent
     zoneParentId.value = null
+  } else {
+    // Auto-assign if single parent option, otherwise clear
+    const options = parentOptions.value
+    if (options.length === 1) {
+      zoneParentId.value = options[0].value
+    } else {
+      zoneParentId.value = null
+    }
   }
 })
 
@@ -604,8 +651,14 @@ onMounted(async () => {
   await nextTick()
   initMap()
   await loadAvailableParents()
+
   if (isEditMode.value) {
     await loadZoneForEdit()
+  } else {
+    // In create mode, auto-assign parent for default level (2)
+    if (zoneLevel.value > 1 && parentOptions.value.length === 1) {
+      zoneParentId.value = parentOptions.value[0].value
+    }
   }
 })
 
