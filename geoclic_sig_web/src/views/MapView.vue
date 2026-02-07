@@ -1332,7 +1332,7 @@ const toolMode = ref<string>('navigation')
 const selectedBaseLayer = ref('ign_plan')
 const showCadastre = ref(false)
 const showLayerPanel = ref(false)
-const showStatsPanel = ref(false)
+const showStatsPanel = ref(true) // Dashboard toujours ouvert par défaut
 const showProjectPanel = ref(false)
 
 // Recherche
