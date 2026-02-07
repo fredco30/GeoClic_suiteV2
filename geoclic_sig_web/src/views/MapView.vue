@@ -1747,10 +1747,14 @@ function toggleProjectPanel() {
   }
 }
 
-function selectProject(project: any) {
-  mapStore.selectProject(project)
+async function selectProject(project: any) {
+  await mapStore.selectProject(project)
   showProjectPanel.value = false
   showToast(`Projet "${project.name}" chargé`, 'success')
+  // Forcer le rendu des couches après le chargement des données
+  renderLayers()
+  // Centrer la carte sur les données chargées
+  zoomToData()
 }
 
 // Périmètres
@@ -2053,18 +2057,11 @@ function createLeafletLayerGroup(layer: { data: GeoJSON.FeatureCollection | null
 
 // Watch pour les changements de couches
 // Fingerprint = identité + visibilité + nombre de features (détecte les changements de données)
+// Note: pas de check _animatingZoom — le monkey-patch Leaflet protège contre les crash
 watch(
   () => mapStore.layers.map(l => `${l.id}:${l.visible}:${l.data?.features?.length || 0}`).join(','),
   () => {
     if (!map.value) return
-
-    const m = map.value
-
-    // Si la carte est en pleine animation de zoom, attendre la fin
-    if ((m as any)._animatingZoom) {
-      m.once('zoomend', () => renderLayers())
-      return
-    }
     renderLayers()
   }
 )
