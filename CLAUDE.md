@@ -545,6 +545,44 @@ GeoClic_Suite/
   - 2e ligne de filtres "Données techniques :" avec `v-autocomplete` par champ
   - `watch(activeFilterCode)` déclenche le chargement des champs quand la cascade change
 
+#### SIG Web - Recherche geocoding + amélioration features
+- **Barre de recherche** dans la toolbar : Nominatim (adresses France) + recherche locale dans les features chargées
+  - Debounce 300ms, résultats groupés (éléments locaux + adresses)
+  - Clic sur résultat → zoom + sélection (feature) ou marqueur temporaire (adresse)
+- **Filtres cascade → rendu carte** : les filtres cascade affectent maintenant le rendu Leaflet (pas juste la liste)
+  - Watch sur `filteredLayers` déclenche `renderLayers()`
+  - `renderLayers()` utilise `filteredLayers` au lieu de `mapStore.layers`
+- **custom_properties** affichées dans le détail feature (section "Données techniques")
+
+#### SIG Web - Multi-projets + Tableau de bord cockpit
+- **Multi-projets (superposition de couches):**
+  - Cases à cocher au lieu de sélection unique dans le panneau Projets
+  - `activeProjectIds: Set<string>` dans le store, `toggleProject()`, `isProjectActive()`
+  - Layer IDs préfixés `${projectId}_${code}` pour éviter les collisions
+  - Lexique fusionne entre projets (merge dans la Map, pas remplacement)
+  - Features portent `_project_id` et `_project_name` dans leurs properties
+  - `addProjectLayers()` ajoute sans effacer les couches des autres projets
+- **Tableau de bord 3 onglets** (panneau droit, remplace l'ancien stats-panel + feature-panel) :
+  - **Onglet Stats (Cockpit patrimoine) :**
+    - KPI globaux : total éléments, couches, projets actifs
+    - Inventaire : points/lignes/zones avec icônes
+    - Linéaire total et surface totale via Turf.js (`turf.length()`, `turf.area()`)
+    - Donut CSS (`conic-gradient`) pour la distribution `condition_state` (Neuf/Bon/Moyen/À rénover/Critique)
+    - Barres horizontales par catégorie (répartition du patrimoine)
+    - Répartition par projet (si multi-projets actifs)
+  - **Onglet Propriétés :**
+    - Carte header avec couleur catégorie + hiérarchie
+    - Propriétés standard + données techniques + photos
+    - Boutons : Centrer, Modifier, Supprimer
+    - S'ouvre automatiquement quand on clique sur un élément (watch sur `selectedFeature`)
+  - **Onglet Export :**
+    - CSV (Excel-compatible, UTF-8 BOM, colonnes : Nom/Catégorie/Type/État/Statut/Commentaire/Projet/Géométrie/Lat/Lng)
+    - GeoJSON standard
+    - GeoJSON + métadonnées (source, date, comptage)
+    - Résumé du contenu par catégorie
+- **Fix cascade filtre** : `filteredLayers` utilisait `layer.id` pour le lookup lexique, mais le nouveau format `${projectId}_${code}` cassait le filtre. Ajout de `getLayerLexiqueCode()` pour extraire le code.
+- **Fichiers modifiés :** `geoclic_sig_web/src/stores/map.ts`, `geoclic_sig_web/src/views/MapView.vue`
+
 ### Autres tâches en attente
 - Merger vers main après validation
 - Configurer renouvellement auto certificats SSL
@@ -916,6 +954,11 @@ async def get_demande(): ...
 - **Filtres cascade dynamiques**: Les dropdowns de filtre lexique se génèrent automatiquement selon les niveaux présents dans les données (`activeLevels` = Set des `niveau`). Ne pas coder en dur les niveaux 0/1/2. Le filtre Projet est masqué automatiquement quand il n'y a qu'un seul projet.
 - **Filtres données techniques**: Le param API `custom_filters` accepte du JSON (`{"Matériau":"Bois"}`). Le backend utilise l'opérateur JSONB `@>` avec `CAST(:param AS jsonb)` — entièrement paramétrisé, aucune injection possible. Les champs disponibles viennent de `type_field_configs` via `champsAPI.getByLexique()`, avec héritage des parents.
 - **Héritage champs dynamiques (filtres)**: Quand une catégorie est sélectionnée, charger ses champs ET ceux de tous ses parents (`parent_id` chain). Ex: POUB_SIMPLE hérite des champs de PROPRETE et MOBILIER.
+- **SIG multi-projets (layer IDs)**: Les couches du SIG ont des IDs au format `${projectId}_${code}`. Pour extraire le code lexique d'une couche, utiliser `getLayerLexiqueCode(layer)` qui strip le préfixe projectId. Ne jamais comparer `layer.id` directement avec un code lexique.
+- **SIG lexiqueMap merge**: Quand plusieurs projets sont chargés, le `lexiqueMap` fusionne les entrées de tous les projets. `loadLexique()` crée une nouvelle Map à partir de l'existante et y ajoute les nouvelles entrées (pas de remplacement). Cela permet aux filtres cascade de fonctionner avec des données multi-projets.
+- **SIG features _project_id/_project_name**: Chaque feature GeoJSON du SIG porte `_project_id` et `_project_name` dans ses properties. Ces champs sont dans `HIDDEN_PROPERTIES` (pas affichés au détail) mais utilisés par les stats (répartition par projet) et l'export CSV.
+- **SIG Turf.js**: La dépendance `@turf/turf` est installée dans geoclic_sig_web. Utilisée pour calculer le linéaire total (`turf.length()` en mètres) et la surface totale (`turf.area()` en m²) dans le cockpit Stats.
+- **SIG dashboard panel**: Le panneau droit du SIG est un composant unique avec 3 onglets (Stats/Propriétés/Export) géré par `dashboardTab` ref. Le watch sur `selectedFeature` ouvre automatiquement l'onglet Propriétés. Pas de panneaux séparés stats-panel/feature-panel.
 
 ## Liste des Migrations
 
@@ -1240,7 +1283,7 @@ deploy/www/                   # Copie de production (montée par nginx)
 | geoclic_services | Desktop terrain | CSS custom | 7/10 |
 | geoclic_services_pwa | PWA mobile terrain | CSS custom | 6/10 |
 | geoclic_mobile_pwa | Relevé terrain offline | CSS custom | 8/10 |
-| geoclic_sig_web | SIG cartographie | CSS custom | 7/10 |
+| geoclic_sig_web | SIG cartographie | CSS custom + Turf.js | 8/10 |
 | portail_citoyen | Portail citoyen public | CSS custom | 8/10 |
 
 ---
