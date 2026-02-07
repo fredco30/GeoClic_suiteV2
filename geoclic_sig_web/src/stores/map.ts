@@ -299,30 +299,64 @@ export const useMapStore = defineStore('map', () => {
   async function loadProjectData(projectId: string) {
     loading.value = true
     try {
-      const response = await axios.get(`/api/points?project_id=${projectId}`)
+      const response = await axios.get(`/api/points?project_id=${projectId}&page_size=500`)
 
       // Grouper par type de géométrie
       const points: GeoJSON.Feature[] = []
       const lines: GeoJSON.Feature[] = []
       const polygons: GeoJSON.Feature[] = []
 
-      response.data.forEach((point: any) => {
+      // L'API retourne { total, page, page_size, items: [...] }
+      const items = Array.isArray(response.data) ? response.data : (response.data.items || [])
+
+      items.forEach((point: any) => {
+        // Construire la géométrie GeoJSON depuis geom_type + coordinates
+        let geometry: GeoJSON.Geometry | null = null
+        if (point.coordinates && point.coordinates.length > 0) {
+          const geomType = (point.geom_type || 'POINT').toUpperCase()
+          if (geomType === 'POINT') {
+            geometry = {
+              type: 'Point',
+              coordinates: [point.coordinates[0].longitude, point.coordinates[0].latitude]
+            }
+          } else if (geomType === 'LINESTRING') {
+            geometry = {
+              type: 'LineString',
+              coordinates: point.coordinates.map((c: any) => [c.longitude, c.latitude])
+            }
+          } else if (geomType === 'POLYGON') {
+            geometry = {
+              type: 'Polygon',
+              coordinates: [point.coordinates.map((c: any) => [c.longitude, c.latitude])]
+            }
+          }
+        }
+
+        if (!geometry) return
+
         const feature: GeoJSON.Feature = {
           type: 'Feature',
-          geometry: point.geom,
+          geometry: geometry,
           properties: {
             id: point.id,
             name: point.name,
             type: point.type,
-            ...point
+            subtype: point.subtype,
+            lexique_code: point.lexique_code,
+            condition_state: point.condition_state,
+            point_status: point.point_status,
+            sync_status: point.sync_status,
+            comment: point.comment,
+            color_value: point.color_value,
+            icon_name: point.icon_name,
           }
         }
 
-        if (point.geom?.type === 'Point') {
+        if (geometry.type === 'Point') {
           points.push(feature)
-        } else if (point.geom?.type === 'LineString' || point.geom?.type === 'MultiLineString') {
+        } else if (geometry.type === 'LineString' || geometry.type === 'MultiLineString') {
           lines.push(feature)
-        } else if (point.geom?.type === 'Polygon' || point.geom?.type === 'MultiPolygon') {
+        } else if (geometry.type === 'Polygon' || geometry.type === 'MultiPolygon') {
           polygons.push(feature)
         }
       })
