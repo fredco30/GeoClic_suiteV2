@@ -495,6 +495,56 @@ GeoClic_Suite/
 - 4 apps n'avaient pas de `package-lock.json` → `npm ci` échouait en CI
 - Généré pour: geoclic_demandes, geoclic_services, geoclic_services_pwa, portail_citoyen
 
+### Phase 15 : Améliorations UX geoclic_data & SIG (EN COURS - février 2026)
+
+#### Corrections auth zones.py
+- **Problème:** DELETE /api/zones/ retournait 403 Forbidden
+- **Cause:** `zones.py` utilisait l'ancien pattern `current_user.get("role") not in ["admin", "moderator"]`
+- **Solution:** 4 occurrences remplacées par `not current_user.get("is_super_admin") and current_user.get("role_data") != "admin"`
+
+#### Carte admin - Données points et visibilité marqueurs
+- **Problème 1:** Perte de données entre l'onglet Points (modal édition) et le panneau carte
+  - `mapPointFromBackend()` dans `api.ts` ne mappait pas `custom_properties`, `icon_name`, `color_value`
+  - Fix: mapping complet `custom_properties→donnees_techniques`, `icon_name→icone`, `color_value (int ARGB)→couleur (hex string)`
+- **Problème 2:** Marqueur quasi invisible sur la carte
+  - `L.divIcon` sans `iconSize`/`iconAnchor` → Leaflet clip à 12x12 par défaut
+  - Fix: `iconSize: [36, 36]`, `iconAnchor: [18, 36]`, bordure blanche, ombre renforcée
+- **Ajouts dans le panneau détail carte:**
+  - Infos classification : Famille, Catégorie, Type (chip), Projet
+  - Couleur réelle des données techniques (swatch `.color-swatch`)
+  - Fonction `getPointHierarchy()` remonte la hiérarchie lexique depuis `parent_id`
+
+#### Filtres catégorie - LIKE → IN pour hiérarchie
+- **Problème:** Filtrer par "Propreté" (niveau 1) retournait 0 résultats malgré un point "Poubelle simple" (niveau 2)
+- **Cause:** Backend utilisait `WHERE lexique_code LIKE 'PROPRETE%'` mais les codes enfants ne sont pas préfixés par le parent
+- **Solution backend (points.py):** LIKE remplacé par `=` (single) ou `IN` (comma-separated) dans 4 endpoints
+- **Solution frontend (points.ts):** `getDescendantCodes()` résout récursivement tous les codes enfants depuis la hiérarchie lexique
+- **Bug supplémentaire (carte.vue):** Envoyait l'UUID (`item-value="id"`) au lieu du code (`item-value="code"`)
+
+#### Filtres cascade dynamiques (remplace single dropdown)
+- **Avant:** Un seul dropdown avec tous les niveaux indentés → inutilisable avec beaucoup de catégories
+- **Après:** Cascade de N dropdowns qui s'adaptent à la profondeur réelle du lexique
+  - Noms des niveaux: `['Famille', 'Type', 'Sous-type', 'Variante', 'Détail', 'Précision']`
+  - `activeLevels` computed: détecte les niveaux présents dans les données (Set des `niveau`)
+  - `cascadeOptions(level)`: retourne les entrées du niveau N dont le `parent_id` = sélection du niveau N-1
+  - `onCascadeChange(level)`: vide tous les niveaux en dessous
+  - Le filtre Projet est caché automatiquement quand il n'y a qu'un seul projet (`v-if="projets.length > 1"`)
+- **Appliqué sur:** `points.vue`, `carte.vue`, `MapView.vue` (SIG)
+- **Fichiers modifiés:** 3 pages frontend + `points.ts` store + `points.py` backend
+
+#### Filtres données techniques contextuels (Option C)
+- **Concept:** Quand une catégorie est sélectionnée dans la cascade, charger ses champs dynamiques (`type_field_configs`) et afficher un dropdown par champ de type `select`
+- **Backend (points.py):** Nouveau param `custom_filters` (JSON) → filtre JSONB via opérateur `@>` (paramétrisé, pas d'injection SQL)
+  ```python
+  custom_properties @> CAST(:cf_0 AS jsonb)  -- Ex: '{"Matériau": "Bois"}'
+  ```
+- **Store (points.ts):** `custom_filters: Record<string, string>` dans les filtres, sérialisé en JSON pour l'API
+- **Frontend (points.vue & carte.vue):**
+  - `loadedChamps`: chargés via `champsAPI.getByLexique()` pour la catégorie sélectionnée + tous ses parents (héritage)
+  - `selectChamps` computed: filtre sur `type === 'select' || type === 'multiselect'`
+  - 2e ligne de filtres "Données techniques :" avec `v-autocomplete` par champ
+  - `watch(activeFilterCode)` déclenche le chargement des champs quand la cascade change
+
 ### Autres tâches en attente
 - Merger vers main après validation
 - Configurer renouvellement auto certificats SSL
@@ -810,6 +860,29 @@ async def get_demande(): ...
 - `main.ts`: Suppression de l'enregistrement manuel du SW (VitePWA avec `registerType: 'autoUpdate'` gère tout automatiquement)
 - Les erreurs empêchaient l'installation PWA mais n'impactaient pas le fonctionnement de l'app
 
+### zones.py - 403 Forbidden sur suppression de zone
+**Symptôme:** DELETE /api/zones/ retourne 403
+
+**Cause:** `zones.py` utilisait l'ancien pattern `current_user.get("role") not in ["admin", "moderator"]` au lieu du système d'auth unifié.
+
+**Solution appliquée:** 4 occurrences remplacées par `not current_user.get("is_super_admin") and current_user.get("role_data") != "admin"`
+
+### geoclic_data Carte - Données manquantes dans le panneau point
+**Symptôme:** Le panneau latéral carte affiche "Aucune description", "Aucune donnée technique" malgré des données existantes
+
+**Cause:** `mapPointFromBackend()` dans `api.ts` ne mappait que `name→nom`, `comment→description`, `project_id→projet_id`. Il manquait `custom_properties→donnees_techniques`, `icon_name→icone`, `color_value→couleur`.
+
+**Solution appliquée:** Mapping complet ajouté dans `mapPointFromBackend()` avec conversion `color_value` (int ARGB) → couleur (hex string via `& 0xFFFFFF`).
+
+### geoclic_data - Filtre catégorie retourne 0 résultats
+**Symptôme:** Sélectionner "Propreté" dans les filtres retourne 0 points malgré un point "Poubelle simple" existant
+
+**Cause:** Le backend utilisait `LIKE 'PROPRETE%'` mais les codes enfants (POUB_SIMPLE) ne sont pas préfixés par le code parent.
+
+**Solution appliquée:**
+- Backend `points.py`: LIKE remplacé par `=` (code unique) ou `IN` (codes multiples séparés par virgule) dans 4 endpoints
+- Frontend `points.ts`: `getDescendantCodes()` résout récursivement tous les codes enfants et les envoie séparés par virgule
+
 ## Notes Importantes
 
 - Les photos sont stockées dans le volume `geoclic_photos_data`
@@ -837,6 +910,12 @@ async def get_demande(): ...
 - **JSONB asyncpg**: PostgreSQL JSONB retourne des objets Python natifs (list/dict) via asyncpg, PAS des strings JSON. Ne jamais utiliser `json.loads()` directement — toujours vérifier `isinstance(value, (list, dict))` avant.
 - **Statuts sync_status dans geoclic_mobile_pwa**: L'agent terrain voit "Envoyé ✓" (draft/pending), "Validé ✓✓" (validated), "Rejeté ✗" (rejected). Ne pas afficher les termes internes (draft, brouillon, pending).
 - **Cache PWA après déploiement**: Après un rebuild d'une app frontend, les utilisateurs doivent vider le cache (DevTools > Application > Effacer données du site) ou ouvrir en navigation privée pour voir les changements.
+- **Lexique codes non hiérarchiques**: Les codes lexique (POUB_SIMPLE, BANC_BOIS) ne sont PAS préfixés par le code parent (PROPRETE, ASSISE). Ne jamais utiliser `LIKE 'PARENT%'` pour filtrer les enfants. Utiliser `getDescendantCodes()` côté frontend (résolution récursive depuis `parent_id`) puis envoyer les codes en `IN (...)` côté backend.
+- **mapPointFromBackend() complet**: Le mapping dans `api.ts` doit mapper TOUS les champs : `name→nom`, `comment→description`, `project_id→projet_id`, `lexique_code→lexique_id`, `custom_properties→donnees_techniques`, `icon_name→icone`, `color_value (int ARGB)→couleur (hex '#RRGGBB')`. Oublier un champ = données invisibles dans la carte.
+- **Leaflet DivIcon sizing obligatoire**: Toujours spécifier `iconSize` et `iconAnchor` sur `L.divIcon`. Sans ça, Leaflet utilise 12x12 par défaut et clipe les icônes plus grandes.
+- **Filtres cascade dynamiques**: Les dropdowns de filtre lexique se génèrent automatiquement selon les niveaux présents dans les données (`activeLevels` = Set des `niveau`). Ne pas coder en dur les niveaux 0/1/2. Le filtre Projet est masqué automatiquement quand il n'y a qu'un seul projet.
+- **Filtres données techniques**: Le param API `custom_filters` accepte du JSON (`{"Matériau":"Bois"}`). Le backend utilise l'opérateur JSONB `@>` avec `CAST(:param AS jsonb)` — entièrement paramétrisé, aucune injection possible. Les champs disponibles viennent de `type_field_configs` via `champsAPI.getByLexique()`, avec héritage des parents.
+- **Héritage champs dynamiques (filtres)**: Quand une catégorie est sélectionnée, charger ses champs ET ceux de tous ses parents (`parent_id` chain). Ex: POUB_SIMPLE hérite des champs de PROPRETE et MOBILIER.
 
 ## Liste des Migrations
 
