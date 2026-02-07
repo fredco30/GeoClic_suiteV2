@@ -256,6 +256,32 @@
             color: white;
         }
 
+        /* Visual blocks - full-width images */
+        .visual-block {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .visual-block img {
+            width: 100%;
+            display: block;
+        }
+
+        .visual-block-caption {
+            text-align: center;
+            padding: 18px 20px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .visual-block-caption p {
+            font-size: 1.15em;
+            font-weight: 700;
+            color: var(--secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
         /* Sections */
         .section { padding: 70px 20px; }
         .section-container { max-width: 1100px; margin: 0 auto; }
@@ -492,6 +518,22 @@
                 <a href="#avantages" class="nav-anchor">Pourquoi GéoClic</a>
                 <a href="#tarifs" class="nav-anchor">Tarifs</a>
             </div>
+        </div>
+    </section>
+
+    <!-- Bloc visuel SIG - Patrimoine -->
+    <section class="visual-block">
+        <img src="screenshots/sig-patrimoine.png" alt="Maîtrisez votre patrimoine communal, du bureau au terrain - SIG GéoClic avec desktop et tablette">
+        <div class="visual-block-caption">
+            <p>Une solution complète pour une fraction du prix des logiciels SIG traditionnels.</p>
+        </div>
+    </section>
+
+    <!-- Bloc visuel Terrain - Synchronisation -->
+    <section class="visual-block">
+        <img src="screenshots/terrain-sync.png" alt="L'inventaire terrain synchronisé en temps réel - Agent sur le terrain vers le bureau technique">
+        <div class="visual-block-caption">
+            <p>Fonctionne sur tous les appareils, sans installation complexe (PWA).</p>
         </div>
     </section>
 
