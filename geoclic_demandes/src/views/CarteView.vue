@@ -22,6 +22,24 @@ const heatmapMode = ref(false)
 
 const selectedStatuts = ref<StatutDemande[]>(['nouveau', 'en_moderation', 'envoye', 'accepte', 'en_cours', 'planifie'])
 
+// Mapping noms Material Icons → Emojis
+const iconToEmoji: Record<string, string> = {
+  park: '🌳', nature: '🌿', eco: '♻️', grass: '🌱',
+  directions_car: '🚗', route: '🛣️', traffic: '🚦', road: '🛣️',
+  construction: '🚧', warning: '⚠️', lightbulb: '💡', brightness_low: '🔅',
+  water_drop: '💧', delete: '🗑️', delete_sweep: '🧹', cleaning_services: '🧹',
+  pets: '🐕', noise: '🔊', local_parking: '🅿️', format_paint: '🎨',
+  dangerous: '☠️', report: '📋', help: '❓', child_friendly_zone: '👶',
+  home: '🏠', business: '🏢', school: '🏫',
+  sports: '⚽', pool: '🏊', fitness_center: '💪',
+  child_care: '👶', elderly: '👴', accessibility: '♿',
+  security: '🔒', camera: '📷', speed: '🏎️',
+}
+function getIconEmoji(iconName: string | null | undefined): string {
+  if (!iconName) return '📌'
+  return iconToEmoji[iconName] || '📌'
+}
+
 const statutColors: Record<string, string> = {
   nouveau: '#3b82f6',
   en_moderation: '#f59e0b',
@@ -214,7 +232,7 @@ function updateMarkers() {
             justify-content: center;
           ">
             <span style="transform: rotate(45deg); font-size: 14px;">
-              ${demande.categorie_icone || '📌'}
+              ${getIconEmoji(demande.categorie_icone)}
             </span>
           </div>
         `,
