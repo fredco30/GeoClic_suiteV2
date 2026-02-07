@@ -39,6 +39,79 @@
         </div>
       </div>
 
+      <!-- Barre de recherche -->
+      <div class="toolbar-section toolbar-section-search">
+        <span class="section-label">Recherche</span>
+        <div class="search-container">
+          <div class="search-input-wrapper">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input
+              ref="searchInput"
+              type="text"
+              v-model="searchQuery"
+              @input="onSearchInput"
+              @keydown.enter="onSearchEnter"
+              @keydown.escape="closeSearch"
+              @focus="showSearchResults = searchResults.length > 0 || featureSearchResults.length > 0"
+              class="search-input"
+              placeholder="Adresse, lieu ou élément..."
+            >
+            <button v-if="searchQuery" @click="clearSearch" class="search-clear">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+          <!-- Résultats de recherche -->
+          <div v-if="showSearchResults && (searchResults.length > 0 || featureSearchResults.length > 0 || searchLoading)" class="search-results">
+            <div v-if="searchLoading" class="search-loading">
+              <span>Recherche en cours...</span>
+            </div>
+            <!-- Résultats features locales -->
+            <div v-if="featureSearchResults.length > 0" class="search-group">
+              <div class="search-group-label">Éléments chargés</div>
+              <div
+                v-for="result in featureSearchResults"
+                :key="'feat-' + result.properties?.id"
+                class="search-result-item"
+                @click="goToFeature(result)"
+              >
+                <svg class="result-icon result-icon-feature" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <div class="result-info">
+                  <span class="result-name">{{ result.properties?.name || 'Sans nom' }}</span>
+                  <span class="result-detail">{{ result.properties?.categorie }} {{ result.properties?.type ? '› ' + result.properties.type : '' }}</span>
+                </div>
+              </div>
+            </div>
+            <!-- Résultats adresses (Nominatim) -->
+            <div v-if="searchResults.length > 0" class="search-group">
+              <div class="search-group-label">Adresses</div>
+              <div
+                v-for="(result, idx) in searchResults"
+                :key="'addr-' + idx"
+                class="search-result-item"
+                @click="goToAddress(result)"
+              >
+                <svg class="result-icon result-icon-address" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+                </svg>
+                <div class="result-info">
+                  <span class="result-name">{{ result.display_name?.split(',').slice(0, 2).join(',') }}</span>
+                  <span class="result-detail">{{ result.display_name?.split(',').slice(2, 4).join(',') }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Groupe: Navigation et dessin -->
       <div class="toolbar-section">
         <span class="section-label">Outils</span>
@@ -797,6 +870,16 @@
             Aucune propriété définie
           </div>
         </div>
+        <!-- Données techniques -->
+        <div v-if="getCustomProperties(mapStore.selectedFeature.properties).length > 0" class="feature-custom-props">
+          <h4 class="custom-props-title">Données techniques</h4>
+          <div class="custom-props-list">
+            <div v-for="prop in getCustomProperties(mapStore.selectedFeature.properties)" :key="prop.key" class="custom-prop-item">
+              <span class="custom-prop-key">{{ prop.key }}</span>
+              <span class="custom-prop-value">{{ prop.value }}</span>
+            </div>
+          </div>
+        </div>
         <!-- Photos -->
         <div v-if="mapStore.selectedFeature.properties?.photos?.length" class="feature-photos">
           <h4 class="photos-title">Photos</h4>
@@ -1051,6 +1134,17 @@ const showCadastre = ref(false)
 const showLayerPanel = ref(false)
 const showStatsPanel = ref(false)
 const showProjectPanel = ref(false)
+
+// Recherche
+const searchInput = ref<HTMLInputElement | null>(null)
+const searchQuery = ref('')
+const searchResults = ref<any[]>([])
+const featureSearchResults = ref<GeoJSON.Feature[]>([])
+const showSearchResults = ref(false)
+const searchLoading = ref(false)
+let searchDebounceTimer: number | null = null
+let searchMarker: L.Marker | null = null
+
 // Dynamic cascade layer filters
 const sigCascadeFilters = ref<Record<number, string>>({})
 const sigLevelPlaceholders: Record<number, string> = {
@@ -1257,10 +1351,12 @@ onMounted(async () => {
   }
 
   window.addEventListener('keydown', handleKeydown)
+  window.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('click', handleClickOutside)
   if (map.value) {
     map.value.remove()
   }
@@ -1789,7 +1885,7 @@ const PROPERTY_LABELS: Record<string, string> = {
 }
 
 // Propriétés internes à masquer
-const HIDDEN_PROPERTIES = new Set(['id', 'color_value', 'icon_name', 'sync_status', 'lexique_code', 'photos', '_category_icon', '_category_color'])
+const HIDDEN_PROPERTIES = new Set(['id', 'color_value', 'icon_name', 'sync_status', 'lexique_code', 'photos', 'custom_properties', '_category_icon', '_category_color'])
 
 function getDisplayProperties(properties: Record<string, any> | null): { key: string; label: string; value: string }[] {
   if (!properties) return []
@@ -1800,6 +1896,15 @@ function getDisplayProperties(properties: Record<string, any> | null): { key: st
       label: PROPERTY_LABELS[key] || formatPropertyKey(key),
       value: String(value),
     }))
+}
+
+function getCustomProperties(properties: Record<string, any> | null): { key: string; value: string }[] {
+  if (!properties?.custom_properties) return []
+  const cp = properties.custom_properties
+  if (typeof cp !== 'object' || Array.isArray(cp)) return []
+  return Object.entries(cp)
+    .filter(([, v]) => v != null && v !== '')
+    .map(([k, v]) => ({ key: k, value: String(v) }))
 }
 
 function formatPropertyKey(key: string): string {
@@ -2083,16 +2188,160 @@ function getRandomColor(): string {
   return colors[Math.floor(Math.random() * colors.length)]
 }
 
+// =========================================
+// Recherche (geocoding Nominatim + features)
+// =========================================
+function onSearchInput() {
+  if (searchDebounceTimer) clearTimeout(searchDebounceTimer)
+  const query = searchQuery.value.trim()
+  if (!query) {
+    searchResults.value = []
+    featureSearchResults.value = []
+    showSearchResults.value = false
+    return
+  }
+  // Recherche locale immédiate dans les features chargées
+  searchFeaturesLocal(query)
+  // Recherche Nominatim avec debounce (300ms)
+  searchDebounceTimer = window.setTimeout(() => {
+    searchNominatim(query)
+  }, 300)
+}
+
+function searchFeaturesLocal(query: string) {
+  const q = query.toLowerCase()
+  const results: GeoJSON.Feature[] = []
+  mapStore.layers.forEach(layer => {
+    if (!layer.data?.features) return
+    layer.data.features.forEach(f => {
+      const name = (f.properties?.name || '').toLowerCase()
+      const cat = (f.properties?.categorie || '').toLowerCase()
+      const type = (f.properties?.type || '').toLowerCase()
+      const comment = (f.properties?.comment || '').toLowerCase()
+      if (name.includes(q) || cat.includes(q) || type.includes(q) || comment.includes(q)) {
+        results.push(f)
+      }
+    })
+  })
+  featureSearchResults.value = results.slice(0, 8)
+  showSearchResults.value = results.length > 0 || searchResults.value.length > 0
+}
+
+async function searchNominatim(query: string) {
+  searchLoading.value = true
+  try {
+    const params = new URLSearchParams({
+      q: query,
+      format: 'json',
+      limit: '5',
+      countrycodes: 'fr',
+      addressdetails: '1',
+    })
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
+      headers: { 'Accept-Language': 'fr' }
+    })
+    if (!response.ok) return
+    searchResults.value = await response.json()
+    showSearchResults.value = searchResults.value.length > 0 || featureSearchResults.value.length > 0
+  } catch (err) {
+    console.warn('Nominatim search error:', err)
+  } finally {
+    searchLoading.value = false
+  }
+}
+
+function onSearchEnter() {
+  // Si un seul résultat feature, y aller directement
+  if (featureSearchResults.value.length === 1) {
+    goToFeature(featureSearchResults.value[0])
+  } else if (searchResults.value.length > 0) {
+    goToAddress(searchResults.value[0])
+  }
+}
+
+function goToAddress(result: any) {
+  if (!map.value) return
+  const lat = parseFloat(result.lat)
+  const lng = parseFloat(result.lon)
+  // Supprimer l'ancien marqueur
+  if (searchMarker) {
+    map.value.removeLayer(searchMarker)
+  }
+  // Placer un marqueur temporaire
+  searchMarker = L.marker([lat, lng], {
+    icon: L.divIcon({
+      className: 'search-result-marker',
+      html: `<div class="search-pin"><svg viewBox="0 0 24 24" fill="#e74c3c" stroke="white" stroke-width="1"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3" fill="white"/></svg></div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+    })
+  }).addTo(map.value)
+  searchMarker.bindPopup(result.display_name?.split(',').slice(0, 3).join(',') || 'Lieu')
+  // Zoomer
+  if (result.boundingbox) {
+    const bounds: L.LatLngBoundsExpression = [
+      [parseFloat(result.boundingbox[0]), parseFloat(result.boundingbox[2])],
+      [parseFloat(result.boundingbox[1]), parseFloat(result.boundingbox[3])]
+    ]
+    map.value.fitBounds(bounds, { padding: [50, 50], maxZoom: 17 })
+  } else {
+    map.value.setView([lat, lng], 17)
+  }
+  closeSearch()
+}
+
+function goToFeature(feature: GeoJSON.Feature) {
+  if (!map.value) return
+  // Sélectionner la feature
+  mapStore.selectFeature(feature)
+  // Zoomer dessus
+  try {
+    const layer = L.geoJSON(feature)
+    const bounds = layer.getBounds()
+    if (bounds.isValid()) {
+      map.value.fitBounds(bounds, { padding: [100, 100], maxZoom: 18 })
+    }
+  } catch (e) {
+    console.warn('goToFeature error:', e)
+  }
+  closeSearch()
+}
+
+function clearSearch() {
+  searchQuery.value = ''
+  searchResults.value = []
+  featureSearchResults.value = []
+  showSearchResults.value = false
+  // Supprimer le marqueur de recherche
+  if (searchMarker && map.value) {
+    map.value.removeLayer(searchMarker)
+    searchMarker = null
+  }
+}
+
+function closeSearch() {
+  showSearchResults.value = false
+}
+
 // Raccourcis clavier
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
-    if (showHelp.value) {
+    if (showSearchResults.value) {
+      closeSearch()
+    } else if (showHelp.value) {
       showHelp.value = false
     } else if (toolMode.value !== 'navigation') {
       setToolMode('navigation')
     }
   } else if (e.key === 'Delete' && mapStore.selectedFeature) {
     deleteFeature()
+  }
+}
+
+function handleClickOutside(e: MouseEvent) {
+  const target = e.target as HTMLElement
+  if (!target.closest('.search-container')) {
+    showSearchResults.value = false
   }
 }
 
@@ -2156,6 +2405,15 @@ watch(
   }
 )
 
+// Watch pour les filtres cascade — quand le filtre change, re-rendre les couches
+watch(
+  () => filteredLayers.value.map(l => l.id).join(','),
+  () => {
+    if (!map.value) return
+    renderLayers()
+  }
+)
+
 function renderLayers() {
   if (!map.value) return
 
@@ -2165,8 +2423,8 @@ function renderLayers() {
   })
   layerGroups.value.clear()
 
-  // Ajouter les couches visibles
-  mapStore.layers.forEach(layer => {
+  // Utiliser filteredLayers (respecte le filtre cascade) au lieu de mapStore.layers
+  filteredLayers.value.forEach(layer => {
     if (!layer.visible || !layer.data) return
 
     const group = createLeafletLayerGroup(layer)
@@ -2413,6 +2671,177 @@ watch(
 
 .tool-btn-help:hover {
   opacity: 1;
+}
+
+/* ============================================
+   Barre de recherche
+   ============================================ */
+.toolbar-section-search {
+  flex: 1;
+  min-width: 180px;
+  max-width: 360px;
+}
+
+.search-container {
+  position: relative;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #f5f7fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0 8px;
+  transition: all 0.2s;
+}
+
+.search-input-wrapper:focus-within {
+  background: white;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+}
+
+.search-icon {
+  width: 16px;
+  height: 16px;
+  color: #95a5a6;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  color: #2c3e50;
+  outline: none;
+  min-width: 0;
+}
+
+.search-input::placeholder {
+  color: #bdc3c7;
+}
+
+.search-clear {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.search-clear svg {
+  width: 14px;
+  height: 14px;
+  color: #95a5a6;
+}
+
+.search-clear:hover svg {
+  color: #e74c3c;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  max-height: 350px;
+  overflow-y: auto;
+  z-index: 2000;
+}
+
+.search-loading {
+  padding: 12px 16px;
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.search-group {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.search-group:last-child {
+  border-bottom: none;
+}
+
+.search-group-label {
+  padding: 8px 12px 4px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #95a5a6;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.search-result-item:hover {
+  background: #f5f7fa;
+}
+
+.result-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.result-icon-feature {
+  color: #27ae60;
+}
+
+.result-icon-address {
+  color: #3498db;
+}
+
+.result-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.result-name {
+  font-size: 0.85rem;
+  color: #2c3e50;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-detail {
+  font-size: 0.75rem;
+  color: #95a5a6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Marqueur de résultat de recherche */
+:deep(.search-result-marker) {
+  background: none !important;
+  border: none !important;
+}
+
+.search-pin svg {
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
 /* Sélecteur fond de carte */
@@ -3686,6 +4115,46 @@ watch(
   padding: 20px;
   color: #95a5a6;
   font-size: 0.85rem;
+}
+
+/* Données techniques */
+.feature-custom-props {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.custom-props-title {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin: 0 0 8px 0;
+  font-weight: 500;
+}
+
+.custom-props-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.custom-prop-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.82rem;
+}
+
+.custom-prop-key {
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.custom-prop-value {
+  color: #2c3e50;
+  font-weight: 600;
 }
 
 .feature-photos {

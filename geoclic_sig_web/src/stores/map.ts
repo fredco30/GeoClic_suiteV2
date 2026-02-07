@@ -505,6 +505,7 @@ export const useMapStore = defineStore('map', () => {
             color_value: point.color_value,
             icon_name: pointDisplay.icon || point.icon_name,
             photos: point.photos || [],
+            custom_properties: point.custom_properties || {},
             // Info catégorie pour le rendu carte
             _category_icon: categoryDisplay.icon,
             _category_color: categoryDisplay.color,
