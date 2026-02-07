@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - GéoClic Suite</title>
+    <meta name="description" content="Contactez l'équipe GéoClic pour une démonstration gratuite ou pour toute question sur notre solution de gestion territoriale.">
+    <style>
+        :root {
+            --primary: #1565C0;
+            --primary-dark: #0D47A1;
+            --primary-light: #1976D2;
+            --secondary: #37474F;
+            --accent: #FF6F00;
+            --success: #2E7D32;
+            --background: #FAFAFA;
+            --surface: #FFFFFF;
+            --text: #212121;
+            --text-light: #757575;
+            --border: #E0E0E0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--background);
+        }
+
+        nav {
+            background: var(--surface);
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            margin-left: 30px;
+            text-decoration: none;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        .nav-links a:hover { color: var(--primary); }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 120px 20px 60px;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .contact-grid {
+            max-width: 1000px;
+            margin: -30px auto 60px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .contact-form {
+            background: var(--surface);
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .contact-form h2 {
+            font-size: 1.3em;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: var(--secondary);
+            font-size: 0.9em;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.1);
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .required { color: #ef4444; }
+
+        .btn-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        .btn-submit:hover { background: var(--primary-dark); }
+
+        .btn-submit:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+        }
+
+        .form-success {
+            display: none;
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            color: #166534;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .form-error {
+            display: none;
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .contact-info {
+            background: var(--surface);
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .contact-info h2 {
+            font-size: 1.3em;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .info-card {
+            padding: 18px;
+            background: var(--background);
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .info-card h3 {
+            font-size: 1em;
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+
+        .info-card p {
+            color: var(--text-light);
+            font-size: 0.95em;
+        }
+
+        .info-card a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .info-card a:hover { text-decoration: underline; }
+
+        .demo-cta {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #EBF5FF, #E8F0FE);
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .demo-cta h3 {
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .demo-cta p {
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+
+        .demo-cta ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+
+        .demo-cta li {
+            padding: 3px 0;
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+
+        .demo-cta li::before {
+            content: "✓ ";
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        footer {
+            background: var(--secondary);
+            color: white;
+            padding: 30px 0 15px;
+            margin-top: 60px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.85em;
+            opacity: 0.7;
+        }
+
+        .footer-bottom a { color: white; }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .page-header { padding: 90px 15px 40px; }
+            .page-header h1 { font-size: 1.6em; }
+            .contact-grid {
+                grid-template-columns: 1fr;
+                margin: -20px 15px 30px;
+            }
+            .contact-form, .contact-info { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">GéoClic Suite</a>
+            <div class="nav-links">
+                <a href="fonctionnalites.html">Fonctionnalités</a>
+                <a href="comparatif.html">Comparatif</a>
+                <a href="tarifs.html">Tarifs</a>
+                <a href="contact.html">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <h1>Contactez-nous</h1>
+        <p>Demandez une démonstration gratuite ou posez-nous vos questions</p>
+    </div>
+
+    <div class="contact-grid">
+        <div class="contact-form">
+            <h2>Envoyer un message</h2>
+            <form id="contactForm" onsubmit="return handleSubmit(event)">
+                <div class="form-group">
+                    <label for="nom">Nom complet <span class="required">*</span></label>
+                    <input type="text" id="nom" name="nom" required placeholder="Jean Dupont">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email professionnel <span class="required">*</span></label>
+                    <input type="email" id="email" name="email" required placeholder="jean.dupont@mairie-exemple.fr">
+                </div>
+
+                <div class="form-group">
+                    <label for="collectivite">Collectivité</label>
+                    <input type="text" id="collectivite" name="collectivite" placeholder="Mairie de...">
+                </div>
+
+                <div class="form-group">
+                    <label for="objet">Objet <span class="required">*</span></label>
+                    <select id="objet" name="objet" required>
+                        <option value="">-- Choisissez --</option>
+                        <option value="demo">Demande de démonstration</option>
+                        <option value="devis">Demande de devis</option>
+                        <option value="info">Demande d'information</option>
+                        <option value="support">Support technique</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Message <span class="required">*</span></label>
+                    <textarea id="message" name="message" required placeholder="Décrivez votre besoin..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">Envoyer le message</button>
+
+                <div class="form-success" id="formSuccess">
+                    Merci ! Votre message a bien été envoyé. Nous vous répondrons sous 24h ouvrées.
+                </div>
+                <div class="form-error" id="formError">
+                    Une erreur est survenue. Veuillez réessayer ou nous contacter directement à contact@geoclic.fr
+                </div>
+            </form>
+        </div>
+
+        <div class="contact-info">
+            <h2>Informations</h2>
+
+            <div class="info-card">
+                <h3>Email</h3>
+                <p><a href="mailto:contact@geoclic.fr">contact@geoclic.fr</a></p>
+            </div>
+
+            <div class="info-card">
+                <h3>Temps de réponse</h3>
+                <p>Nous répondons à toutes les demandes sous <strong>24h ouvrées</strong>.</p>
+            </div>
+
+            <div class="info-card">
+                <h3>Support clients</h3>
+                <p>Les collectivités clientes bénéficient d'un support prioritaire par email et téléphone.</p>
+            </div>
+
+            <div class="demo-cta">
+                <h3>Démonstration gratuite</h3>
+                <p>30 minutes pour découvrir GéoClic en action :</p>
+                <ul>
+                    <li>Présentation personnalisée des 7 modules</li>
+                    <li>Configuration avec vos données réelles</li>
+                    <li>Réponses à toutes vos questions techniques</li>
+                    <li>Devis sur mesure immédiat</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2026 GéoClic Suite - <a href="mentions-legales.html">Mentions légales</a> - <a href="contact.html">Contact</a></p>
+        </div>
+    </footer>
+
+    <script>
+    function handleSubmit(event) {
+        event.preventDefault();
+
+        var btn = document.getElementById('submitBtn');
+        var successDiv = document.getElementById('formSuccess');
+        var errorDiv = document.getElementById('formError');
+
+        btn.disabled = true;
+        btn.textContent = 'Envoi en cours...';
+        successDiv.style.display = 'none';
+        errorDiv.style.display = 'none';
+
+        // Collecter les données du formulaire
+        var formData = {
+            nom: document.getElementById('nom').value,
+            email: document.getElementById('email').value,
+            collectivite: document.getElementById('collectivite').value,
+            objet: document.getElementById('objet').value,
+            message: document.getElementById('message').value
+        };
+
+        // Envoyer via l'API GéoClic
+        fetch('/api/public/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        })
+        .then(function(response) {
+            if (response.ok) {
+                successDiv.style.display = 'block';
+                document.getElementById('contactForm').reset();
+            } else {
+                // Fallback : ouvrir le client email
+                var subject = encodeURIComponent('[GéoClic] ' + formData.objet + ' - ' + formData.collectivite);
+                var body = encodeURIComponent(
+                    'Nom: ' + formData.nom + '\n' +
+                    'Email: ' + formData.email + '\n' +
+                    'Collectivité: ' + formData.collectivite + '\n\n' +
+                    formData.message
+                );
+                window.location.href = 'mailto:contact@geoclic.fr?subject=' + subject + '&body=' + body;
+                successDiv.style.display = 'block';
+            }
+        })
+        .catch(function() {
+            // Fallback mailto
+            var subject = encodeURIComponent('[GéoClic] ' + formData.objet);
+            var body = encodeURIComponent(
+                'Nom: ' + formData.nom + '\n' +
+                'Email: ' + formData.email + '\n' +
+                'Collectivité: ' + formData.collectivite + '\n\n' +
+                formData.message
+            );
+            window.location.href = 'mailto:contact@geoclic.fr?subject=' + subject + '&body=' + body;
+            successDiv.style.display = 'block';
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.textContent = 'Envoyer le message';
+        });
+
+        return false;
+    }
+    </script>
+</body>
+</html>

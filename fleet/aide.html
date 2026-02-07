@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GéoClic Fleet Manager - Guide Complet</title>
+<style>
+:root {
+  --primary: #1a73e8;
+  --primary-dark: #1557b0;
+  --primary-light: #e8f0fe;
+  --success: #34a853;
+  --warning: #f9ab00;
+  --danger: #ea4335;
+  --text: #202124;
+  --text-light: #5f6368;
+  --bg: #ffffff;
+  --bg-alt: #f8f9fa;
+  --border: #dadce0;
+  --sidebar-bg: #1e293b;
+  --sidebar-text: #e2e8f0;
+  --sidebar-active: #3b82f6;
+  --code-bg: #1e1e1e;
+  --code-text: #d4d4d4;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  background: var(--bg-alt);
+  line-height: 1.6;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ─── Sidebar ─── */
+.sidebar {
+  width: 280px;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  transition: transform .3s;
+}
+
+.sidebar-header {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+
+.sidebar-header h1 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-header h1 .logo {
+  width: 32px;
+  height: 32px;
+  background: var(--sidebar-active);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.sidebar-header .version {
+  font-size: 12px;
+  color: rgba(255,255,255,.5);
+  margin-top: 4px;
+}
+
+/* Search */
+.sidebar-search {
+  padding: 12px 16px;
+}
+
+.sidebar-search input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 8px;
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .2s, background .2s;
+}
+
+.sidebar-search input::placeholder { color: rgba(255,255,255,.4); }
+.sidebar-search input:focus {
+  border-color: var(--sidebar-active);
+  background: rgba(255,255,255,.12);
+}
+
+.sidebar-search-wrap {
+  position: relative;
+}
+
+.sidebar-search-wrap::before {
+  content: '🔍';
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  opacity: .6;
+}
+
+/* Nav */
+.sidebar-nav {
+  flex: 1;
+  padding: 8px 0;
+  overflow-y: auto;
+}
+
+.nav-section {
+  padding: 8px 16px 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: rgba(255,255,255,.35);
+  font-weight: 600;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 20px;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  font-size: 14px;
+  border-left: 3px solid transparent;
+  transition: all .15s;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  background: rgba(255,255,255,.06);
+  color: #fff;
+}
+
+.nav-link.active {
+  background: rgba(59,130,246,.15);
+  color: #fff;
+  border-left-color: var(--sidebar-active);
+  font-weight: 500;
+}
+
+.nav-link .icon {
+  font-size: 16px;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.nav-link .badge {
+  margin-left: auto;
+  background: var(--sidebar-active);
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* ─── Main Content ─── */
+.main {
+  margin-left: 280px;
+  flex: 1;
+  min-height: 100vh;
+}
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.topbar h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  transition: all .15s;
+  text-decoration: none;
+}
+
+.btn:hover { background: var(--bg-alt); }
+.btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.btn-primary:hover { background: var(--primary-dark); }
+
+.content {
+  padding: 32px;
+  max-width: 960px;
+}
+
+/* Sections */
+.section {
+  display: none;
+  animation: fadeIn .3s;
+}
+
+.section.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cards */
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card-header .card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.card-header h3 {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.card-header p {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+
+/* Steps */
+.steps {
+  counter-reset: step;
+}
+
+.step {
+  position: relative;
+  padding: 20px 24px 20px 72px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  transition: box-shadow .2s;
+}
+
+.step:hover { box-shadow: var(--shadow-lg); }
+
+.step::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  width: 36px;
+  height: 36px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.step h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.step p {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-bottom: 8px;
+}
+
+/* Code blocks */
+.code-block {
+  position: relative;
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: 16px 48px 16px 16px;
+  border-radius: 8px;
+  font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-x: auto;
+  margin: 10px 0;
+  white-space: pre;
+}
+
+.code-block .copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255,255,255,.1);
+  border: none;
+  color: rgba(255,255,255,.6);
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all .2s;
+}
+
+.code-block .copy-btn:hover {
+  background: rgba(255,255,255,.2);
+  color: #fff;
+}
+
+.code-block .copy-btn.copied {
+  background: var(--success);
+  color: #fff;
+}
+
+code {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+  font-size: .9em;
+}
+
+/* Alert boxes */
+.alert {
+  padding: 14px 16px 14px 48px;
+  border-radius: 8px;
+  margin: 12px 0;
+  font-size: 14px;
+  position: relative;
+}
+
+.alert::before {
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  font-size: 18px;
+}
+
+.alert-info {
+  background: #e8f0fe;
+  border: 1px solid #c2d7f7;
+  color: #174ea6;
+}
+.alert-info::before { content: 'ℹ️'; }
+
+.alert-warning {
+  background: #fef7e0;
+  border: 1px solid #f5deb3;
+  color: #8a6d3b;
+}
+.alert-warning::before { content: '⚠️'; }
+
+.alert-success {
+  background: #e6f4ea;
+  border: 1px solid #b7e1c4;
+  color: #137333;
+}
+.alert-success::before { content: '✅'; }
+
+.alert-danger {
+  background: #fce8e6;
+  border: 1px solid #f5b7b1;
+  color: #a93226;
+}
+.alert-danger::before { content: '🚫'; }
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+th {
+  background: var(--bg-alt);
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--border);
+}
+
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+tr:hover td { background: rgba(26,115,232,.03); }
+
+/* Accordion / Collapsible */
+.accordion {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.accordion-item { border-bottom: 1px solid var(--border); }
+.accordion-item:last-child { border-bottom: none; }
+
+.accordion-header {
+  padding: 14px 16px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background .15s;
+  user-select: none;
+}
+
+.accordion-header:hover { background: var(--bg-alt); }
+
+.accordion-header .arrow {
+  transition: transform .2s;
+  font-size: 12px;
+  color: var(--text-light);
+}
+
+.accordion-item.open .accordion-header .arrow {
+  transform: rotate(90deg);
+}
+
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .3s ease;
+}
+
+.accordion-item.open .accordion-body {
+  max-height: 2000px;
+}
+
+.accordion-content {
+  padding: 0 16px 16px;
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+/* Workflow diagram */
+.workflow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 20px 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.workflow-step {
+  background: #fff;
+  border: 2px solid var(--primary);
+  border-radius: 12px;
+  padding: 16px 20px;
+  text-align: center;
+  min-width: 160px;
+  box-shadow: var(--shadow);
+}
+
+.workflow-step .wf-icon { font-size: 28px; margin-bottom: 6px; }
+.workflow-step .wf-title { font-weight: 600; font-size: 14px; }
+.workflow-step .wf-desc { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+
+.workflow-arrow {
+  font-size: 24px;
+  color: var(--primary);
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+
+/* Command ref grid */
+.cmd-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.cmd-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  transition: all .2s;
+  cursor: default;
+}
+
+.cmd-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.cmd-card .cmd-name {
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.cmd-card .cmd-desc {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.cmd-card .cmd-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-essential { background: #e8f0fe; color: var(--primary); }
+.badge-advanced { background: #fef7e0; color: #b45309; }
+.badge-debug { background: #f3e8ff; color: #7c3aed; }
+
+/* Responsive */
+.mobile-toggle {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 200;
+  background: var(--sidebar-bg);
+  color: #fff;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .mobile-toggle { display: flex; align-items: center; justify-content: center; }
+  .topbar { padding-left: 60px; }
+  .content { padding: 20px; }
+}
+
+/* Scroll bar sidebar */
+.sidebar::-webkit-scrollbar { width: 6px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 3px; }
+
+/* Highlight search */
+mark {
+  background: #fff3cd;
+  padding: 1px 3px;
+  border-radius: 2px;
+}
+
+/* Print */
+@media print {
+  .sidebar, .topbar, .mobile-toggle { display: none !important; }
+  .main { margin-left: 0 !important; }
+  .section { display: block !important; page-break-inside: avoid; }
+  .code-block .copy-btn { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Mobile toggle -->
+<button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h1><span class="logo">🚀</span> GéoClic Fleet</h1>
+    <div class="version">Fleet Manager v2.0 - Guide interactif</div>
+  </div>
+
+  <div class="sidebar-search">
+    <div class="sidebar-search-wrap">
+      <input type="text" id="searchInput" placeholder="Rechercher..." oninput="filterSections(this.value)">
+    </div>
+  </div>
+
+  <nav class="sidebar-nav" id="sidebarNav">
+    <div class="nav-section">Accueil</div>
+    <a class="nav-link active" data-section="accueil" onclick="showSection('accueil')">
+      <span class="icon">🏠</span> Vue d'ensemble
+    </a>
+
+    <div class="nav-section">Prérequis</div>
+    <a class="nav-link" data-section="prerequis" onclick="showSection('prerequis')">
+      <span class="icon">📋</span> Avant de commencer
+    </a>
+    <a class="nav-link" data-section="vps" onclick="showSection('vps')">
+      <span class="icon">🖥️</span> Acheter un VPS
+    </a>
+    <a class="nav-link" data-section="dns" onclick="showSection('dns')">
+      <span class="icon">🌐</span> Configurer le DNS
+    </a>
+    <a class="nav-link" data-section="ssh" onclick="showSection('ssh')">
+      <span class="icon">🔑</span> Configurer SSH
+    </a>
+
+    <div class="nav-section">Installation</div>
+    <a class="nav-link" data-section="provision" onclick="showSection('provision')">
+      <span class="icon">📦</span> Provisionner un serveur
+      <span class="badge">Essentiel</span>
+    </a>
+    <a class="nav-link" data-section="init" onclick="showSection('init')">
+      <span class="icon">🗄️</span> Initialiser la base
+      <span class="badge">Essentiel</span>
+    </a>
+
+    <div class="nav-section">Gestion quotidienne</div>
+    <a class="nav-link" data-section="update" onclick="showSection('update')">
+      <span class="icon">🔄</span> Mettre à jour
+    </a>
+    <a class="nav-link" data-section="status" onclick="showSection('status')">
+      <span class="icon">📊</span> Voir l'état
+    </a>
+    <a class="nav-link" data-section="backup" onclick="showSection('backup')">
+      <span class="icon">💾</span> Sauvegardes
+    </a>
+    <a class="nav-link" data-section="logs" onclick="showSection('logs')">
+      <span class="icon">📝</span> Consulter les logs
+    </a>
+
+    <div class="nav-section">Gestion serveurs</div>
+    <a class="nav-link" data-section="list" onclick="showSection('list')">
+      <span class="icon">📃</span> Lister / Ajouter / Retirer
+    </a>
+    <a class="nav-link" data-section="ssh-cmd" onclick="showSection('ssh-cmd')">
+      <span class="icon">💻</span> Accès SSH distant
+    </a>
+
+    <div class="nav-section">Référence</div>
+    <a class="nav-link" data-section="reference" onclick="showSection('reference')">
+      <span class="icon">📖</span> Toutes les commandes
+    </a>
+    <a class="nav-link" data-section="faq" onclick="showSection('faq')">
+      <span class="icon">❓</span> FAQ / Dépannage
+    </a>
+    <a class="nav-link" data-section="glossaire" onclick="showSection('glossaire')">
+      <span class="icon">📚</span> Glossaire
+    </a>
+  </nav>
+</aside>
+
+<!-- Main content -->
+<div class="main">
+  <div class="topbar">
+    <h2 id="topbarTitle">Vue d'ensemble</h2>
+    <div class="topbar-actions">
+      <button class="btn" onclick="window.print()">🖨️ Imprimer</button>
+      <button class="btn btn-primary" onclick="showSection('provision')">🚀 Nouveau client</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══ ACCUEIL ═══ -->
+    <div class="section active" id="sec-accueil">
+      <div class="card" style="border-left: 4px solid var(--primary);">
+        <h3 style="font-size: 22px; margin-bottom: 12px;">Bienvenue dans GéoClic Fleet Manager</h3>
+        <p style="font-size: 15px; color: var(--text-light); margin-bottom: 20px;">
+          Fleet Manager vous permet de déployer et gérer GéoClic Suite sur plusieurs serveurs clients,
+          le tout depuis votre serveur principal. Aucune connaissance Linux avancée n'est requise :
+          suivez simplement ce guide étape par étape.
+        </p>
+      </div>
+
+      <h3 style="margin: 24px 0 16px;">Comment ça marche ?</h3>
+      <div class="workflow">
+        <div class="workflow-step">
+          <div class="wf-icon">🖥️</div>
+          <div class="wf-title">1. Acheter un VPS</div>
+          <div class="wf-desc">Serveur chez OVH, Scaleway...</div>
+        </div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-step">
+          <div class="wf-icon">🌐</div>
+          <div class="wf-title">2. Configurer DNS</div>
+          <div class="wf-desc">nom-du-client.geoclic.fr</div>
+        </div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-step">
+          <div class="wf-icon">📦</div>
+          <div class="wf-title">3. Provisionner</div>
+          <div class="wf-desc">Docker, code, SSL, .env</div>
+        </div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-step">
+          <div class="wf-icon">🗄️</div>
+          <div class="wf-title">4. Initialiser DB</div>
+          <div class="wf-desc">25 migrations + admin</div>
+        </div>
+        <div class="workflow-arrow">→</div>
+        <div class="workflow-step" style="border-color: var(--success);">
+          <div class="wf-icon">✅</div>
+          <div class="wf-title">5. C'est prêt !</div>
+          <div class="wf-desc">Le client se connecte</div>
+        </div>
+      </div>
+
+      <h3 style="margin: 28px 0 16px;">Commandes essentielles</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card" onclick="showSection('provision')">
+          <div class="cmd-name">provision</div>
+          <div class="cmd-desc">Installer GéoClic sur un nouveau serveur vierge</div>
+          <span class="cmd-badge badge-essential">Essentiel</span>
+        </div>
+        <div class="cmd-card" onclick="showSection('init')">
+          <div class="cmd-name">init</div>
+          <div class="cmd-desc">Créer les tables et le compte administrateur</div>
+          <span class="cmd-badge badge-essential">Essentiel</span>
+        </div>
+        <div class="cmd-card" onclick="showSection('update')">
+          <div class="cmd-name">update</div>
+          <div class="cmd-desc">Mettre à jour un ou tous les serveurs clients</div>
+          <span class="cmd-badge badge-essential">Essentiel</span>
+        </div>
+        <div class="cmd-card" onclick="showSection('status')">
+          <div class="cmd-name">status</div>
+          <div class="cmd-desc">Vérifier que tous les serveurs fonctionnent</div>
+          <span class="cmd-badge badge-advanced">Gestion</span>
+        </div>
+        <div class="cmd-card" onclick="showSection('backup')">
+          <div class="cmd-name">backup</div>
+          <div class="cmd-desc">Déclencher une sauvegarde de la base de données</div>
+          <span class="cmd-badge badge-advanced">Gestion</span>
+        </div>
+        <div class="cmd-card" onclick="showSection('logs')">
+          <div class="cmd-name">logs</div>
+          <div class="cmd-desc">Voir les logs d'un service Docker distant</div>
+          <span class="cmd-badge badge-debug">Debug</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PREREQUIS ═══ -->
+    <div class="section" id="sec-prerequis">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: var(--primary-light); color: var(--primary);">📋</div>
+          <div>
+            <h3>Ce dont vous avez besoin avant de commencer</h3>
+            <p>Checklist complète des prérequis pour déployer un nouveau client</p>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr><th>Élément</th><th>Détail</th><th>Coût</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Un VPS (serveur)</strong></td>
+              <td>Ubuntu 22.04 ou 24.04, minimum 2 Go RAM, 20 Go disque</td>
+              <td>~5-10€/mois</td>
+            </tr>
+            <tr>
+              <td><strong>Un nom de domaine</strong></td>
+              <td>Sous-domaine de geoclic.fr ou domaine du client</td>
+              <td>Inclus ou ~10€/an</td>
+            </tr>
+            <tr>
+              <td><strong>Accès SSH au serveur</strong></td>
+              <td>L'IP du VPS + la clé SSH Fleet configurée</td>
+              <td>Gratuit</td>
+            </tr>
+            <tr>
+              <td><strong>Un email admin</strong></td>
+              <td>Pour les certificats SSL et le compte super admin</td>
+              <td>Gratuit</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="alert alert-info">
+          <strong>Rappel :</strong> Toutes les commandes Fleet s'exécutent depuis votre serveur principal
+          (geoclic.fr). Vous n'avez jamais besoin de vous connecter manuellement au serveur du client.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ VPS ═══ -->
+    <div class="section" id="sec-vps">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: #e8f0fe; color: var(--primary);">🖥️</div>
+          <div>
+            <h3>Acheter un VPS pour un nouveau client</h3>
+            <p>Guide pas-à-pas pour commander un serveur</p>
+          </div>
+        </div>
+
+        <p>Un <strong>VPS</strong> (Virtual Private Server) est un serveur virtuel chez un hébergeur. C'est comme un ordinateur qui tourne 24h/24 sur internet.</p>
+
+        <h4 style="margin: 20px 0 12px;">Fournisseurs recommandés</h4>
+        <table>
+          <thead>
+            <tr><th>Fournisseur</th><th>Offre recommandée</th><th>Prix</th><th>Avantage</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>OVH</strong></td>
+              <td>VPS Starter (2 Go RAM, 40 Go SSD)</td>
+              <td>~6€/mois</td>
+              <td>Hébergeur français, RGPD, support FR</td>
+            </tr>
+            <tr>
+              <td><strong>Scaleway</strong></td>
+              <td>DEV1-S (2 Go RAM, 20 Go SSD)</td>
+              <td>~5€/mois</td>
+              <td>Interface moderne, Paris datacenter</td>
+            </tr>
+            <tr>
+              <td><strong>Hetzner</strong></td>
+              <td>CX22 (4 Go RAM, 40 Go SSD)</td>
+              <td>~4€/mois</td>
+              <td>Très bon rapport qualité/prix</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="steps">
+          <div class="step">
+            <h4>Aller sur le site du fournisseur</h4>
+            <p>Exemple OVH : allez sur <code>ovhcloud.com</code>, section "VPS", cliquez "Commander".</p>
+          </div>
+          <div class="step">
+            <h4>Choisir le système d'exploitation</h4>
+            <p>Sélectionnez <strong>Ubuntu 22.04</strong> ou <strong>Ubuntu 24.04</strong> (jamais Windows, jamais CentOS).</p>
+          </div>
+          <div class="step">
+            <h4>Choisir l'offre</h4>
+            <p>Minimum <strong>2 Go de RAM</strong> et <strong>20 Go de disque</strong>. Pour une grosse commune, préférez 4 Go.</p>
+          </div>
+          <div class="step">
+            <h4>Payer et récupérer les infos</h4>
+            <p>Après le paiement, vous recevrez par email :</p>
+            <ul style="margin: 8px 0 0 20px;">
+              <li><strong>L'adresse IP</strong> du serveur (ex: <code>51.210.42.100</code>)</li>
+              <li><strong>Le mot de passe root</strong> (on ne l'utilisera qu'une fois)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="alert alert-success">
+          <strong>Notez bien l'adresse IP</strong> — vous en aurez besoin pour toutes les étapes suivantes.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ DNS ═══ -->
+    <div class="section" id="sec-dns">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: #e6f4ea; color: var(--success);">🌐</div>
+          <div>
+            <h3>Configurer le DNS</h3>
+            <p>Relier un nom de domaine à l'adresse IP du serveur</p>
+          </div>
+        </div>
+
+        <p>Le <strong>DNS</strong> est l'annuaire d'internet. Il traduit un nom lisible (ex: <code>lyon.geoclic.fr</code>) en adresse IP (ex: <code>51.210.42.100</code>).</p>
+
+        <div class="steps">
+          <div class="step">
+            <h4>Aller dans votre gestionnaire DNS</h4>
+            <p>Connectez-vous à l'interface où vous gérez le domaine <code>geoclic.fr</code> (OVH, Cloudflare, etc.).</p>
+          </div>
+          <div class="step">
+            <h4>Ajouter un enregistrement DNS de type A</h4>
+            <p>Créez un nouvel enregistrement avec ces valeurs :</p>
+            <table>
+              <tr><th>Champ</th><th>Valeur</th></tr>
+              <tr><td>Type</td><td><code>A</code></td></tr>
+              <tr><td>Nom / Sous-domaine</td><td><code>lyon</code> (pour lyon.geoclic.fr)</td></tr>
+              <tr><td>Adresse IP</td><td><code>51.210.42.100</code> (IP du VPS)</td></tr>
+              <tr><td>TTL</td><td><code>3600</code> (ou laisser par défaut)</td></tr>
+            </table>
+          </div>
+          <div class="step">
+            <h4>Attendre la propagation</h4>
+            <p>Le DNS met entre <strong>5 minutes et 24 heures</strong> à se propager. En général, c'est actif en moins d'une heure.</p>
+            <p>Pour vérifier :</p>
+            <div class="code-block">ping lyon.geoclic.fr<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+            <p>Si vous voyez l'IP du VPS dans la réponse, c'est bon !</p>
+          </div>
+        </div>
+
+        <div class="alert alert-warning">
+          <strong>Important :</strong> Le DNS doit être configuré AVANT l'étape "provision" car le certificat SSL (HTTPS) a besoin que le domaine pointe déjà vers le serveur.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SSH ═══ -->
+    <div class="section" id="sec-ssh">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: #fef7e0; color: #b45309;">🔑</div>
+          <div>
+            <h3>Configurer la clé SSH Fleet</h3>
+            <p>Permettre à Fleet de se connecter aux serveurs clients sans mot de passe</p>
+          </div>
+        </div>
+
+        <p><strong>SSH</strong> est un moyen sécurisé de se connecter à un serveur distant. La <strong>clé SSH</strong> remplace le mot de passe : c'est plus sécurisé et Fleet en a besoin.</p>
+
+        <h4 style="margin: 16px 0 8px;">Étape 1 : Générer la clé Fleet (une seule fois)</h4>
+        <p>Sur votre serveur principal (geoclic.fr) :</p>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh ssh-key generate<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+        <p>Cela crée deux fichiers :</p>
+        <ul style="margin: 8px 0 0 20px;">
+          <li><code>~/.ssh/geoclic_fleet_key</code> — la clé privée (ne jamais partager !)</li>
+          <li><code>~/.ssh/geoclic_fleet_key.pub</code> — la clé publique (à copier sur les VPS)</li>
+        </ul>
+
+        <h4 style="margin: 20px 0 8px;">Étape 2 : Copier la clé sur le nouveau VPS</h4>
+        <p>D'abord, affichez la clé publique :</p>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh ssh-key show<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+        <p>Copiez le texte affiché. Puis connectez-vous au VPS avec le mot de passe root reçu par email :</p>
+        <div class="code-block">ssh root@51.210.42.100
+# Entrez le mot de passe root
+
+# Créer l'utilisateur ubuntu (si pas déjà fait)
+adduser ubuntu --disabled-password --gecos ""
+usermod -aG sudo docker ubuntu
+echo "ubuntu ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/ubuntu
+
+# Autoriser la clé Fleet
+mkdir -p /home/ubuntu/.ssh
+echo "COLLEZ_LA_CLE_PUBLIQUE_ICI" >> /home/ubuntu/.ssh/authorized_keys
+chown -R ubuntu:ubuntu /home/ubuntu/.ssh
+chmod 700 /home/ubuntu/.ssh
+chmod 600 /home/ubuntu/.ssh/authorized_keys
+
+# Quitter
+exit<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <h4 style="margin: 20px 0 8px;">Étape 3 : Vérifier que ça marche</h4>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh test-ssh 51.210.42.100 ubuntu<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+        <p>Si vous voyez <code>{"status":"ok"}</code>, la connexion SSH fonctionne !</p>
+
+        <div class="alert alert-danger">
+          <strong>Ne partagez JAMAIS la clé privée</strong> (<code>geoclic_fleet_key</code>). Seule la clé publique (<code>.pub</code>) se copie sur les serveurs.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PROVISION ═══ -->
+    <div class="section" id="sec-provision">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: #e8f0fe; color: var(--primary);">📦</div>
+          <div>
+            <h3>Provisionner un nouveau serveur</h3>
+            <p>Installe Docker, copie le code, configure SSL et démarre les conteneurs</p>
+          </div>
+        </div>
+
+        <div class="alert alert-info">
+          <strong>Prérequis :</strong> Le VPS est acheté, le DNS est configuré, la clé SSH est installée.
+        </div>
+
+        <h4 style="margin: 16px 0 8px;">La commande</h4>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh provision \
+  --name ville-lyon \
+  --domain lyon.geoclic.fr \
+  --ip 51.210.42.100 \
+  --email admin@lyon.fr<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <h4 style="margin: 20px 0 12px;">Paramètres</h4>
+        <table>
+          <thead>
+            <tr><th>Paramètre</th><th>Obligatoire</th><th>Description</th><th>Exemple</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>--name</code></td><td>Oui</td><td>Nom unique du client (sans espaces)</td><td><code>ville-lyon</code></td></tr>
+            <tr><td><code>--domain</code></td><td>Oui</td><td>Nom de domaine du client</td><td><code>lyon.geoclic.fr</code></td></tr>
+            <tr><td><code>--ip</code></td><td>Oui</td><td>Adresse IP du VPS</td><td><code>51.210.42.100</code></td></tr>
+            <tr><td><code>--email</code></td><td>Oui</td><td>Email pour SSL (Let's Encrypt)</td><td><code>admin@lyon.fr</code></td></tr>
+            <tr><td><code>--ssh-user</code></td><td>Non</td><td>Utilisateur SSH (défaut: ubuntu)</td><td><code>ubuntu</code></td></tr>
+            <tr><td><code>--ssh-port</code></td><td>Non</td><td>Port SSH (défaut: 22)</td><td><code>22</code></td></tr>
+          </tbody>
+        </table>
+
+        <h4 style="margin: 20px 0 12px;">Ce que fait la commande (7 étapes automatiques)</h4>
+        <div class="steps">
+          <div class="step">
+            <h4>Test connexion SSH</h4>
+            <p>Vérifie qu'on peut se connecter au serveur</p>
+          </div>
+          <div class="step">
+            <h4>Installation des prérequis</h4>
+            <p>Met à jour Ubuntu, installe Docker et docker-compose</p>
+          </div>
+          <div class="step">
+            <h4>Copie du code GéoClic</h4>
+            <p>Envoie tout le code de votre serveur vers le nouveau VPS via rsync</p>
+          </div>
+          <div class="step">
+            <h4>Configuration environnement</h4>
+            <p>Génère le fichier <code>.env</code> avec des mots de passe sécurisés uniques</p>
+          </div>
+          <div class="step">
+            <h4>Certificat SSL</h4>
+            <p>Obtient un certificat HTTPS gratuit via Let's Encrypt</p>
+          </div>
+          <div class="step">
+            <h4>Construction Docker</h4>
+            <p>Build tous les conteneurs et les démarre</p>
+          </div>
+          <div class="step">
+            <h4>Configuration finale</h4>
+            <p>Configure les sauvegardes automatiques, le monitoring, et le redémarrage auto</p>
+          </div>
+        </div>
+
+        <div class="alert alert-warning">
+          <strong>Durée :</strong> Le provisionnement prend environ <strong>10 à 20 minutes</strong> selon la vitesse du VPS. Ne fermez pas le terminal pendant l'exécution.
+        </div>
+
+        <div class="alert alert-success">
+          <strong>Après le provisionnement :</strong> L'étape suivante est d'initialiser la base de données avec la commande <code>init</code>.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ INIT ═══ -->
+    <div class="section" id="sec-init">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: #e6f4ea; color: var(--success);">🗄️</div>
+          <div>
+            <h3>Initialiser la base de données</h3>
+            <p>Applique les 25 migrations SQL et crée le compte super administrateur</p>
+          </div>
+        </div>
+
+        <div class="alert alert-info">
+          <strong>Prérequis :</strong> Le serveur doit être provisionné (commande <code>provision</code> terminée avec succès).
+        </div>
+
+        <h4 style="margin: 16px 0 8px;">La commande</h4>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh init \
+  --client ville-lyon \
+  --email admin@lyon.fr \
+  --password MotDePasse2026! \
+  --collectivite "Mairie de Lyon"<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <h4 style="margin: 20px 0 12px;">Paramètres</h4>
+        <table>
+          <thead>
+            <tr><th>Paramètre</th><th>Obligatoire</th><th>Description</th><th>Exemple</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>--client</code></td><td>Oui</td><td>Nom du serveur (celui donné lors du provision)</td><td><code>ville-lyon</code></td></tr>
+            <tr><td><code>--email</code></td><td>Oui</td><td>Email du super administrateur</td><td><code>admin@lyon.fr</code></td></tr>
+            <tr><td><code>--password</code></td><td>Oui</td><td>Mot de passe du super admin</td><td><code>MotDePasse2026!</code></td></tr>
+            <tr><td><code>--collectivite</code></td><td>Non</td><td>Nom de la collectivité (défaut: "Ma Collectivité")</td><td><code>"Mairie de Lyon"</code></td></tr>
+            <tr><td><code>--with-demo</code></td><td>Non</td><td>Charger aussi les données de démonstration</td><td>(pas de valeur)</td></tr>
+          </tbody>
+        </table>
+
+        <h4 style="margin: 20px 0 12px;">Ce que fait la commande</h4>
+        <div class="steps">
+          <div class="step">
+            <h4>Vérifie la connexion à la base de données</h4>
+            <p>S'assure que PostgreSQL et PostGIS fonctionnent dans le conteneur Docker</p>
+          </div>
+          <div class="step">
+            <h4>Applique les 25 migrations SQL</h4>
+            <p>Crée toutes les tables, fonctions, triggers et vues. C'est ce qui donne au client TOUTES les fonctionnalités (demandes, services, zones, tchat, notifications...)</p>
+          </div>
+          <div class="step">
+            <h4>Crée le compte super administrateur</h4>
+            <p>Génère un hash bcrypt du mot de passe et insère le compte dans la table <code>geoclic_users</code> avec tous les droits</p>
+          </div>
+          <div class="step">
+            <h4>Configure le branding initial</h4>
+            <p>Enregistre le nom de la collectivité et les couleurs par défaut dans <code>system_settings</code></p>
+          </div>
+        </div>
+
+        <h4 style="margin: 20px 0 12px;">Avec données de démonstration</h4>
+        <p>Ajoutez <code>--with-demo</code> pour charger des données fictives réalistes :</p>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh init \
+  --client demo-serveur \
+  --email admin@demo.geoclic.fr \
+  --password demo2026! \
+  --collectivite "Ville de Montpellier" \
+  --with-demo<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <p style="margin-top: 8px;">Les données de démo incluent :</p>
+        <ul style="margin: 4px 0 0 20px;">
+          <li>3 comptes utilisateurs (admin, voirie, espaces verts)</li>
+          <li>4 services municipaux</li>
+          <li>15 catégories de signalement</li>
+          <li>12 signalements fictifs autour de Montpellier</li>
+        </ul>
+
+        <div class="alert alert-success">
+          <strong>C'est terminé !</strong> Le client peut maintenant se connecter sur <code>https://lyon.geoclic.fr/admin/</code> avec son email et mot de passe. Le wizard d'onboarding le guidera pour la configuration.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ UPDATE ═══ -->
+    <div class="section" id="sec-update">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: #e8f0fe; color: var(--primary);">🔄</div>
+          <div>
+            <h3>Mettre à jour les serveurs clients</h3>
+            <p>Envoie les dernières modifications de code et reconstruit les conteneurs</p>
+          </div>
+        </div>
+
+        <h4 style="margin: 16px 0 8px;">Mettre à jour un seul client</h4>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh update --client ville-lyon<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <h4 style="margin: 20px 0 8px;">Mettre à jour TOUS les clients d'un coup</h4>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh update --all<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <h4 style="margin: 20px 0 8px;">Mettre à jour avec une migration SQL</h4>
+        <p>Si une nouvelle fonctionnalité nécessite un changement de base de données :</p>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh update \
+  --client ville-lyon \
+  --migration 025_nouvelle_feature.sql<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <h4 style="margin: 20px 0 8px;">Mettre à jour uniquement certains services</h4>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh update \
+  --client ville-lyon \
+  --services "api portail demandes"<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <h4 style="margin: 20px 0 12px;">Ce que fait la commande (4-5 étapes)</h4>
+        <div class="steps">
+          <div class="step">
+            <h4>Sauvegarde automatique</h4>
+            <p>Fait un backup de la base de données AVANT toute modification (sécurité)</p>
+          </div>
+          <div class="step">
+            <h4>Synchronisation du code</h4>
+            <p>Envoie les fichiers modifiés via rsync (seuls les fichiers changés sont transférés)</p>
+          </div>
+          <div class="step">
+            <h4>Migration SQL (si demandé)</h4>
+            <p>Applique le fichier SQL sur la base de données du client</p>
+          </div>
+          <div class="step">
+            <h4>Reconstruction Docker</h4>
+            <p>Rebuild et redémarre les conteneurs avec le nouveau code</p>
+          </div>
+          <div class="step">
+            <h4>Vérification de santé</h4>
+            <p>Teste que l'API répond correctement (HTTP 200)</p>
+          </div>
+        </div>
+
+        <div class="alert alert-warning">
+          <strong>Important :</strong> La mise à jour provoque une courte interruption de service (2-5 minutes) pendant le rebuild Docker. Préférez les mises à jour en dehors des heures de bureau.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STATUS ═══ -->
+    <div class="section" id="sec-status">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: #e6f4ea; color: var(--success);">📊</div>
+          <div>
+            <h3>Vérifier l'état des serveurs</h3>
+            <p>Voir si tous les serveurs clients sont en ligne et fonctionnent</p>
+          </div>
+        </div>
+
+        <h4 style="margin: 16px 0 8px;">État de tous les serveurs</h4>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh status<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+        <p>Résultat :</p>
+        <div class="code-block" style="color: #fff;">🟢 ville-lyon (lyon.geoclic.fr) - HTTP 200 - SSL: Mar 15 2027 - SSH: true
+🟢 ville-nice (nice.geoclic.fr) - HTTP 200 - SSL: Jun 20 2027 - SSH: true
+🔴 ville-test (test.geoclic.fr) - HTTP 000 - SSL:  - SSH: false<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <h4 style="margin: 20px 0 12px;">Comprendre les résultats</h4>
+        <table>
+          <tr><th>Indicateur</th><th>Signification</th></tr>
+          <tr><td>🟢 HTTP 200</td><td>Le serveur fonctionne parfaitement</td></tr>
+          <tr><td>🔴 HTTP 000</td><td>Le serveur ne répond pas (éteint ou DNS pas configuré)</td></tr>
+          <tr><td>🔴 HTTP 502</td><td>Nginx fonctionne mais l'API est plantée</td></tr>
+          <tr><td>SSL: date</td><td>Date d'expiration du certificat HTTPS</td></tr>
+          <tr><td>SSH: true/false</td><td>Connexion SSH possible ou non</td></tr>
+        </table>
+
+        <h4 style="margin: 20px 0 8px;">État détaillé d'un seul client (JSON)</h4>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh status --client ville-lyon<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+      </div>
+    </div>
+
+    <!-- ═══ BACKUP ═══ -->
+    <div class="section" id="sec-backup">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: #fef7e0; color: #b45309;">💾</div>
+          <div>
+            <h3>Sauvegardes</h3>
+            <p>Déclencher une sauvegarde de la base de données d'un client</p>
+          </div>
+        </div>
+
+        <div class="alert alert-info">
+          <strong>Automatique :</strong> Les sauvegardes sont déjà configurées automatiquement tous les jours à 2h du matin sur chaque serveur. Cette commande permet de déclencher une sauvegarde supplémentaire manuellement.
+        </div>
+
+        <h4 style="margin: 16px 0 8px;">Sauvegarder un client</h4>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh backup --client ville-lyon<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <h4 style="margin: 20px 0 8px;">Sauvegarder tous les clients</h4>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh backup --all<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <div class="alert alert-warning">
+          <strong>Conseil :</strong> Faites toujours un backup manuel <strong>avant</strong> une mise à jour importante. La commande <code>update</code> le fait automatiquement, mais mieux vaut être prudent.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ LOGS ═══ -->
+    <div class="section" id="sec-logs">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: #f3e8ff; color: #7c3aed;">📝</div>
+          <div>
+            <h3>Consulter les logs</h3>
+            <p>Voir ce qu'il se passe dans les conteneurs Docker d'un client</p>
+          </div>
+        </div>
+
+        <h4 style="margin: 16px 0 8px;">Voir les logs de l'API</h4>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh logs ville-lyon<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <h4 style="margin: 20px 0 8px;">Voir les logs d'un service spécifique</h4>
+        <div class="code-block"># Logs du portail citoyen
+sudo /opt/geoclic/fleet/geoclic-fleet.sh logs ville-lyon --service portail
+
+# Logs de nginx (proxy web)
+sudo /opt/geoclic/fleet/geoclic-fleet.sh logs ville-lyon --service nginx
+
+# Logs de la base de données
+sudo /opt/geoclic/fleet/geoclic-fleet.sh logs ville-lyon --service db<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <h4 style="margin: 20px 0 8px;">Afficher plus de lignes</h4>
+        <div class="code-block"># Afficher les 200 dernières lignes
+sudo /opt/geoclic/fleet/geoclic-fleet.sh logs ville-lyon --lines 200<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <h4 style="margin: 20px 0 12px;">Services disponibles</h4>
+        <table>
+          <tr><th>Service</th><th>Conteneur</th><th>Description</th></tr>
+          <tr><td><code>api</code></td><td>geoclic_api</td><td>API FastAPI (erreurs 500, requêtes)</td></tr>
+          <tr><td><code>db</code></td><td>geoclic_db</td><td>PostgreSQL (erreurs SQL)</td></tr>
+          <tr><td><code>nginx</code></td><td>geoclic_nginx</td><td>Proxy web (erreurs 502, 404)</td></tr>
+          <tr><td><code>portail</code></td><td>geoclic_portail</td><td>Portail citoyen</td></tr>
+          <tr><td><code>demandes</code></td><td>geoclic_demandes</td><td>Back-office demandes</td></tr>
+          <tr><td><code>admin</code></td><td>geoclic_admin</td><td>GéoClic Data (admin)</td></tr>
+          <tr><td><code>sig</code></td><td>geoclic_sig</td><td>SIG Web cartographie</td></tr>
+          <tr><td><code>services</code></td><td>geoclic_services</td><td>Services terrain (desktop)</td></tr>
+          <tr><td><code>terrain</code></td><td>geoclic_terrain</td><td>PWA terrain (mobile)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ LIST / ADD / REMOVE ═══ -->
+    <div class="section" id="sec-list">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: #e8f0fe; color: var(--primary);">📃</div>
+          <div>
+            <h3>Gérer le registre des serveurs</h3>
+            <p>Lister, ajouter ou retirer des serveurs du registre Fleet</p>
+          </div>
+        </div>
+
+        <h4 style="margin: 16px 0 8px;">Lister tous les serveurs</h4>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh list<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <h4 style="margin: 20px 0 8px;">Ajouter un serveur manuellement</h4>
+        <p>Utile si vous avez un serveur déjà existant que vous voulez gérer avec Fleet :</p>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh add \
+  --name ville-nice \
+  --domain nice.geoclic.fr \
+  --ip 51.210.99.200<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <h4 style="margin: 20px 0 8px;">Retirer un serveur du registre</h4>
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh remove --name ville-test<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <div class="alert alert-info">
+          <strong>Note :</strong> Retirer un serveur du registre ne supprime rien sur le serveur distant. Cela supprime simplement l'entrée dans le fichier <code>clients.conf</code>.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SSH CMD ═══ -->
+    <div class="section" id="sec-ssh-cmd">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: var(--code-bg); color: var(--code-text);">💻</div>
+          <div>
+            <h3>Accès SSH direct</h3>
+            <p>Se connecter directement au terminal d'un serveur client</p>
+          </div>
+        </div>
+
+        <div class="code-block">sudo /opt/geoclic/fleet/geoclic-fleet.sh ssh ville-lyon<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <p style="margin-top: 12px;">Cela vous connecte directement au serveur du client. Vous pouvez alors exécuter des commandes comme :</p>
+
+        <div class="code-block"># Voir l'état des conteneurs
+cd /opt/geoclic/deploy && sudo docker-compose ps
+
+# Redémarrer un service
+sudo docker-compose restart api
+
+# Accéder à la base de données
+sudo docker exec -it geoclic_db psql -U geoclic -d geoclic_db
+
+# Quitter le serveur
+exit<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+
+        <div class="alert alert-warning">
+          <strong>Attention :</strong> Sur le serveur client, toutes les commandes doivent être préfixées par <code>sudo</code>. Pour quitter, tapez <code>exit</code>.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ REFERENCE ═══ -->
+    <div class="section" id="sec-reference">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: #e8f0fe; color: var(--primary);">📖</div>
+          <div>
+            <h3>Référence complète des commandes</h3>
+            <p>Toutes les commandes Fleet avec leurs options</p>
+          </div>
+        </div>
+
+        <div class="cmd-grid">
+          <div class="cmd-card">
+            <div class="cmd-name">provision</div>
+            <div class="cmd-desc">Installe GéoClic sur un nouveau VPS</div>
+            <span class="cmd-badge badge-essential">Essentiel</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">init</div>
+            <div class="cmd-desc">Initialise la DB (migrations + admin)</div>
+            <span class="cmd-badge badge-essential">Essentiel</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">update</div>
+            <div class="cmd-desc">Met à jour un ou tous les serveurs</div>
+            <span class="cmd-badge badge-essential">Essentiel</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">status</div>
+            <div class="cmd-desc">Vérifie l'état de santé des serveurs</div>
+            <span class="cmd-badge badge-advanced">Gestion</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">list</div>
+            <div class="cmd-desc">Liste les serveurs enregistrés</div>
+            <span class="cmd-badge badge-advanced">Gestion</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">add</div>
+            <div class="cmd-desc">Ajoute un serveur au registre</div>
+            <span class="cmd-badge badge-advanced">Gestion</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">remove</div>
+            <div class="cmd-desc">Retire un serveur du registre</div>
+            <span class="cmd-badge badge-advanced">Gestion</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">ssh</div>
+            <div class="cmd-desc">Connexion SSH directe à un serveur</div>
+            <span class="cmd-badge badge-debug">Debug</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">logs</div>
+            <div class="cmd-desc">Consulte les logs Docker d'un serveur</div>
+            <span class="cmd-badge badge-debug">Debug</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">backup</div>
+            <div class="cmd-desc">Déclenche une sauvegarde manuelle</div>
+            <span class="cmd-badge badge-advanced">Gestion</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">ssh-key</div>
+            <div class="cmd-desc">Génère ou affiche la clé SSH Fleet</div>
+            <span class="cmd-badge badge-advanced">Gestion</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">test-ssh</div>
+            <div class="cmd-desc">Teste la connexion SSH vers une IP</div>
+            <span class="cmd-badge badge-debug">Debug</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">task-status</div>
+            <div class="cmd-desc">Vérifie l'avancement d'une tâche</div>
+            <span class="cmd-badge badge-debug">Debug</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">task-log</div>
+            <div class="cmd-desc">Consulte le log d'une tâche passée</div>
+            <span class="cmd-badge badge-debug">Debug</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">aide</div>
+            <div class="cmd-desc">Ouvre cette page d'aide interactive</div>
+            <span class="cmd-badge badge-essential">Essentiel</span>
+          </div>
+          <div class="cmd-card">
+            <div class="cmd-name">help</div>
+            <div class="cmd-desc">Aide rapide dans le terminal</div>
+            <span class="cmd-badge badge-essential">Essentiel</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FAQ ═══ -->
+    <div class="section" id="sec-faq">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: #fef7e0; color: #b45309;">❓</div>
+          <div>
+            <h3>FAQ et Dépannage</h3>
+            <p>Solutions aux problèmes les plus fréquents</p>
+          </div>
+        </div>
+
+        <div class="accordion">
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              Le provision échoue à l'étape SSH
+              <span class="arrow">▶</span>
+            </div>
+            <div class="accordion-body">
+              <div class="accordion-content">
+                <p><strong>Cause :</strong> La clé SSH Fleet n'est pas autorisée sur le VPS.</p>
+                <p><strong>Solution :</strong></p>
+                <ol style="margin: 8px 0 0 20px;">
+                  <li>Vérifiez que la clé est générée : <code>geoclic-fleet.sh ssh-key show</code></li>
+                  <li>Connectez-vous au VPS manuellement et ajoutez la clé dans <code>/home/ubuntu/.ssh/authorized_keys</code></li>
+                  <li>Testez : <code>geoclic-fleet.sh test-ssh IP ubuntu</code></li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              Le certificat SSL échoue (erreur certbot)
+              <span class="arrow">▶</span>
+            </div>
+            <div class="accordion-body">
+              <div class="accordion-content">
+                <p><strong>Cause :</strong> Le DNS ne pointe pas encore vers le bon serveur.</p>
+                <p><strong>Solution :</strong></p>
+                <ol style="margin: 8px 0 0 20px;">
+                  <li>Vérifiez avec <code>ping votre-domaine.geoclic.fr</code></li>
+                  <li>Si l'IP ne correspond pas, attendez la propagation DNS (jusqu'à 24h)</li>
+                  <li>Relancez le provision une fois le DNS actif</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              Erreur "KeyError: ContainerConfig" pendant le build Docker
+              <span class="arrow">▶</span>
+            </div>
+            <div class="accordion-body">
+              <div class="accordion-content">
+                <p><strong>Cause :</strong> Cache Docker corrompu (fréquent avec docker-compose 1.29.2).</p>
+                <p><strong>Solution :</strong> Connectez-vous au serveur en SSH et exécutez :</p>
+                <div class="code-block">cd /opt/geoclic/deploy
+sudo docker-compose down
+sudo docker container prune -f
+sudo docker-compose up -d --build<button class="copy-btn" onclick="copyCode(this)">Copier</button></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              Le site affiche "502 Bad Gateway"
+              <span class="arrow">▶</span>
+            </div>
+            <div class="accordion-body">
+              <div class="accordion-content">
+                <p><strong>Cause :</strong> Nginx fonctionne mais l'API ou le frontend ne répond pas.</p>
+                <p><strong>Solution :</strong></p>
+                <ol style="margin: 8px 0 0 20px;">
+                  <li>Vérifiez les logs : <code>geoclic-fleet.sh logs NOM --service api</code></li>
+                  <li>Si l'API a planté, redémarrez via SSH : <code>sudo docker-compose restart api</code></li>
+                  <li>Si le problème persiste, redémarrez tout : <code>sudo docker-compose down && sudo docker-compose up -d</code></li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              L'init échoue sur une migration SQL
+              <span class="arrow">▶</span>
+            </div>
+            <div class="accordion-body">
+              <div class="accordion-content">
+                <p><strong>Cause :</strong> Une table ou extension manquante, ou migration déjà appliquée.</p>
+                <p><strong>Solution :</strong></p>
+                <ol style="margin: 8px 0 0 20px;">
+                  <li>Notez le numéro de la migration qui échoue dans la sortie</li>
+                  <li>Connectez-vous en SSH au serveur client</li>
+                  <li>Examinez l'erreur : <code>sudo docker exec -i geoclic_db psql -U geoclic -d geoclic_db < /opt/geoclic/database/migrations/NNN_fichier.sql</code></li>
+                  <li>Si "already exists", c'est OK — la migration est déjà passée</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              Comment supprimer complètement un serveur client ?
+              <span class="arrow">▶</span>
+            </div>
+            <div class="accordion-body">
+              <div class="accordion-content">
+                <p><strong>Attention :</strong> Cette action est irréversible !</p>
+                <ol style="margin: 8px 0 0 20px;">
+                  <li>Faire un backup d'abord : <code>geoclic-fleet.sh backup --client NOM</code></li>
+                  <li>Se connecter : <code>geoclic-fleet.sh ssh NOM</code></li>
+                  <li>Arrêter : <code>cd /opt/geoclic/deploy && sudo docker-compose down -v</code></li>
+                  <li>Supprimer : <code>sudo rm -rf /opt/geoclic</code></li>
+                  <li>Quitter : <code>exit</code></li>
+                  <li>Retirer du registre : <code>geoclic-fleet.sh remove --name NOM</code></li>
+                  <li>Supprimer le VPS chez l'hébergeur</li>
+                  <li>Supprimer l'enregistrement DNS</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              Les utilisateurs voient l'ancienne version après une mise à jour
+              <span class="arrow">▶</span>
+            </div>
+            <div class="accordion-body">
+              <div class="accordion-content">
+                <p><strong>Cause :</strong> Le cache du navigateur ou du Service Worker garde l'ancienne version.</p>
+                <p><strong>Solution pour les utilisateurs :</strong></p>
+                <ul style="margin: 8px 0 0 20px;">
+                  <li>Ouvrir DevTools (F12) → Application → Stockage → "Effacer les données du site"</li>
+                  <li>Ou ouvrir en navigation privée (Ctrl+Shift+N)</li>
+                  <li>Ou vider le cache (Ctrl+Shift+Suppr)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              Combien de temps prend chaque opération ?
+              <span class="arrow">▶</span>
+            </div>
+            <div class="accordion-body">
+              <div class="accordion-content">
+                <table>
+                  <tr><th>Opération</th><th>Durée estimée</th></tr>
+                  <tr><td>provision (première installation)</td><td>10-20 minutes</td></tr>
+                  <tr><td>init (migrations + admin)</td><td>1-3 minutes</td></tr>
+                  <tr><td>update (mise à jour code)</td><td>5-10 minutes</td></tr>
+                  <tr><td>backup</td><td>< 1 minute</td></tr>
+                  <tr><td>status</td><td>< 30 secondes</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ GLOSSAIRE ═══ -->
+    <div class="section" id="sec-glossaire">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background: #f3e8ff; color: #7c3aed;">📚</div>
+          <div>
+            <h3>Glossaire</h3>
+            <p>Définition des termes techniques utilisés dans ce guide</p>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr><th style="width:180px;">Terme</th><th>Définition simple</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>VPS</strong></td>
+              <td>Virtual Private Server. Un ordinateur distant loué chez un hébergeur, accessible 24h/24 via internet.</td>
+            </tr>
+            <tr>
+              <td><strong>SSH</strong></td>
+              <td>Secure Shell. Un moyen sécurisé de se connecter à un ordinateur distant pour y taper des commandes.</td>
+            </tr>
+            <tr>
+              <td><strong>DNS</strong></td>
+              <td>Domain Name System. L'annuaire d'internet qui traduit les noms (lyon.geoclic.fr) en adresses IP (51.210.42.100).</td>
+            </tr>
+            <tr>
+              <td><strong>SSL / HTTPS</strong></td>
+              <td>Le cadenas vert dans le navigateur. Chiffre les communications entre le navigateur et le serveur.</td>
+            </tr>
+            <tr>
+              <td><strong>Docker</strong></td>
+              <td>Logiciel qui empaquète les applications dans des "conteneurs" isolés. Chaque module GéoClic tourne dans son propre conteneur.</td>
+            </tr>
+            <tr>
+              <td><strong>Conteneur</strong></td>
+              <td>Une boîte isolée qui fait tourner une application. GéoClic en utilise ~10 (API, DB, portail, etc.).</td>
+            </tr>
+            <tr>
+              <td><strong>Migration SQL</strong></td>
+              <td>Un fichier qui modifie la structure de la base de données (ajoute des tables, colonnes, etc.). GéoClic en a 25.</td>
+            </tr>
+            <tr>
+              <td><strong>rsync</strong></td>
+              <td>Outil qui copie des fichiers entre deux serveurs en ne transférant que ce qui a changé (rapide et efficace).</td>
+            </tr>
+            <tr>
+              <td><strong>Clé SSH</strong></td>
+              <td>Paire de fichiers (privé + public) qui remplace le mot de passe pour se connecter à un serveur. Plus sécurisé.</td>
+            </tr>
+            <tr>
+              <td><strong>Let's Encrypt</strong></td>
+              <td>Service gratuit qui fournit des certificats SSL (HTTPS). Se renouvelle automatiquement tous les 3 mois.</td>
+            </tr>
+            <tr>
+              <td><strong>Provision</strong></td>
+              <td>Action de préparer un serveur vierge pour qu'il soit prêt à utiliser (installation de tout ce qu'il faut).</td>
+            </tr>
+            <tr>
+              <td><strong>Super admin</strong></td>
+              <td>Le compte utilisateur principal qui a tous les droits sur toutes les applications GéoClic.</td>
+            </tr>
+            <tr>
+              <td><strong>Branding</strong></td>
+              <td>Personnalisation visuelle (logo, couleurs, nom) pour chaque collectivité cliente.</td>
+            </tr>
+            <tr>
+              <td><strong>Onboarding</strong></td>
+              <td>Le wizard (assistant) qui guide le client lors de sa première connexion pour configurer ses catégories, services et emails.</td>
+            </tr>
+            <tr>
+              <td><strong>PWA</strong></td>
+              <td>Progressive Web App. Application web qui peut s'installer sur mobile comme une app native (sans passer par l'App Store).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ─── Navigation ───
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+  const section = document.getElementById('sec-' + id);
+  const link = document.querySelector(`.nav-link[data-section="${id}"]`);
+
+  if (section) section.classList.add('active');
+  if (link) link.classList.add('active');
+
+  // Update topbar title
+  const titles = {
+    accueil: 'Vue d\'ensemble',
+    prerequis: 'Avant de commencer',
+    vps: 'Acheter un VPS',
+    dns: 'Configurer le DNS',
+    ssh: 'Configurer SSH',
+    provision: 'Provisionner un serveur',
+    init: 'Initialiser la base de données',
+    update: 'Mettre à jour',
+    status: 'État des serveurs',
+    backup: 'Sauvegardes',
+    logs: 'Consulter les logs',
+    list: 'Gérer les serveurs',
+    'ssh-cmd': 'Accès SSH distant',
+    reference: 'Référence des commandes',
+    faq: 'FAQ et Dépannage',
+    glossaire: 'Glossaire'
+  };
+  document.getElementById('topbarTitle').textContent = titles[id] || id;
+
+  // Close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── Copy code ───
+function copyCode(btn) {
+  const block = btn.parentElement;
+  const code = block.textContent.replace('Copier', '').replace('Copié !', '').trim();
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'Copié !';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copier';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// ─── Accordion ───
+function toggleAccordion(header) {
+  const item = header.parentElement;
+  item.classList.toggle('open');
+}
+
+// ─── Mobile sidebar ───
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ─── Search ───
+function filterSections(query) {
+  query = query.toLowerCase().trim();
+  const links = document.querySelectorAll('.nav-link');
+
+  if (!query) {
+    links.forEach(l => l.style.display = '');
+    document.querySelectorAll('.nav-section').forEach(s => s.style.display = '');
+    return;
+  }
+
+  links.forEach(link => {
+    const text = link.textContent.toLowerCase();
+    const sectionId = link.getAttribute('data-section');
+    const section = document.getElementById('sec-' + sectionId);
+    const sectionText = section ? section.textContent.toLowerCase() : '';
+
+    if (text.includes(query) || sectionText.includes(query)) {
+      link.style.display = '';
+    } else {
+      link.style.display = 'none';
+    }
+  });
+}
+
+// ─── Keyboard shortcut ───
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('searchInput').focus();
+  }
+});
+</script>
+
+</body>
+</html>

@@ -61,6 +61,13 @@ class Settings(BaseSettings):
     sentry_environment: str = os.environ.get("SENTRY_ENVIRONMENT", "production")
     sentry_traces_sample_rate: float = float(os.environ.get("SENTRY_TRACES_RATE", "0.1"))
 
+    # Push Notifications (Web Push / VAPID)
+    # Générer avec: python3 -c "from pywebpush import webpush; from py_vapid import Vapid; v=Vapid(); v.generate_keys(); print('Private:', v.private_pem()); print('Public:', v.public_key)"
+    # Ou avec: npx web-push generate-vapid-keys
+    vapid_private_key: str = os.environ.get("VAPID_PRIVATE_KEY", "")
+    vapid_public_key: str = os.environ.get("VAPID_PUBLIC_KEY", "")
+    vapid_contact_email: str = os.environ.get("VAPID_CONTACT_EMAIL", "mailto:contact@geoclic.fr")
+
     # Stockage photos
     photo_storage_path: str = "/app/storage/photos"
     max_photo_size_mb: int = 10

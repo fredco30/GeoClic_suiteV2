@@ -89,6 +89,14 @@ export const api = {
     })
   },
 
+  initServer(name: string, data: {
+    email: string; password: string; collectivite: string; with_demo?: boolean
+  }) {
+    return request<{ task_id: string }>(`/fleet/servers/${name}/init`, {
+      method: 'POST', body: JSON.stringify(data),
+    })
+  },
+
   updateServer(name: string, data?: { services?: string; migration?: string }) {
     return request<{ task_id: string }>(`/fleet/servers/${name}/update`, {
       method: 'POST', body: JSON.stringify(data || {}),

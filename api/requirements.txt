@@ -40,3 +40,6 @@ reportlab>=4.0.0
 
 # Monitoring & Error Tracking
 sentry-sdk[fastapi]>=2.0.0
+
+# Push Notifications (Web Push / VAPID)
+pywebpush>=2.0.0

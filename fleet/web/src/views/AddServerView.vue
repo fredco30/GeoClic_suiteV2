@@ -7,9 +7,9 @@ const router = useRouter()
 
 // Wizard state
 const step = ref(1)
-const totalSteps = 4
+const totalSteps = 5
 
-// Form data
+// Form data - Step 1
 const name = ref('')
 const domain = ref('')
 const ip = ref('')
@@ -17,10 +17,18 @@ const email = ref('')
 const sshUser = ref('ubuntu')
 const sshPort = ref(22)
 
+// Form data - Step 3 (Config admin)
+const adminPassword = ref('')
+const adminPasswordConfirm = ref('')
+const collectivite = ref('')
+const withDemo = ref(false)
+
 // State
 const sshKey = ref('')
 const sshTestResult = ref<'idle' | 'testing' | 'ok' | 'failed'>('idle')
 const provisioning = ref(false)
+const initializing = ref(false)
+const installPhase = ref<'provision' | 'init' | 'done' | 'failed'>('provision')
 const taskId = ref('')
 const taskStatus = ref<any>(null)
 const taskLog = ref('')
@@ -33,6 +41,18 @@ const autoName = computed(() => {
   if (domain.value) {
     return domain.value.replace(/\.geoclic\.fr$/, '').replace(/\./g, '-')
   }
+  return ''
+})
+
+// Password validation
+const passwordValid = computed(() => {
+  return adminPassword.value.length >= 8 && adminPassword.value === adminPasswordConfirm.value
+})
+
+const passwordError = computed(() => {
+  if (!adminPassword.value) return ''
+  if (adminPassword.value.length < 8) return 'Minimum 8 caractères'
+  if (adminPasswordConfirm.value && adminPassword.value !== adminPasswordConfirm.value) return 'Les mots de passe ne correspondent pas'
   return ''
 })
 
@@ -83,13 +103,29 @@ function goStep3() {
   step.value = 3
 }
 
-// Step 3: Confirm
-async function startProvisioning() {
+// Step 3: Admin config
+function goStep4() {
+  if (!adminPassword.value || !collectivite.value) {
+    error.value = 'Le mot de passe et le nom de collectivité sont requis'
+    return
+  }
+  if (!passwordValid.value) {
+    error.value = passwordError.value || 'Vérifiez le mot de passe'
+    return
+  }
+  error.value = ''
+  step.value = 4
+}
+
+// Step 4: Confirm → Step 5: Install
+async function startInstallation() {
   error.value = ''
   provisioning.value = true
-  step.value = 4
+  installPhase.value = 'provision'
+  step.value = 5
 
   try {
+    // Phase 1: Provisioning
     const result = await api.provisionServer({
       name: name.value,
       domain: domain.value,
@@ -109,9 +145,15 @@ async function startProvisioning() {
         const logData = await api.getTaskLog(taskId.value)
         taskLog.value = logData.log
 
-        if (status.status === 'completed' || status.status === 'failed') {
+        if (status.status === 'completed') {
           clearInterval(pollInterval)
           provisioning.value = false
+          // Auto-start init phase
+          startInit()
+        } else if (status.status === 'failed') {
+          clearInterval(pollInterval)
+          provisioning.value = false
+          installPhase.value = 'failed'
         }
       } catch {
         // Ignore poll errors
@@ -120,6 +162,56 @@ async function startProvisioning() {
   } catch (e: any) {
     error.value = e.message
     provisioning.value = false
+    installPhase.value = 'failed'
+  }
+}
+
+async function startInit() {
+  initializing.value = true
+  installPhase.value = 'init'
+  taskLog.value += '\n\n━━━ Phase 2 : Initialisation de la base de données ━━━\n\n'
+
+  try {
+    const result = await api.initServer(name.value, {
+      email: email.value,
+      password: adminPassword.value,
+      collectivite: collectivite.value,
+      with_demo: withDemo.value,
+    })
+    taskId.value = result.task_id
+
+    // Poll init task
+    pollInterval = setInterval(async () => {
+      try {
+        const status = await api.getTask(taskId.value)
+        taskStatus.value = status
+
+        const logData = await api.getTaskLog(taskId.value)
+        // Append init logs after provision logs
+        const provisionEnd = taskLog.value.indexOf('━━━ Phase 2')
+        if (provisionEnd >= 0) {
+          taskLog.value = taskLog.value.substring(0, provisionEnd) +
+            '━━━ Phase 2 : Initialisation de la base de données ━━━\n\n' +
+            logData.log
+        }
+
+        if (status.status === 'completed') {
+          clearInterval(pollInterval)
+          initializing.value = false
+          installPhase.value = 'done'
+        } else if (status.status === 'failed') {
+          clearInterval(pollInterval)
+          initializing.value = false
+          installPhase.value = 'failed'
+        }
+      } catch {
+        // Ignore poll errors
+      }
+    }, 3000)
+  } catch (e: any) {
+    error.value = e.message
+    initializing.value = false
+    installPhase.value = 'failed'
   }
 }
 
@@ -128,8 +220,10 @@ function copyKey() {
 }
 
 function goBack() {
-  if (step.value > 1) step.value -= 1
+  if (step.value > 1 && step.value < 5) step.value -= 1
 }
+
+const isInstalling = computed(() => provisioning.value || initializing.value)
 </script>
 
 <template>
@@ -137,7 +231,7 @@ function goBack() {
     <div class="page-header">
       <div>
         <h1>Ajouter un serveur</h1>
-        <p class="subtitle">Provisionnement automatique d'un nouveau VPS</p>
+        <p class="subtitle">Provisionnement et configuration automatique d'un nouveau VPS</p>
       </div>
     </div>
 
@@ -151,7 +245,13 @@ function goBack() {
       >
         <div class="step-dot">{{ s < step ? '✓' : s }}</div>
         <span class="step-label">
-          {{ s === 1 ? 'Informations' : s === 2 ? 'Connexion SSH' : s === 3 ? 'Confirmation' : 'Installation' }}
+          {{
+            s === 1 ? 'Informations' :
+            s === 2 ? 'Connexion SSH' :
+            s === 3 ? 'Configuration' :
+            s === 4 ? 'Confirmation' :
+            'Installation'
+          }}
         </span>
       </div>
     </div>
@@ -178,7 +278,7 @@ function goBack() {
       <div class="form-group">
         <label>Email administrateur *</label>
         <input v-model="email" type="email" class="input" placeholder="admin@ville-lyon.fr" />
-        <p class="form-hint">Pour le certificat SSL et les notifications</p>
+        <p class="form-hint">Pour le certificat SSL, le compte super admin et les notifications</p>
       </div>
 
       <div class="form-group">
@@ -259,10 +359,53 @@ function goBack() {
       </div>
     </div>
 
-    <!-- STEP 3: Confirmation -->
+    <!-- STEP 3: Configuration admin et collectivité -->
     <div v-if="step === 3" class="card step-card">
+      <h2>Configuration initiale</h2>
+      <p class="step-desc">
+        Ces informations seront utilisées pour créer le compte super administrateur
+        et configurer la plateforme GéoClic.
+      </p>
+
+      <div class="form-group">
+        <label>Nom de la collectivité *</label>
+        <input v-model="collectivite" class="input" placeholder="Mairie de Lyon" />
+        <p class="form-hint">Affiché sur toutes les applications (portail citoyen, back-office, etc.)</p>
+      </div>
+
+      <div class="form-group">
+        <label>Mot de passe administrateur *</label>
+        <input v-model="adminPassword" type="password" class="input" placeholder="Minimum 8 caractères" />
+        <p class="form-hint" v-if="!passwordError">Le compte admin utilisera l'email : <strong>{{ email }}</strong></p>
+        <p class="form-hint form-error" v-else>{{ passwordError }}</p>
+      </div>
+
+      <div class="form-group">
+        <label>Confirmer le mot de passe *</label>
+        <input v-model="adminPasswordConfirm" type="password" class="input" placeholder="Retapez le mot de passe" />
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" v-model="withDemo" />
+          <span>Charger les données de démonstration</span>
+        </label>
+        <p class="form-hint">
+          12 signalements fictifs, 4 services municipaux, 3 comptes agents.
+          Utile pour tester la plateforme avant de la configurer.
+        </p>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-outline" @click="goBack">Précédent</button>
+        <button class="btn btn-primary" @click="goStep4">Suivant</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Confirmation -->
+    <div v-if="step === 4" class="card step-card">
       <h2>Confirmation</h2>
-      <p class="step-desc">Vérifiez les informations avant de lancer l'installation.</p>
+      <p class="step-desc">Vérifiez les informations avant de lancer l'installation complète.</p>
 
       <div class="recap">
         <div class="recap-row">
@@ -275,32 +418,85 @@ function goBack() {
           <span>IP</span><strong>{{ ip }}</strong>
         </div>
         <div class="recap-row">
-          <span>Email</span><strong>{{ email }}</strong>
+          <span>SSH</span><strong>{{ sshUser }}@{{ ip }}:{{ sshPort }}</strong>
         </div>
         <div class="recap-row">
-          <span>SSH</span><strong>{{ sshUser }}@{{ ip }}:{{ sshPort }}</strong>
+          <span>Email admin</span><strong>{{ email }}</strong>
+        </div>
+        <div class="recap-row">
+          <span>Collectivité</span><strong>{{ collectivite }}</strong>
+        </div>
+        <div class="recap-row">
+          <span>Données démo</span><strong>{{ withDemo ? 'Oui' : 'Non' }}</strong>
         </div>
       </div>
 
-      <div class="recap-warning">
-        L'installation va installer Docker, copier le code GéoClic, configurer SSL,
-        construire tous les conteneurs et démarrer le service. Cela prend environ 10-15 minutes.
+      <div class="recap-info">
+        <h3>Ce qui va se passer :</h3>
+        <div class="install-phases">
+          <div class="phase">
+            <div class="phase-icon">1</div>
+            <div>
+              <strong>Provisioning</strong> (~10-15 min)
+              <p>Installation Docker, copie du code, génération du .env, certificat SSL, construction et démarrage des 10 conteneurs.</p>
+            </div>
+          </div>
+          <div class="phase">
+            <div class="phase-icon">2</div>
+            <div>
+              <strong>Initialisation BDD</strong> (~2-3 min)
+              <p>Application des 25 migrations SQL (toutes les tables et fonctionnalités), création du super admin, configuration du branding{{ withDemo ? ', chargement des données démo' : '' }}.</p>
+            </div>
+          </div>
+          <div class="phase">
+            <div class="phase-icon">3</div>
+            <div>
+              <strong>Prêt à l'emploi</strong>
+              <p>Le client se connecte et le wizard d'onboarding le guide (catégories, services, email SMTP).</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="step-actions">
         <button class="btn btn-outline" @click="goBack">Précédent</button>
-        <button class="btn btn-accent" @click="startProvisioning">
-          Lancer l'installation
+        <button class="btn btn-accent" @click="startInstallation">
+          Lancer l'installation complète
         </button>
       </div>
     </div>
 
-    <!-- STEP 4: Provisioning en cours -->
-    <div v-if="step === 4" class="card step-card">
-      <h2>{{ provisioning ? 'Installation en cours...' : taskStatus?.status === 'completed' ? 'Installation terminée !' : 'Installation échouée' }}</h2>
+    <!-- STEP 5: Installation en cours -->
+    <div v-if="step === 5" class="card step-card">
+      <h2>
+        {{
+          installPhase === 'provision' ? 'Phase 1 : Provisioning en cours...' :
+          installPhase === 'init' ? 'Phase 2 : Initialisation de la base de données...' :
+          installPhase === 'done' ? 'Installation terminée !' :
+          'Installation échouée'
+        }}
+      </h2>
 
-      <!-- Progress -->
-      <div v-if="taskStatus" class="provision-progress">
+      <!-- Phase indicator -->
+      <div class="phase-indicator">
+        <div class="phase-step" :class="{ active: installPhase === 'provision', done: installPhase !== 'provision' && installPhase !== 'failed' }">
+          <div class="phase-dot">{{ installPhase === 'provision' ? '⏳' : (installPhase === 'failed' && !initializing ? '✗' : '✓') }}</div>
+          <span>Provisioning</span>
+        </div>
+        <div class="phase-line" :class="{ done: installPhase !== 'provision' }"></div>
+        <div class="phase-step" :class="{ active: installPhase === 'init', done: installPhase === 'done' }">
+          <div class="phase-dot">{{ installPhase === 'init' ? '⏳' : (installPhase === 'done' ? '✓' : (installPhase === 'failed' && !provisioning ? '✗' : '·')) }}</div>
+          <span>Initialisation BDD</span>
+        </div>
+        <div class="phase-line" :class="{ done: installPhase === 'done' }"></div>
+        <div class="phase-step" :class="{ done: installPhase === 'done' }">
+          <div class="phase-dot">{{ installPhase === 'done' ? '✓' : '·' }}</div>
+          <span>Prêt</span>
+        </div>
+      </div>
+
+      <!-- Provision progress steps -->
+      <div v-if="taskStatus && installPhase === 'provision'" class="provision-progress">
         <div class="provision-steps">
           <div
             v-for="s in (taskStatus.total || 7)"
@@ -325,11 +521,25 @@ function goBack() {
         <pre>{{ taskLog }}</pre>
       </div>
 
+      <!-- Success message -->
+      <div v-if="installPhase === 'done'" class="success-box">
+        <div class="success-icon">🎉</div>
+        <h3>Serveur opérationnel !</h3>
+        <p>
+          <strong>{{ collectivite }}</strong> est maintenant en ligne sur
+          <a :href="`https://${domain}`" target="_blank">{{ domain }}</a>.
+        </p>
+        <p class="success-detail">
+          Le compte administrateur <strong>{{ email }}</strong> peut se connecter
+          et lancer le wizard d'onboarding pour configurer les catégories, services et email.
+        </p>
+      </div>
+
       <!-- Actions post-install -->
-      <div v-if="!provisioning" class="step-actions">
+      <div v-if="!isInstalling" class="step-actions">
         <router-link to="/" class="btn btn-primary">Retour au dashboard</router-link>
-        <a v-if="taskStatus?.status === 'completed'" :href="`https://${domain}`" target="_blank" class="btn btn-accent">
-          Ouvrir {{ domain }}
+        <a v-if="installPhase === 'done'" :href="`https://${domain}/data/`" target="_blank" class="btn btn-accent">
+          Ouvrir GéoClic Admin
         </a>
       </div>
     </div>
@@ -344,7 +554,7 @@ function goBack() {
 
 .progress-bar {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   margin-bottom: 24px;
 }
 
@@ -381,7 +591,7 @@ function goBack() {
 }
 
 .step-label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-secondary);
 }
 
@@ -485,6 +695,25 @@ function goBack() {
   margin: 20px 0;
 }
 
+/* Step 3 - Config */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.form-error {
+  color: #c62828 !important;
+}
+
 /* Recap */
 .recap {
   background: #f5f5f5;
@@ -505,12 +734,116 @@ function goBack() {
   border-bottom: none;
 }
 
-.recap-warning {
-  background: #fff3e0;
-  color: #e65100;
-  padding: 12px 16px;
+.recap-info {
+  background: #e8eaf6;
   border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.recap-info h3 {
+  font-size: 15px;
+  margin-bottom: 12px;
+  color: var(--primary);
+}
+
+.install-phases {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.phase {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.phase-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
   font-size: 14px;
+  flex-shrink: 0;
+}
+
+.phase p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Phase indicator */
+.phase-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 24px 0;
+}
+
+.phase-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.phase-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  background: var(--border);
+  color: var(--text-secondary);
+  transition: all 0.3s;
+}
+
+.phase-step.active .phase-dot {
+  background: var(--primary);
+  color: white;
+  animation: pulse 1.5s infinite;
+}
+
+.phase-step.done .phase-dot {
+  background: var(--accent);
+  color: white;
+}
+
+.phase-step span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.phase-step.active span {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.phase-step.done span {
+  color: var(--accent);
+}
+
+.phase-line {
+  width: 60px;
+  height: 3px;
+  background: var(--border);
+  margin: 0 8px;
+  margin-bottom: 22px;
+  transition: background 0.3s;
+}
+
+.phase-line.done {
+  background: var(--accent);
 }
 
 /* Provisioning */
@@ -576,5 +909,36 @@ function goBack() {
   font-size: 12px;
   line-height: 1.6;
   white-space: pre-wrap;
+}
+
+/* Success */
+.success-box {
+  text-align: center;
+  padding: 24px;
+  background: #e8f5e9;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.success-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.success-box h3 {
+  font-size: 20px;
+  color: #2e7d32;
+  margin-bottom: 8px;
+}
+
+.success-box a {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.success-detail {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 8px;
 }
 </style>

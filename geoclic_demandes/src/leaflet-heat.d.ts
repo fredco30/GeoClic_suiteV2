@@ -1,0 +1,18 @@
+declare module 'leaflet.heat' {
+  import * as L from 'leaflet'
+  // leaflet.heat extends L namespace with heatLayer function
+}
+
+declare namespace L {
+  function heatLayer(
+    latlngs: Array<[number, number] | [number, number, number]>,
+    options?: {
+      radius?: number
+      blur?: number
+      maxZoom?: number
+      max?: number
+      minOpacity?: number
+      gradient?: Record<number, string>
+    }
+  ): any
+}

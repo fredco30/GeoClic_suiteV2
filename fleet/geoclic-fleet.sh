@@ -829,6 +829,73 @@ cmd_test_ssh() {
     fi
 }
 
+# ─── Commande: init ─────────────────────────────────────────────────────────
+# Initialise la base de données d'un nouveau client (migrations + super admin)
+cmd_init() {
+    local client="" email="" password="" collectivite="Ma Collectivité" with_demo=false
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --client)        client="$2"; shift 2 ;;
+            --email)         email="$2"; shift 2 ;;
+            --password)      password="$2"; shift 2 ;;
+            --collectivite)  collectivite="$2"; shift 2 ;;
+            --with-demo)     with_demo=true; shift ;;
+            *) log_error "Option inconnue: $1"; return 1 ;;
+        esac
+    done
+
+    if [[ -z "$client" || -z "$email" || -z "$password" ]]; then
+        log_error "Paramètres requis: --client NOM --email EMAIL --password MDP"
+        echo ""
+        echo "Usage:"
+        echo "  geoclic-fleet.sh init --client NOM --email admin@mairie.fr --password MotDePasse123!"
+        echo "                        [--collectivite \"Mairie d'Exemple\"] [--with-demo]"
+        echo ""
+        echo "Options:"
+        echo "  --client        Nom du serveur (dans le registre)"
+        echo "  --email         Email du super administrateur"
+        echo "  --password      Mot de passe du super admin"
+        echo "  --collectivite  Nom de la collectivité (défaut: Ma Collectivité)"
+        echo "  --with-demo     Charger aussi les données de démonstration"
+        return 1
+    fi
+
+    check_ssh_key || return 1
+
+    local line
+    line=$(get_client "$client")
+    if [[ -z "$line" ]]; then
+        log_error "Client '$client' non trouvé dans le registre"
+        return 1
+    fi
+
+    parse_client "$line"
+    local SUDO
+    SUDO=$(get_sudo "$CLIENT_USER")
+
+    log_info "Initialisation de la base de données de '$client' ($CLIENT_DOMAIN)..."
+
+    # Exécuter le script init_client.sh sur le serveur distant
+    run_ssh "$CLIENT_IP" "$CLIENT_USER" "$CLIENT_PORT" "
+        $SUDO /opt/geoclic/scripts/init_client.sh '$email' '$password' '$collectivite'
+    "
+
+    if [[ "$with_demo" == true ]]; then
+        log_info "Chargement des données de démonstration..."
+        run_ssh "$CLIENT_IP" "$CLIENT_USER" "$CLIENT_PORT" "
+            $SUDO docker exec -i geoclic_db psql -U geoclic -d geoclic_db < /opt/geoclic/database/demo_data.sql
+        "
+        log_ok "Données de démo chargées"
+    fi
+
+    log_ok "Initialisation de '$client' terminée !"
+    echo ""
+    echo "  Le client peut se connecter sur https://$CLIENT_DOMAIN/admin/"
+    echo "  Email    : $email"
+    echo "  Le wizard d'onboarding guidera la configuration."
+}
+
 # ─── Commande: ssh-key ──────────────────────────────────────────────────────
 cmd_ssh_key() {
     local action="${1:-show}"
@@ -861,6 +928,36 @@ cmd_ssh_key() {
     esac
 }
 
+# ─── Commande: aide ──────────────────────────────────────────────────────────
+# Ouvre le guide interactif HTML dans le navigateur
+cmd_aide() {
+    local aide_file="$FLEET_DIR/aide.html"
+
+    if [[ ! -f "$aide_file" ]]; then
+        log_error "Fichier aide non trouvé: $aide_file"
+        return 1
+    fi
+
+    log_info "Ouverture du guide interactif Fleet..."
+
+    # Essayer d'ouvrir dans le navigateur
+    if command -v xdg-open &>/dev/null; then
+        xdg-open "$aide_file" 2>/dev/null &
+    elif command -v open &>/dev/null; then
+        open "$aide_file" 2>/dev/null &
+    elif command -v python3 &>/dev/null; then
+        # Fallback: serveur HTTP temporaire
+        local port=8888
+        log_info "Serveur local: http://localhost:$port/aide.html"
+        log_info "Appuyez sur Ctrl+C pour arrêter"
+        cd "$FLEET_DIR" && python3 -m http.server "$port"
+    else
+        log_warn "Impossible d'ouvrir le navigateur automatiquement."
+        log_info "Ouvrez manuellement ce fichier dans votre navigateur:"
+        echo "  $aide_file"
+    fi
+}
+
 # ─── Commande: help ──────────────────────────────────────────────────────────
 cmd_help() {
     cat <<EOF
@@ -871,6 +968,7 @@ ${BOLD}Usage:${NC} geoclic-fleet.sh <commande> [options]
 
 ${BOLD}Commandes:${NC}
   ${CYAN}provision${NC}    Installer GéoClic sur un nouveau serveur
+  ${CYAN}init${NC}         Initialiser la DB d'un nouveau client (migrations + admin)
   ${CYAN}update${NC}       Mettre à jour un ou tous les serveurs
   ${CYAN}status${NC}       Voir l'état des serveurs
   ${CYAN}list${NC}         Lister les serveurs enregistrés
@@ -883,11 +981,16 @@ ${BOLD}Commandes:${NC}
   ${CYAN}test-ssh${NC}     Tester la connexion SSH (IP [USER] [PORT])
   ${CYAN}task-status${NC}  Statut d'une tâche en cours (TASK_ID)
   ${CYAN}task-log${NC}     Logs d'une tâche (TASK_ID [LINES])
+  ${CYAN}aide${NC}         Ouvrir le guide interactif HTML (navigateur)
 
 ${BOLD}Exemples:${NC}
   # Provisionner un nouveau client
   geoclic-fleet.sh provision --name ville-lyon --domain lyon.geoclic.fr \\
     --ip 51.210.42.100 --email admin@lyon.fr
+
+  # Initialiser la DB d'un nouveau client
+  geoclic-fleet.sh init --client ville-lyon --email admin@lyon.fr \\
+    --password MonMDP123! --collectivite "Mairie de Lyon"
 
   # Mettre à jour tous les clients
   geoclic-fleet.sh update --all
@@ -912,6 +1015,7 @@ main() {
 
     case "$command" in
         provision)     cmd_provision "$@" ;;
+        init)          cmd_init "$@" ;;
         update)        cmd_update "$@" ;;
         status)        cmd_status "$@" ;;
         list)          cmd_list "$@" ;;
@@ -924,6 +1028,7 @@ main() {
         test-ssh)      cmd_test_ssh "$@" ;;
         task-status)   cmd_task_status "$@" ;;
         task-log)      cmd_task_log "$@" ;;
+        aide)          cmd_aide ;;
         help|--help|-h) cmd_help ;;
         *)             log_error "Commande inconnue: $command"; cmd_help; exit 1 ;;
     esac

@@ -5,6 +5,7 @@ import { useDemandesStore, type StatutDemande } from '../stores/demandes'
 import { useZonesStore } from '../stores/zones'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet.heat'
 import HelpButton from '@/components/help/HelpButton.vue'
 
 const router = useRouter()
@@ -14,9 +15,30 @@ const zonesStore = useZonesStore()
 const mapContainer = ref<HTMLElement | null>(null)
 let map: L.Map | null = null
 let markersLayer: L.LayerGroup | null = null
+let heatLayer: any = null
 let zonesLayer: L.GeoJSON | null = null
 
+const heatmapMode = ref(false)
+
 const selectedStatuts = ref<StatutDemande[]>(['nouveau', 'en_moderation', 'envoye', 'accepte', 'en_cours', 'planifie'])
+
+// Mapping noms Material Icons → Emojis
+const iconToEmoji: Record<string, string> = {
+  park: '🌳', nature: '🌿', eco: '♻️', grass: '🌱',
+  directions_car: '🚗', route: '🛣️', traffic: '🚦', road: '🛣️',
+  construction: '🚧', warning: '⚠️', lightbulb: '💡', brightness_low: '🔅',
+  water_drop: '💧', delete: '🗑️', delete_sweep: '🧹', cleaning_services: '🧹',
+  pets: '🐕', noise: '🔊', local_parking: '🅿️', format_paint: '🎨',
+  dangerous: '☠️', report: '📋', help: '❓', child_friendly_zone: '👶',
+  home: '🏠', business: '🏢', school: '🏫',
+  sports: '⚽', pool: '🏊', fitness_center: '💪',
+  child_care: '👶', elderly: '👴', accessibility: '♿',
+  security: '🔒', camera: '📷', speed: '🏎️',
+}
+function getIconEmoji(iconName: string | null | undefined): string {
+  if (!iconName) return '📌'
+  return iconToEmoji[iconName] || '📌'
+}
 
 const statutColors: Record<string, string> = {
   nouveau: '#3b82f6',
@@ -71,6 +93,10 @@ watch(showZones, () => {
       zonesLayer.removeFrom(map)
     }
   }
+})
+
+watch(heatmapMode, () => {
+  updateMarkers()
 })
 
 function initMap() {
@@ -142,6 +168,12 @@ function updateMarkers() {
 
   markersLayer.clearLayers()
 
+  // Nettoyer la heatmap précédente
+  if (heatLayer) {
+    map.removeLayer(heatLayer)
+    heatLayer = null
+  }
+
   const demandesWithCoords = demandesStore.demandes.filter(
     d => d.latitude && d.longitude
   )
@@ -149,78 +181,109 @@ function updateMarkers() {
   if (demandesWithCoords.length === 0) return
 
   const bounds = L.latLngBounds([])
+  demandesWithCoords.forEach(d => bounds.extend([d.latitude!, d.longitude!]))
 
-  demandesWithCoords.forEach(demande => {
-    const color = statutColors[demande.statut] || '#6b7280'
+  if (heatmapMode.value) {
+    // Mode heatmap : carte thermique
+    const prioriteWeight: Record<string, number> = {
+      urgente: 1.0,
+      haute: 0.8,
+      normale: 0.5,
+      basse: 0.3
+    }
 
-    const icon = L.divIcon({
-      className: 'custom-marker',
-      html: `
-        <div style="
-          background: ${color};
-          width: 32px;
-          height: 32px;
-          border-radius: 50% 50% 50% 0;
-          transform: rotate(-45deg);
-          border: 2px solid white;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        ">
-          <span style="transform: rotate(45deg); font-size: 14px;">
-            ${demande.categorie_icone || '📌'}
-          </span>
+    const heatPoints = demandesWithCoords.map(d => [
+      d.latitude!,
+      d.longitude!,
+      prioriteWeight[d.priorite] || 0.5
+    ])
+
+    heatLayer = (L as any).heatLayer(heatPoints, {
+      radius: 30,
+      blur: 20,
+      maxZoom: 17,
+      max: 1.0,
+      gradient: {
+        0.2: '#3b82f6',
+        0.4: '#22c55e',
+        0.6: '#f59e0b',
+        0.8: '#f97316',
+        1.0: '#ef4444'
+      }
+    }).addTo(map)
+  } else {
+    // Mode marqueurs classiques
+    demandesWithCoords.forEach(demande => {
+      const color = statutColors[demande.statut] || '#6b7280'
+
+      const icon = L.divIcon({
+        className: 'custom-marker',
+        html: `
+          <div style="
+            background: ${color};
+            width: 32px;
+            height: 32px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">
+            <span style="transform: rotate(45deg); font-size: 14px;">
+              ${getIconEmoji(demande.categorie_icone)}
+            </span>
+          </div>
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32]
+      })
+
+      const marker = L.marker([demande.latitude!, demande.longitude!], { icon })
+
+      marker.bindPopup(`
+        <div style="min-width: 200px;">
+          <div style="font-weight: 600; margin-bottom: 8px;">
+            ${demande.numero_suivi}
+          </div>
+          <div style="
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 12px;
+            background: ${color}20;
+            color: ${color};
+            margin-bottom: 8px;
+          ">
+            ${statutLabels[demande.statut]}
+          </div>
+          <div style="color: #6b7280; font-size: 13px; margin-bottom: 8px;">
+            ${demande.categorie_nom}
+          </div>
+          <div style="font-size: 14px; margin-bottom: 12px;">
+            ${demande.description.substring(0, 100)}${demande.description.length > 100 ? '...' : ''}
+          </div>
+          <button
+            onclick="window.dispatchEvent(new CustomEvent('open-demande', { detail: '${demande.id}' }))"
+            style="
+              background: #3b82f6;
+              color: white;
+              border: none;
+              padding: 6px 12px;
+              border-radius: 6px;
+              cursor: pointer;
+              font-size: 13px;
+            "
+          >
+            Voir détails
+          </button>
         </div>
-      `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 32]
+      `)
+
+      markersLayer!.addLayer(marker)
     })
-
-    const marker = L.marker([demande.latitude!, demande.longitude!], { icon })
-
-    marker.bindPopup(`
-      <div style="min-width: 200px;">
-        <div style="font-weight: 600; margin-bottom: 8px;">
-          ${demande.numero_suivi}
-        </div>
-        <div style="
-          display: inline-block;
-          padding: 2px 8px;
-          border-radius: 9999px;
-          font-size: 12px;
-          background: ${color}20;
-          color: ${color};
-          margin-bottom: 8px;
-        ">
-          ${statutLabels[demande.statut]}
-        </div>
-        <div style="color: #6b7280; font-size: 13px; margin-bottom: 8px;">
-          ${demande.categorie_nom}
-        </div>
-        <div style="font-size: 14px; margin-bottom: 12px;">
-          ${demande.description.substring(0, 100)}${demande.description.length > 100 ? '...' : ''}
-        </div>
-        <button
-          onclick="window.dispatchEvent(new CustomEvent('open-demande', { detail: '${demande.id}' }))"
-          style="
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-          "
-        >
-          Voir détails
-        </button>
-      </div>
-    `)
-
-    markersLayer!.addLayer(marker)
-    bounds.extend([demande.latitude!, demande.longitude!])
-  })
+  }
 
   if (demandesWithCoords.length > 0) {
     map.fitBounds(bounds, { padding: [50, 50] })
@@ -270,6 +333,24 @@ function toggleStatut(statut: StatutDemande) {
             ></span>
             {{ label }}
           </label>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <h3>Affichage</h3>
+        <label class="heatmap-toggle">
+          <input
+            type="checkbox"
+            v-model="heatmapMode"
+          />
+          <span class="toggle-label">Carte thermique</span>
+        </label>
+        <div v-if="heatmapMode" class="heatmap-legend">
+          <div class="heat-gradient"></div>
+          <div class="heat-labels">
+            <span>Faible</span>
+            <span>Fort</span>
+          </div>
         </div>
       </div>
 
@@ -421,6 +502,43 @@ function toggleStatut(statut: StatutDemande) {
   height: 12px;
   border-radius: 3px;
   opacity: 0.8;
+}
+
+.heatmap-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.heatmap-toggle:hover {
+  background: #f9fafb;
+}
+
+.heatmap-toggle input {
+  margin: 0;
+}
+
+.heatmap-legend {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+}
+
+.heat-gradient {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(to right, #3b82f6, #22c55e, #f59e0b, #f97316, #ef4444);
+}
+
+.heat-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 2px;
 }
 
 .stats-mini {

@@ -68,6 +68,9 @@ export const useAuthStore = defineStore('auth', () => {
 
         agent.value = userData
         localStorage.setItem('terrain_agent', JSON.stringify(userData))
+
+        // Renouveler la souscription push
+        subscribeToPush()
       } catch {
         // Token invalide, déconnecter
         await logout()
@@ -107,6 +110,9 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.setItem('terrain_agent', JSON.stringify(userData))
       setAxiosToken(response.data.access_token)
 
+      // Activer les notifications push
+      subscribeToPush()
+
       return true
     } catch (err: any) {
       error.value = err.response?.data?.detail || 'Erreur de connexion'
@@ -125,6 +131,59 @@ export const useAuthStore = defineStore('auth', () => {
     setAxiosToken(null)
 
     router.push('/login')
+  }
+
+  // Push notifications - souscrire après connexion
+  async function subscribeToPush() {
+    try {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        console.log('Push notifications non supportées')
+        return
+      }
+
+      // Récupérer la clé VAPID
+      const vapidResponse = await axios.get('/api/push/vapid-public-key')
+      const vapidPublicKey = vapidResponse.data.public_key
+      if (!vapidPublicKey) return
+
+      // Demander la permission
+      const permission = await Notification.requestPermission()
+      if (permission !== 'granted') {
+        console.log('Permission notifications refusée')
+        return
+      }
+
+      // Obtenir la souscription
+      const registration = await navigator.serviceWorker.ready
+      let subscription = await registration.pushManager.getSubscription()
+
+      if (!subscription) {
+        // Convertir la clé VAPID en Uint8Array
+        const padding = '='.repeat((4 - vapidPublicKey.length % 4) % 4)
+        const base64 = (vapidPublicKey + padding).replace(/-/g, '+').replace(/_/g, '/')
+        const rawData = window.atob(base64)
+        const applicationServerKey = new Uint8Array(rawData.length)
+        for (let i = 0; i < rawData.length; i++) {
+          applicationServerKey[i] = rawData.charCodeAt(i)
+        }
+
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey
+        })
+      }
+
+      // Envoyer la souscription au serveur
+      const subJson = subscription.toJSON()
+      await axios.post('/api/push/subscribe', {
+        endpoint: subJson.endpoint,
+        keys: subJson.keys
+      })
+
+      console.log('Push notifications activées')
+    } catch (err) {
+      console.warn('Erreur souscription push:', err)
+    }
   }
 
   // Changer mot de passe
@@ -157,6 +216,7 @@ export const useAuthStore = defineStore('auth', () => {
     initialize,
     login,
     logout,
-    changePassword
+    changePassword,
+    subscribeToPush
   }
 })
