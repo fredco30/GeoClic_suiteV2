@@ -76,6 +76,7 @@ export const usePointsStore = defineStore('points', () => {
     projet_id: null as string | null,
     lexique_id: null as string | null,
     search: '',
+    custom_filters: {} as Record<string, string>,
   })
 
   // Pagination
@@ -137,10 +138,18 @@ export const usePointsStore = defineStore('points', () => {
         lexiqueCode = allCodes.join(',')
       }
 
+      // Build custom_filters JSON if any tech filters are set
+      const cf = filters.value.custom_filters
+      const hasCustomFilters = cf && Object.keys(cf).some(k => cf[k])
+      const customFiltersJson = hasCustomFilters
+        ? JSON.stringify(Object.fromEntries(Object.entries(cf).filter(([, v]) => v)))
+        : undefined
+
       const params = {
         project_id: filters.value.projet_id || undefined,
         lexique_code: lexiqueCode,
         search: filters.value.search || undefined,
+        custom_filters: customFiltersJson,
         page: pagination.value.page,
         page_size: pagination.value.page_size,
       }

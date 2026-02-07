@@ -86,6 +86,23 @@
             <HelpButton page-key="carte" size="sm" />
           </v-col>
         </v-row>
+        <v-row v-if="selectChamps.length > 0" align="center" class="mt-1">
+          <v-col cols="12" md="2" class="text-caption text-grey py-0">
+            Données techniques :
+          </v-col>
+          <v-col v-for="champ in selectChamps" :key="champ.id" cols="12" md="2">
+            <v-autocomplete
+              v-model="techFilters[champ.nom]"
+              :label="champ.nom"
+              :items="champ.options || []"
+              clearable
+              hide-details
+              density="compact"
+              auto-select-first
+              @update:model-value="loadPoints"
+            />
+          </v-col>
+        </v-row>
       </v-card-text>
     </v-card>
 
@@ -372,8 +389,8 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { usePointsStore, type Point } from '@/stores/points'
 import HelpButton from '@/components/help/HelpButton.vue'
-import { useLexiqueStore } from '@/stores/lexique'
-import { projetsAPI, qrcodesAPI } from '@/services/api'
+import { useLexiqueStore, type ChampDynamique } from '@/stores/lexique'
+import { projetsAPI, qrcodesAPI, champsAPI } from '@/services/api'
 import api from '@/services/api'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -399,6 +416,8 @@ const selectedProjet = ref<string | null>(null)
 // Dynamic cascade filters
 const cascadeFilters = ref<Record<number, string | null>>({})
 const levelNames = ['Famille', 'Type', 'Sous-type', 'Variante', 'Détail', 'Précision']
+const techFilters = ref<Record<string, string | null>>({})
+const loadedChamps = ref<ChampDynamique[]>([])
 const searchText = ref('')
 const mapStyle = ref('streets')
 const projets = ref<any[]>([])
@@ -449,6 +468,49 @@ function cascadeOptions(level: number) {
     .filter(e => e.niveau === level && e.parent_id === parentCode)
     .sort((a, b) => a.libelle.localeCompare(b.libelle))
 }
+
+// The deepest non-null cascade filter code
+const activeFilterCode = computed(() => {
+  for (const lvl of [...activeLevels.value].reverse()) {
+    if (cascadeFilters.value[lvl]) return cascadeFilters.value[lvl]
+  }
+  return null
+})
+
+// Contextual champs: only select/multiselect fields
+const selectChamps = computed(() =>
+  loadedChamps.value.filter(c => c.type === 'select' || c.type === 'multiselect')
+)
+
+// Watch cascade: load champs with inheritance
+watch(activeFilterCode, async (code) => {
+  techFilters.value = {}
+  loadedChamps.value = []
+  if (!code) return
+
+  const codesToLoad = [code]
+  let entry = lexiqueStore.getByCode(code)
+  while (entry?.parent_id) {
+    codesToLoad.push(entry.parent_id)
+    entry = lexiqueStore.getByCode(entry.parent_id) || lexiqueStore.getById(entry.parent_id)
+  }
+
+  const allChamps: ChampDynamique[] = []
+  const seenNames = new Set<string>()
+  for (const c of codesToLoad) {
+    try {
+      const champs = await champsAPI.getByLexique(c)
+      for (const ch of champs) {
+        if (!seenNames.has(ch.nom)) {
+          seenNames.add(ch.nom)
+          allChamps.push(ch)
+        }
+      }
+    } catch { /* ignore */ }
+  }
+  loadedChamps.value = allChamps.sort((a: ChampDynamique, b: ChampDynamique) => a.ordre - b.ordre)
+})
+
 const points = computed(() => pointsStore.points)
 const zoneFilterItems = computed(() => {
   // Grouper par type avec séparateurs
@@ -801,10 +863,15 @@ async function loadPoints() {
       break
     }
   }
+  const cf: Record<string, string> = {}
+  for (const [key, value] of Object.entries(techFilters.value)) {
+    if (value) cf[key] = value
+  }
   pointsStore.setFilters({
     projet_id: selectedProjet.value,
     lexique_id: lexiqueId,
     search: searchText.value,
+    custom_filters: cf,
   })
   await pointsStore.fetchPoints()
   updateMarkers()
