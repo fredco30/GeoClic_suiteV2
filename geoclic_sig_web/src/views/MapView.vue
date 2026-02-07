@@ -1497,7 +1497,6 @@ function zoomToData() {
 
     if (allBounds.length > 0) {
       const combinedBounds = allBounds.reduce((acc, bounds) => acc.extend(bounds))
-      map.value.closeTooltip()
       map.value.fitBounds(combinedBounds, { padding: [50, 50] })
     }
   } catch (e) {
@@ -1512,11 +1511,9 @@ function zoomToFeature() {
     const layer = L.geoJSON(mapStore.selectedFeature)
     const bounds = layer.getBounds()
     if (bounds.isValid()) {
-      map.value.closeTooltip()
       map.value.fitBounds(bounds, { padding: [100, 100], maxZoom: 18 })
     }
   } catch (e) {
-    // Leaflet peut crasher si des overlays orphelins existent
     console.warn('zoomToFeature error:', e)
   }
 }
@@ -1979,18 +1976,15 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
-// Nettoyer proprement un LayerGroup (unbind tooltips/popups/events avant de supprimer)
-function cleanupLayerGroup(group: L.LayerGroup) {
+// Supprimer proprement un LayerGroup de la carte
+// IMPORTANT: NE PAS appeler clearLayers() avant map.removeLayer() !
+// Leaflet a besoin des layers dans le groupe pour les désabonner
+// de l'événement zoomanim lors du onRemove(). Si on clear avant,
+// les marqueurs restent abonnés avec _map=null → crash _animateZoom.
+function removeLayerGroupFromMap(group: L.LayerGroup, mapInstance: L.Map) {
   try {
-    group.eachLayer((layer: any) => {
-      try {
-        layer.unbindTooltip?.()
-        layer.unbindPopup?.()
-        layer.off?.()
-      } catch (_) { /* ignore cleanup errors */ }
-    })
-    group.clearLayers()
-  } catch (_) { /* ignore cleanup errors */ }
+    mapInstance.removeLayer(group)
+  } catch (_) { /* ignore removal errors */ }
 }
 
 // Créer un LayerGroup Leaflet à partir d'une couche du store
@@ -2052,10 +2046,9 @@ watch(
 function renderLayers() {
   if (!map.value) return
 
-  // Nettoyer toutes les couches existantes
+  // Supprimer les couches existantes de la carte (Leaflet gère le cleanup des events)
   layerGroups.value.forEach((group) => {
-    cleanupLayerGroup(group)
-    try { map.value?.removeLayer(group) } catch (_) {}
+    removeLayerGroupFromMap(group, map.value!)
   })
   layerGroups.value.clear()
 
@@ -2078,10 +2071,9 @@ watch(
   () => {
     if (!map.value) return
 
-    // Supprimer la couche existante avec cleanup
+    // Supprimer la couche existante
     if (apiZonesLayerGroup.value) {
-      cleanupLayerGroup(apiZonesLayerGroup.value)
-      try { map.value.removeLayer(apiZonesLayerGroup.value) } catch (_) {}
+      removeLayerGroupFromMap(apiZonesLayerGroup.value, map.value)
     }
 
     // Afficher les zones si visible globalement
