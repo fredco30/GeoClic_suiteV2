@@ -429,13 +429,14 @@
       </div>
     </div>
 
-    <!-- Panneau de sélection de projet -->
+    <!-- Panneau de sélection de projet (multi-projets) -->
     <div v-if="showProjectPanel" class="project-panel">
       <div class="panel-header">
         <svg class="panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
         </svg>
-        <h3>Mes projets</h3>
+        <h3>Projets</h3>
+        <span class="panel-badge" v-if="mapStore.activeProjectIds.size > 0">{{ mapStore.activeProjectIds.size }}</span>
         <button @click="showProjectPanel = false" class="panel-close">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 6L6 18M6 6l12 12"/>
@@ -443,14 +444,20 @@
         </button>
       </div>
       <div class="panel-body">
+        <div class="panel-hint">Cochez les projets à superposer sur la carte</div>
         <div v-if="mapStore.projects.length > 0" class="projects-list">
-          <div
+          <label
             v-for="project in mapStore.projects"
             :key="project.id"
-            class="project-item"
-            :class="{ 'project-active': mapStore.currentProject?.id === project.id }"
-            @click="selectProject(project)"
+            class="project-item project-checkbox-item"
+            :class="{ 'project-active': mapStore.isProjectActive(project.id) }"
           >
+            <input
+              type="checkbox"
+              :checked="mapStore.isProjectActive(project.id)"
+              @change="onToggleProject(project)"
+              class="project-checkbox"
+            >
             <div class="project-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
@@ -460,12 +467,10 @@
               <span class="project-item-name">{{ project.name }}</span>
               <span class="project-desc">{{ project.description || 'Aucune description' }}</span>
             </div>
-            <div v-if="mapStore.currentProject?.id === project.id" class="project-check">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-            </div>
-          </div>
+            <span v-if="mapStore.isProjectActive(project.id)" class="project-layer-count">
+              {{ mapStore.layers.filter(l => l.projectId === project.id).length }} couches
+            </span>
+          </label>
         </div>
         <div v-else class="projects-empty">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -769,154 +774,352 @@
       </div>
     </div>
 
-    <!-- Panneau statistiques -->
-    <div v-if="showStatsPanel" class="stats-panel">
-      <div class="panel-header">
-        <svg class="panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 20V10M12 20V4M6 20v-6"/>
-        </svg>
-        <h3>Statistiques</h3>
-        <button @click="showStatsPanel = false" class="panel-close">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 6L6 18M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-      <div class="panel-body">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon stat-icon-blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="12,2 2,7 12,12 22,7"/>
-                <polyline points="2,17 12,22 22,17"/>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value">{{ totalLayers }}</span>
-              <span class="stat-label">Couches</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon stat-icon-green">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/>
-                <circle cx="12" cy="10" r="3"/>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value">{{ totalPoints }}</span>
-              <span class="stat-label">Points</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon stat-icon-orange">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3,17 9,11 13,15 21,7"/>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value">{{ totalLines }}</span>
-              <span class="stat-label">Lignes</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon stat-icon-purple">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"/>
-              </svg>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value">{{ totalPolygons }}</span>
-              <span class="stat-label">Zones</span>
-            </div>
-          </div>
-        </div>
-        <div v-if="totalFeatures > 0" class="stats-summary">
-          <strong>{{ totalFeatures }}</strong> éléments au total
-        </div>
-        <div v-else class="stats-empty">
-          Aucune donnée à afficher
-        </div>
-      </div>
-    </div>
-
     <!-- Carte Leaflet -->
     <div ref="mapContainer" class="leaflet-map"></div>
 
-    <!-- Panneau de propriétés -->
-    <div v-if="mapStore.selectedFeature" class="feature-panel">
-      <div class="panel-header panel-header-primary">
-        <svg class="panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 16v-4M12 8h.01"/>
-        </svg>
-        <h3>{{ mapStore.selectedFeature.properties?.name || 'Élément sélectionné' }}</h3>
-        <button @click="mapStore.selectFeature(null)" class="panel-close">
+    <!-- Panneau Tableau de Bord (3 onglets : Stats / Propriétés / Export) -->
+    <div v-if="showStatsPanel || mapStore.selectedFeature" class="dashboard-panel">
+      <div class="dashboard-header">
+        <div class="dashboard-tabs">
+          <button
+            class="dash-tab"
+            :class="{ active: dashboardTab === 'stats' }"
+            @click="dashboardTab = 'stats'"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <path d="M18 20V10M12 20V4M6 20v-6"/>
+            </svg>
+            Stats
+          </button>
+          <button
+            class="dash-tab"
+            :class="{ active: dashboardTab === 'properties' }"
+            @click="dashboardTab = 'properties'"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 16v-4M12 8h.01"/>
+            </svg>
+            Propriétés
+          </button>
+          <button
+            class="dash-tab"
+            :class="{ active: dashboardTab === 'export' }"
+            @click="dashboardTab = 'export'"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+            </svg>
+            Export
+          </button>
+        </div>
+        <button @click="closeDashboard" class="panel-close">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 6L6 18M6 6l12 12"/>
           </svg>
         </button>
       </div>
-      <div class="panel-body">
-        <div v-if="mapStore.selectedFeature.geometry" class="feature-type-badge">
-          {{ getGeometryLabel(mapStore.selectedFeature.geometry.type) }}
-        </div>
-        <div class="feature-properties">
-          <div class="feature-property" v-for="prop in getDisplayProperties(mapStore.selectedFeature.properties)" :key="prop.key">
-            <span class="property-key">{{ prop.label }}</span>
-            <span class="property-value">{{ prop.value }}</span>
+
+      <!-- ====== TAB STATS (Cockpit patrimoine) ====== -->
+      <div v-if="dashboardTab === 'stats'" class="panel-body dashboard-body">
+        <!-- KPI globaux -->
+        <div class="kpi-row">
+          <div class="kpi-card kpi-primary">
+            <span class="kpi-value">{{ totalFeatures }}</span>
+            <span class="kpi-label">Éléments</span>
           </div>
-          <div v-if="getDisplayProperties(mapStore.selectedFeature.properties).length === 0" class="no-properties">
-            Aucune propriété définie
+          <div class="kpi-card">
+            <span class="kpi-value">{{ totalLayers }}</span>
+            <span class="kpi-label">Couches</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-value">{{ mapStore.activeProjectIds.size }}</span>
+            <span class="kpi-label">Projets</span>
           </div>
         </div>
-        <!-- Données techniques -->
-        <div v-if="getCustomProperties(mapStore.selectedFeature.properties).length > 0" class="feature-custom-props">
-          <h4 class="custom-props-title">Données techniques</h4>
-          <div class="custom-props-list">
-            <div v-for="prop in getCustomProperties(mapStore.selectedFeature.properties)" :key="prop.key" class="custom-prop-item">
-              <span class="custom-prop-key">{{ prop.key }}</span>
-              <span class="custom-prop-value">{{ prop.value }}</span>
+
+        <!-- Quantitatif : comptages par type de géométrie -->
+        <div class="dash-section">
+          <h4 class="dash-section-title">Inventaire</h4>
+          <div class="quanti-grid">
+            <div class="quanti-item">
+              <div class="quanti-icon" style="background: #3498db;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="16" height="16">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/>
+                </svg>
+              </div>
+              <div class="quanti-info">
+                <span class="quanti-value">{{ totalPoints }}</span>
+                <span class="quanti-label">Points</span>
+              </div>
+            </div>
+            <div class="quanti-item">
+              <div class="quanti-icon" style="background: #e67e22;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="16" height="16">
+                  <polyline points="3,17 9,11 13,15 21,7"/>
+                </svg>
+              </div>
+              <div class="quanti-info">
+                <span class="quanti-value">{{ totalLines }}</span>
+                <span class="quanti-label">Lignes</span>
+              </div>
+            </div>
+            <div class="quanti-item">
+              <div class="quanti-icon" style="background: #9b59b6;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="16" height="16">
+                  <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"/>
+                </svg>
+              </div>
+              <div class="quanti-info">
+                <span class="quanti-value">{{ totalPolygons }}</span>
+                <span class="quanti-label">Zones</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Linéaire et surface si disponibles -->
+          <div v-if="totalLines > 0 || totalPolygons > 0" class="quanti-metrics">
+            <div v-if="totalLines > 0" class="metric-item">
+              <span class="metric-icon">📏</span>
+              <span class="metric-label">Linéaire total</span>
+              <span class="metric-value">{{ formatLineaire(totalLineaire) }}</span>
+            </div>
+            <div v-if="totalPolygons > 0" class="metric-item">
+              <span class="metric-icon">📐</span>
+              <span class="metric-label">Surface totale</span>
+              <span class="metric-value">{{ formatSurface(totalSurface) }}</span>
             </div>
           </div>
         </div>
-        <!-- Photos -->
-        <div v-if="mapStore.selectedFeature.properties?.photos?.length" class="feature-photos">
-          <h4 class="photos-title">Photos</h4>
-          <div class="photos-grid">
-            <a
-              v-for="photo in mapStore.selectedFeature.properties.photos"
-              :key="photo.id"
-              :href="photo.url"
-              target="_blank"
-              class="photo-thumb"
-            >
-              <img :src="photo.thumbnail_url || photo.url" :alt="photo.filename" />
-            </a>
+
+        <!-- Qualitatif : donut état du patrimoine -->
+        <div v-if="Object.keys(conditionDistribution).length > 1 || (Object.keys(conditionDistribution).length === 1 && !conditionDistribution['Non renseigné'])" class="dash-section">
+          <h4 class="dash-section-title">État du patrimoine</h4>
+          <div class="donut-container">
+            <div class="donut" :style="{ background: donutGradient }">
+              <div class="donut-hole">
+                <span class="donut-total">{{ totalFeatures }}</span>
+                <span class="donut-label">total</span>
+              </div>
+            </div>
+            <div class="donut-legend">
+              <div
+                v-for="(count, state) in conditionDistribution"
+                :key="state"
+                class="legend-item"
+              >
+                <span class="legend-color" :style="{ background: getConditionColor(String(state)) }"></span>
+                <span class="legend-label">{{ state }}</span>
+                <span class="legend-count">{{ count }}</span>
+                <span class="legend-pct">{{ ((count / totalFeatures) * 100).toFixed(0) }}%</span>
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- Répartition par catégorie (barres horizontales) -->
+        <div v-if="categoryDistribution.length > 0" class="dash-section">
+          <h4 class="dash-section-title">Répartition par catégorie</h4>
+          <div class="category-bars">
+            <div v-for="cat in categoryDistribution" :key="cat.name" class="cat-bar-row">
+              <span class="cat-bar-label" :title="cat.name">{{ cat.name }}</span>
+              <div class="cat-bar-track">
+                <div
+                  class="cat-bar-fill"
+                  :style="{ width: (cat.count / maxCategoryCount * 100) + '%', background: cat.color }"
+                ></div>
+              </div>
+              <span class="cat-bar-count">{{ cat.count }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Répartition par projet (si multi-projets) -->
+        <div v-if="projectDistribution.length > 1" class="dash-section">
+          <h4 class="dash-section-title">Par projet</h4>
+          <div class="project-stats-list">
+            <div v-for="proj in projectDistribution" :key="proj.name" class="project-stat-item">
+              <span class="project-stat-name">{{ proj.name }}</span>
+              <span class="project-stat-count">{{ proj.count }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="totalFeatures === 0" class="dash-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40">
+            <path d="M18 20V10M12 20V4M6 20v-6"/>
+          </svg>
+          <p>Aucune donnée à afficher</p>
+          <span>Chargez un projet pour voir les statistiques</span>
+        </div>
       </div>
-      <div class="panel-footer feature-actions">
-        <button @click="zoomToFeature" class="btn-secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+      <!-- ====== TAB PROPRIÉTÉS (Feature sélectionnée) ====== -->
+      <div v-if="dashboardTab === 'properties'" class="panel-body dashboard-body">
+        <div v-if="mapStore.selectedFeature">
+          <div class="feature-header-card">
+            <span
+              class="feature-color-dot"
+              :style="{ background: mapStore.selectedFeature.properties?._category_color || '#3498db' }"
+            ></span>
+            <div class="feature-header-info">
+              <strong>{{ mapStore.selectedFeature.properties?.name || 'Élément' }}</strong>
+              <span class="feature-header-type">
+                {{ mapStore.selectedFeature.properties?.categorie }}
+                <template v-if="mapStore.selectedFeature.properties?.type"> › {{ mapStore.selectedFeature.properties.type }}</template>
+              </span>
+            </div>
+          </div>
+
+          <div v-if="mapStore.selectedFeature.geometry" class="feature-type-badge">
+            {{ getGeometryLabel(mapStore.selectedFeature.geometry.type) }}
+            <template v-if="mapStore.selectedFeature.properties?._project_name">
+              · {{ mapStore.selectedFeature.properties._project_name }}
+            </template>
+          </div>
+
+          <div class="feature-properties">
+            <div class="feature-property" v-for="prop in getDisplayProperties(mapStore.selectedFeature.properties)" :key="prop.key">
+              <span class="property-key">{{ prop.label }}</span>
+              <span class="property-value">{{ prop.value }}</span>
+            </div>
+            <div v-if="getDisplayProperties(mapStore.selectedFeature.properties).length === 0" class="no-properties">
+              Aucune propriété définie
+            </div>
+          </div>
+
+          <!-- Données techniques -->
+          <div v-if="getCustomProperties(mapStore.selectedFeature.properties).length > 0" class="feature-custom-props">
+            <h4 class="custom-props-title">Données techniques</h4>
+            <div class="custom-props-list">
+              <div v-for="prop in getCustomProperties(mapStore.selectedFeature.properties)" :key="prop.key" class="custom-prop-item">
+                <span class="custom-prop-key">{{ prop.key }}</span>
+                <span v-if="prop.isColor" class="custom-prop-value color-value">
+                  <span class="color-swatch" :style="{ backgroundColor: prop.value }"></span>
+                  {{ prop.value }}
+                </span>
+                <span v-else class="custom-prop-value">{{ prop.value }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photos -->
+          <div v-if="mapStore.selectedFeature.properties?.photos?.length" class="feature-photos">
+            <h4 class="photos-title">Photos</h4>
+            <div class="photos-grid">
+              <a
+                v-for="photo in mapStore.selectedFeature.properties.photos"
+                :key="photo.id"
+                :href="photo.url"
+                target="_blank"
+                class="photo-thumb"
+              >
+                <img :src="photo.thumbnail_url || photo.url" :alt="photo.filename" />
+              </a>
+            </div>
+          </div>
+
+          <div class="feature-actions">
+            <button @click="zoomToFeature" class="btn-secondary btn-sm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              Centrer
+            </button>
+            <button @click="editFeature" class="btn-primary btn-sm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+              Modifier
+            </button>
+            <button @click="deleteFeature" class="btn-danger btn-sm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+              </svg>
+              Supprimer
+            </button>
+          </div>
+        </div>
+        <div v-else class="dash-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40">
             <circle cx="12" cy="12" r="10"/>
-            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 16v-4M12 8h.01"/>
           </svg>
-          Centrer
-        </button>
-        <button @click="editFeature" class="btn-primary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          <p>Aucun élément sélectionné</p>
+          <span>Cliquez sur un élément de la carte pour voir ses propriétés</span>
+        </div>
+      </div>
+
+      <!-- ====== TAB EXPORT ====== -->
+      <div v-if="dashboardTab === 'export'" class="panel-body dashboard-body">
+        <div v-if="totalFeatures > 0">
+          <div class="export-summary">
+            <strong>{{ totalFeatures }}</strong> éléments à exporter
+            <template v-if="mapStore.activeProjectIds.size > 1">
+              depuis <strong>{{ mapStore.activeProjectIds.size }}</strong> projets
+            </template>
+          </div>
+
+          <div class="export-options">
+            <button @click="exportCSV" class="export-btn">
+              <div class="export-btn-icon" style="background: #27ae60;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="20" height="20">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+              </div>
+              <div class="export-btn-info">
+                <strong>CSV (tableur)</strong>
+                <span>Compatible Excel, LibreOffice</span>
+              </div>
+            </button>
+            <button @click="exportGeoJSON" class="export-btn">
+              <div class="export-btn-icon" style="background: #3498db;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="20" height="20">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+                </svg>
+              </div>
+              <div class="export-btn-info">
+                <strong>GeoJSON</strong>
+                <span>Format cartographique standard</span>
+              </div>
+            </button>
+            <button @click="exportData" class="export-btn">
+              <div class="export-btn-icon" style="background: #9b59b6;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="20" height="20">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                </svg>
+              </div>
+              <div class="export-btn-info">
+                <strong>GeoJSON + Métadonnées</strong>
+                <span>Avec infos source et date</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Résumé des données -->
+          <div class="export-details">
+            <h4 class="dash-section-title">Contenu de l'export</h4>
+            <div class="export-detail-list">
+              <div v-for="cat in categoryDistribution" :key="cat.name" class="export-detail-item">
+                <span class="export-detail-color" :style="{ background: cat.color }"></span>
+                <span class="export-detail-name">{{ cat.name }}</span>
+                <span class="export-detail-count">{{ cat.count }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="dash-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
           </svg>
-          Modifier
-        </button>
-        <button @click="deleteFeature" class="btn-danger">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-          </svg>
-          Supprimer
-        </button>
+          <p>Rien à exporter</p>
+          <span>Chargez un projet pour pouvoir exporter les données</span>
+        </div>
       </div>
     </div>
 
@@ -1095,6 +1298,7 @@ import { ref, onMounted, watch, computed, onUnmounted } from 'vue'
 import { useMapStore } from '../stores/map'
 import L from 'leaflet'
 import 'leaflet-draw'
+import * as turf from '@turf/turf'
 
 // Patch Leaflet : protéger contre le bug _map=null sur les marqueurs DivIcon
 // Quand un marqueur est supprimé pendant une animation de zoom, Leaflet peut
@@ -1132,7 +1336,7 @@ const toolMode = ref<string>('navigation')
 const selectedBaseLayer = ref('ign_plan')
 const showCadastre = ref(false)
 const showLayerPanel = ref(false)
-const showStatsPanel = ref(false)
+const showStatsPanel = ref(true) // Dashboard toujours ouvert par défaut
 const showProjectPanel = ref(false)
 
 // Recherche
@@ -1194,6 +1398,14 @@ function isDescendantOf(code: string, ancestorCode: string): boolean {
   return false
 }
 
+// Extract the lexique code from a layer ID (strips projectId prefix)
+function getLayerLexiqueCode(layer: { id: string; projectId?: string }): string {
+  if (layer.projectId) {
+    return layer.id.replace(layer.projectId + '_', '')
+  }
+  return layer.id
+}
+
 // Filtered layers based on cascade selection
 const filteredLayers = computed(() => {
   // Find the deepest non-empty filter
@@ -1206,7 +1418,8 @@ const filteredLayers = computed(() => {
   }
   if (!filterCode) return mapStore.layers
   return mapStore.layers.filter(layer => {
-    return isDescendantOf(layer.id, filterCode)
+    const code = getLayerLexiqueCode(layer)
+    return isDescendantOf(code, filterCode)
   })
 })
 
@@ -1264,6 +1477,9 @@ const editingProperties = ref<Record<string, string>>({})
 const newPropertyKey = ref('')
 const newPropertyValue = ref('')
 
+// Dashboard tab state
+const dashboardTab = ref<'stats' | 'properties' | 'export'>('stats')
+
 // Statistiques computées
 const totalLayers = computed(() => mapStore.layers.length)
 const totalFeatures = computed(() => {
@@ -1287,6 +1503,121 @@ const totalPolygons = computed(() => {
     return sum + features.filter((f: any) => f.geometry?.type === 'Polygon' || f.geometry?.type === 'MultiPolygon').length
   }, 0)
 })
+
+// All features across all layers (for stats)
+const allFeatures = computed<GeoJSON.Feature[]>(() => {
+  const result: GeoJSON.Feature[] = []
+  mapStore.layers.forEach(layer => {
+    if (layer.data?.features) result.push(...layer.data.features)
+  })
+  return result
+})
+
+// Linéaire total (metres) via Turf.js
+const totalLineaire = computed(() => {
+  let total = 0
+  allFeatures.value.forEach(f => {
+    if (f.geometry?.type === 'LineString' || f.geometry?.type === 'MultiLineString') {
+      try { total += turf.length(f as any, { units: 'meters' }) } catch { /* skip */ }
+    }
+  })
+  return total
+})
+
+// Surface totale (m²) via Turf.js
+const totalSurface = computed(() => {
+  let total = 0
+  allFeatures.value.forEach(f => {
+    if (f.geometry?.type === 'Polygon' || f.geometry?.type === 'MultiPolygon') {
+      try { total += turf.area(f as any) } catch { /* skip */ }
+    }
+  })
+  return total
+})
+
+// Condition state distribution (for donut chart)
+const conditionDistribution = computed(() => {
+  const dist: Record<string, number> = {}
+  allFeatures.value.forEach(f => {
+    const state = f.properties?.condition_state || 'Non renseigné'
+    dist[state] = (dist[state] || 0) + 1
+  })
+  return dist
+})
+
+// Condition state color mapping
+const CONDITION_COLORS: Record<string, string> = {
+  'Neuf': '#27ae60',
+  'Bon': '#2ecc71',
+  'Moyen': '#f39c12',
+  'À rénover': '#e67e22',
+  'Critique': '#e74c3c',
+  'Hors service': '#95a5a6',
+  'Non renseigné': '#bdc3c7',
+}
+
+function getConditionColor(state: string): string {
+  return CONDITION_COLORS[state] || '#bdc3c7'
+}
+
+// Category distribution (for bar chart)
+const categoryDistribution = computed(() => {
+  const dist: Record<string, { count: number; color: string }> = {}
+  mapStore.layers.forEach(layer => {
+    const count = layer.data?.features?.length || 0
+    if (count > 0) {
+      dist[layer.name] = { count, color: layer.color }
+    }
+  })
+  // Sort by count desc
+  return Object.entries(dist)
+    .sort((a, b) => b[1].count - a[1].count)
+    .map(([name, { count, color }]) => ({ name, count, color }))
+})
+
+// Max count for bar scaling
+const maxCategoryCount = computed(() => {
+  return Math.max(1, ...categoryDistribution.value.map(c => c.count))
+})
+
+// Donut CSS (conic-gradient segments)
+const donutGradient = computed(() => {
+  const entries = Object.entries(conditionDistribution.value)
+  const total = entries.reduce((s, [, c]) => s + c, 0)
+  if (total === 0) return 'conic-gradient(#eee 0deg 360deg)'
+  let offset = 0
+  const segments: string[] = []
+  entries.forEach(([state, count]) => {
+    const pct = (count / total) * 360
+    const color = getConditionColor(state)
+    segments.push(`${color} ${offset}deg ${offset + pct}deg`)
+    offset += pct
+  })
+  return `conic-gradient(${segments.join(', ')})`
+})
+
+// Project distribution for multi-project display
+const projectDistribution = computed(() => {
+  const dist: Record<string, { name: string; count: number }> = {}
+  allFeatures.value.forEach(f => {
+    const pid = f.properties?._project_id || 'unknown'
+    const pname = f.properties?._project_name || 'Import'
+    if (!dist[pid]) dist[pid] = { name: pname, count: 0 }
+    dist[pid].count++
+  })
+  return Object.values(dist).sort((a, b) => b.count - a.count)
+})
+
+// Format helpers
+function formatLineaire(meters: number): string {
+  if (meters < 1000) return `${meters.toFixed(0)} m`
+  return `${(meters / 1000).toFixed(2)} km`
+}
+
+function formatSurface(sqm: number): string {
+  if (sqm < 10000) return `${sqm.toFixed(0)} m²`
+  return `${(sqm / 10000).toFixed(2)} ha`
+}
 
 // URLs des fonds de carte IGN Géoplateforme (gratuits)
 const baseLayers: Record<string, () => L.TileLayer> = {
@@ -1885,7 +2216,7 @@ const PROPERTY_LABELS: Record<string, string> = {
 }
 
 // Propriétés internes à masquer
-const HIDDEN_PROPERTIES = new Set(['id', 'color_value', 'icon_name', 'sync_status', 'lexique_code', 'photos', 'custom_properties', '_category_icon', '_category_color'])
+const HIDDEN_PROPERTIES = new Set(['id', 'color_value', 'icon_name', 'sync_status', 'lexique_code', 'photos', 'custom_properties', '_category_icon', '_category_color', '_project_id', '_project_name'])
 
 function getDisplayProperties(properties: Record<string, any> | null): { key: string; label: string; value: string }[] {
   if (!properties) return []
@@ -1898,13 +2229,20 @@ function getDisplayProperties(properties: Record<string, any> | null): { key: st
     }))
 }
 
-function getCustomProperties(properties: Record<string, any> | null): { key: string; value: string }[] {
+function isColorValue(value: string): boolean {
+  return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(value)
+}
+
+function getCustomProperties(properties: Record<string, any> | null): { key: string; value: string; isColor: boolean }[] {
   if (!properties?.custom_properties) return []
   const cp = properties.custom_properties
   if (typeof cp !== 'object' || Array.isArray(cp)) return []
   return Object.entries(cp)
     .filter(([, v]) => v != null && v !== '')
-    .map(([k, v]) => ({ key: k, value: String(v) }))
+    .map(([k, v]) => {
+      const strVal = String(v)
+      return { key: k, value: strVal, isColor: isColorValue(strVal) }
+    })
 }
 
 function formatPropertyKey(key: string): string {
@@ -1927,13 +2265,85 @@ function showToast(message: string, type: 'success' | 'error' | 'info' = 'info')
   }, 3000)
 }
 
-// Panneau stats
+// Panneau dashboard (stats/propriétés/export)
 function toggleStatsPanel() {
   showStatsPanel.value = !showStatsPanel.value
   if (showStatsPanel.value) {
+    dashboardTab.value = 'stats'
     showLayerPanel.value = false
     showProjectPanel.value = false
   }
+}
+
+function closeDashboard() {
+  showStatsPanel.value = false
+  mapStore.selectFeature(null)
+}
+
+function openDashboardTab(tab: 'stats' | 'properties' | 'export') {
+  dashboardTab.value = tab
+  showStatsPanel.value = true
+  showLayerPanel.value = false
+  showProjectPanel.value = false
+}
+
+// Export CSV
+function exportCSV() {
+  const rows: string[][] = []
+  const headers = ['Nom', 'Catégorie', 'Type', 'État', 'Statut', 'Commentaire', 'Projet', 'Géométrie', 'Latitude', 'Longitude']
+  rows.push(headers)
+
+  allFeatures.value.forEach(f => {
+    const p = f.properties || {}
+    let lat = '', lng = ''
+    if (f.geometry?.type === 'Point') {
+      const coords = (f.geometry as GeoJSON.Point).coordinates
+      lat = String(coords[1])
+      lng = String(coords[0])
+    }
+    rows.push([
+      p.name || '',
+      p.categorie || '',
+      p.type || '',
+      p.condition_state || '',
+      p.point_status || '',
+      (p.comment || '').replace(/"/g, '""'),
+      p._project_name || '',
+      f.geometry?.type || '',
+      lat,
+      lng,
+    ])
+  })
+
+  const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+  const bom = '\uFEFF'
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `patrimoine_${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+  showToast('Export CSV téléchargé', 'success')
+}
+
+// Export GeoJSON (amélioré)
+function exportGeoJSON() {
+  const geojson: GeoJSON.FeatureCollection = {
+    type: 'FeatureCollection',
+    features: allFeatures.value.map(f => ({
+      ...f,
+      properties: { ...f.properties }
+    }))
+  }
+  const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `patrimoine_${new Date().toISOString().slice(0, 10)}.geojson`
+  a.click()
+  URL.revokeObjectURL(url)
+  showToast('Export GeoJSON téléchargé', 'success')
 }
 
 function toggleProjectPanel() {
@@ -1948,8 +2358,18 @@ async function selectProject(project: any) {
   await mapStore.selectProject(project)
   showProjectPanel.value = false
   showToast(`Projet "${project.name}" chargé`, 'success')
-  // Forcer le rendu des couches après le chargement des données
   renderLayers()
+}
+
+// Multi-projets : toggle checkbox
+async function onToggleProject(project: any) {
+  await mapStore.toggleProject(project.id)
+  renderLayers()
+  if (mapStore.isProjectActive(project.id)) {
+    showToast(`Projet "${project.name}" ajouté`, 'success')
+  } else {
+    showToast(`Projet "${project.name}" retiré`, 'info')
+  }
 }
 
 // Périmètres
@@ -2393,6 +2813,13 @@ function createLeafletLayerGroup(layer: { data: GeoJSON.FeatureCollection | null
 
   return group
 }
+
+// Watch : when a feature is selected, open the dashboard on Properties tab
+watch(() => mapStore.selectedFeature, (newVal) => {
+  if (newVal) {
+    openDashboardTab('properties')
+  }
+})
 
 // Watch pour les changements de couches
 // Fingerprint = identité + visibilité + nombre de features (détecte les changements de données)
@@ -3084,10 +3511,8 @@ watch(
    Panneaux latéraux (couches, stats, propriétés, projets, périmètres)
    ============================================ */
 .layer-panel,
-.stats-panel,
 .project-panel,
-.perimeter-panel,
-.feature-panel {
+.perimeter-panel {
   position: absolute;
   width: 280px;
   background: white;
@@ -3105,20 +3530,546 @@ watch(
   top: 80px;
 }
 
-.stats-panel {
-  left: 12px;
-  top: 80px;
-}
-
 .project-panel {
   left: 12px;
   top: 80px;
   width: 320px;
 }
 
-.feature-panel {
+/* ============================================
+   Dashboard panel (3-tab right panel)
+   ============================================ */
+.dashboard-panel {
+  position: absolute;
   right: 12px;
   top: 80px;
+  width: 340px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: calc(100% - 120px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  background: #f8f9fa;
+  border-bottom: 1px solid #eee;
+  padding: 0 8px;
+}
+
+.dashboard-tabs {
+  display: flex;
+  flex: 1;
+  gap: 2px;
+}
+
+.dash-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #7f8c8d;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.dash-tab:hover {
+  color: #2c3e50;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.dash-tab.active {
+  color: #3498db;
+  border-bottom-color: #3498db;
+}
+
+.dash-tab svg {
+  width: 16px;
+  height: 16px;
+}
+
+.dashboard-header .panel-close {
+  margin-left: 4px;
+}
+
+.dashboard-body {
+  overflow-y: auto;
+  padding: 12px;
+}
+
+/* KPI row */
+.kpi-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.kpi-card {
+  flex: 1;
+  text-align: center;
+  padding: 10px 6px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.kpi-card.kpi-primary {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+}
+
+.kpi-value {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.kpi-label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+.kpi-primary .kpi-label {
+  opacity: 0.85;
+}
+
+/* Dash sections */
+.dash-section {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dash-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.dash-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #7f8c8d;
+  margin: 0 0 10px;
+}
+
+/* Quantitatif grid */
+.quanti-grid {
+  display: flex;
+  gap: 8px;
+}
+
+.quanti-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.quanti-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.quanti-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.quanti-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1.2;
+}
+
+.quanti-label {
+  font-size: 0.65rem;
+  color: #95a5a6;
+  text-transform: uppercase;
+}
+
+/* Linéaire / Surface metrics */
+.quanti-metrics {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metric-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #f0f7ff;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.metric-icon {
+  font-size: 1rem;
+}
+
+.metric-label {
+  flex: 1;
+  color: #5d6d7e;
+}
+
+.metric-value {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* Donut chart */
+.donut-container {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.donut {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.donut-hole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.donut-total {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1;
+}
+
+.donut-label {
+  font-size: 0.6rem;
+  color: #95a5a6;
+  text-transform: uppercase;
+}
+
+.donut-legend {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+}
+
+.legend-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  flex: 1;
+  color: #5d6d7e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.legend-count {
+  font-weight: 600;
+  color: #2c3e50;
+  min-width: 20px;
+  text-align: right;
+}
+
+.legend-pct {
+  font-size: 0.7rem;
+  color: #95a5a6;
+  min-width: 28px;
+  text-align: right;
+}
+
+/* Category bars */
+.category-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cat-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cat-bar-label {
+  width: 80px;
+  font-size: 0.75rem;
+  color: #5d6d7e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.cat-bar-track {
+  flex: 1;
+  height: 14px;
+  background: #f0f0f0;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.cat-bar-fill {
+  height: 100%;
+  border-radius: 7px;
+  min-width: 4px;
+  transition: width 0.3s ease;
+}
+
+.cat-bar-count {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #2c3e50;
+  min-width: 24px;
+  text-align: right;
+}
+
+/* Project stats */
+.project-stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.project-stat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 0.82rem;
+}
+
+.project-stat-name {
+  color: #5d6d7e;
+}
+
+.project-stat-count {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* Empty state */
+.dash-empty {
+  text-align: center;
+  padding: 30px 16px;
+  color: #95a5a6;
+}
+
+.dash-empty svg {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.dash-empty p {
+  margin: 0 0 6px;
+  font-weight: 500;
+  color: #7f8c8d;
+}
+
+.dash-empty span {
+  font-size: 0.82rem;
+}
+
+/* Feature header card in Properties tab */
+.feature-header-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.feature-color-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.feature-header-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-header-info strong {
+  font-size: 0.95rem;
+  color: #2c3e50;
+}
+
+.feature-header-type {
+  font-size: 0.78rem;
+  color: #7f8c8d;
+}
+
+/* Feature actions in Properties tab */
+.feature-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+}
+
+.btn-sm {
+  padding: 6px 10px !important;
+  font-size: 0.78rem !important;
+  gap: 4px !important;
+}
+
+/* Export tab */
+.export-summary {
+  text-align: center;
+  padding: 10px;
+  background: #f0f7ff;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #2c3e50;
+  margin-bottom: 14px;
+}
+
+.export-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.export-btn:hover {
+  background: #eef5fd;
+  border-color: #3498db;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.15);
+}
+
+.export-btn-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.export-btn-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.export-btn-info strong {
+  font-size: 0.88rem;
+  color: #2c3e50;
+}
+
+.export-btn-info span {
+  font-size: 0.75rem;
+  color: #95a5a6;
+}
+
+.export-details {
+  padding-top: 4px;
+}
+
+.export-detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.export-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 0.8rem;
+}
+
+.export-detail-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.export-detail-name {
+  flex: 1;
+  color: #5d6d7e;
+}
+
+.export-detail-count {
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .panel-header {
@@ -4000,78 +4951,7 @@ watch(
   width: 100%;
 }
 
-/* Stats */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-}
-
-.stat-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px;
-  background: #f8f9fa;
-  border-radius: 10px;
-}
-
-.stat-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stat-icon svg {
-  width: 20px;
-  height: 20px;
-  color: white;
-}
-
-.stat-icon-blue { background: linear-gradient(135deg, #3498db, #2980b9); }
-.stat-icon-green { background: linear-gradient(135deg, #2ecc71, #27ae60); }
-.stat-icon-orange { background: linear-gradient(135deg, #f39c12, #e67e22); }
-.stat-icon-purple { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
-
-.stat-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat-value {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #2c3e50;
-  line-height: 1;
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  color: #95a5a6;
-  font-weight: 500;
-}
-
-.stats-summary {
-  margin-top: 16px;
-  padding: 12px;
-  background: #ebf5fb;
-  border-radius: 8px;
-  text-align: center;
-  font-size: 0.85rem;
-  color: #2980b9;
-}
-
-.stats-empty {
-  text-align: center;
-  padding: 20px;
-  color: #95a5a6;
-  font-size: 0.85rem;
-}
-
-/* Feature panel */
+/* Feature panel (used inside Properties tab) */
 .feature-type-badge {
   display: inline-block;
   padding: 6px 12px;
@@ -4155,6 +5035,21 @@ watch(
 .custom-prop-value {
   color: #2c3e50;
   font-weight: 600;
+}
+
+.custom-prop-value.color-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.color-swatch {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
 }
 
 .feature-photos {
@@ -4695,18 +5590,20 @@ watch(
     display: none;
   }
 
-  .layer-panel,
-  .stats-panel,
-  .feature-panel {
+  .layer-panel {
     width: calc(100% - 16px);
     left: 8px;
     right: 8px;
     max-height: 50vh;
   }
 
-  .feature-panel {
+  .dashboard-panel {
+    width: calc(100% - 16px);
+    left: 8px;
+    right: 8px;
     bottom: 60px;
     top: auto;
+    max-height: 50vh;
   }
 
   .mode-indicator {
