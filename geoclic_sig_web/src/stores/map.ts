@@ -11,6 +11,7 @@ export interface Layer {
   icon?: string  // MDI icon name (ex: "mdi-bench")
   data: GeoJSON.FeatureCollection | null
   projectId?: string
+  projectName?: string
 }
 
 export interface Project {
@@ -92,13 +93,22 @@ function argbToHex(argb: number): string {
 export const useMapStore = defineStore('map', () => {
   const layers = ref<Layer[]>([])
   const projects = ref<Project[]>([])
-  const currentProject = ref<Project | null>(null)
   const selectedFeature = ref<GeoJSON.Feature | null>(null)
   const loading = ref(false)
   const mapCenter = ref<[number, number]>([46.603354, 1.888334]) // France center
   const mapZoom = ref(6)
 
-  // Lexique (code → entrée)
+  // Multi-projets : IDs des projets cochés
+  const activeProjectIds = ref<Set<string>>(new Set())
+
+  // Compat : "currentProject" = dernier projet coché (pour backward compat)
+  const currentProject = computed<Project | null>(() => {
+    if (activeProjectIds.value.size === 0) return null
+    const lastId = Array.from(activeProjectIds.value).pop()!
+    return projects.value.find(p => p.id === lastId) || null
+  })
+
+  // Lexique (code → entrée) - fusionné depuis tous les projets actifs
   const lexiqueMap = ref<Map<string, LexiqueEntry>>(new Map())
 
   // Zones API
@@ -141,14 +151,15 @@ export const useMapStore = defineStore('map', () => {
     }
   }
 
-  // Charger le lexique pour un projet et construire le mapping code → entrée
+  // Charger le lexique pour un projet et MERGER dans le mapping global
   async function loadLexique(projectId: string) {
     try {
       const response = await axios.get(`/api/lexique?project_id=${projectId}`)
       const entries: LexiqueEntry[] = response.data
-      const map = new Map<string, LexiqueEntry>()
+      // Merger dans la map existante (multi-projets)
+      const newMap = new Map(lexiqueMap.value)
       entries.forEach((e: any) => {
-        map.set(e.code, {
+        newMap.set(e.code, {
           code: e.code,
           label: e.label,
           parent_code: e.parent_code,
@@ -157,7 +168,7 @@ export const useMapStore = defineStore('map', () => {
           color_value: e.color_value,
         })
       })
-      lexiqueMap.value = map
+      lexiqueMap.value = newMap
     } catch (error) {
       console.error('Erreur chargement lexique:', error)
     }
@@ -381,16 +392,44 @@ export const useMapStore = defineStore('map', () => {
     return [[minLat, minLng], [maxLat, maxLng]]
   }
 
-  // Sélectionner un projet
-  async function selectProject(project: Project) {
-    currentProject.value = project
-    await loadProjectData(project.id)
+  // =========================================
+  // Multi-projets : cocher/décocher un projet
+  // =========================================
+  async function toggleProject(projectId: string) {
+    if (activeProjectIds.value.has(projectId)) {
+      // Décocher : retirer ses couches
+      activeProjectIds.value.delete(projectId)
+      layers.value = layers.value.filter(l => l.projectId !== projectId)
+      // Forcer réactivité
+      activeProjectIds.value = new Set(activeProjectIds.value)
+    } else {
+      // Cocher : charger et ajouter ses couches
+      activeProjectIds.value.add(projectId)
+      activeProjectIds.value = new Set(activeProjectIds.value)
+      await addProjectLayers(projectId)
+    }
   }
 
-  // Charger les données d'un projet
-  async function loadProjectData(projectId: string) {
+  // Vérifier si un projet est actif
+  function isProjectActive(projectId: string): boolean {
+    return activeProjectIds.value.has(projectId)
+  }
+
+  // Ancien selectProject (compat) : décocher tous, cocher celui-ci
+  async function selectProject(project: Project) {
+    // Retirer toutes les couches des anciens projets
+    layers.value = layers.value.filter(l => !l.projectId)
+    activeProjectIds.value = new Set([project.id])
+    await addProjectLayers(project.id)
+  }
+
+  // Charger et ajouter les couches d'un projet (sans effacer les autres)
+  async function addProjectLayers(projectId: string) {
     loading.value = true
     try {
+      const project = projects.value.find(p => p.id === projectId)
+      const projectName = project?.name || 'Projet'
+
       // Charger le lexique et les points en parallèle
       const [pointsResponse] = await Promise.allSettled([
         axios.get(`/api/points?project_id=${projectId}&page_size=500`),
@@ -399,7 +438,6 @@ export const useMapStore = defineStore('map', () => {
 
       if (pointsResponse.status !== 'fulfilled') {
         console.error('Erreur chargement points:', pointsResponse.reason)
-        layers.value = []
         return
       }
 
@@ -447,13 +485,8 @@ export const useMapStore = defineStore('map', () => {
         let categoryDisplay = { label: 'Autres', icon: 'mdi-map-marker', color: '#95a5a6' }
 
         if (lexiqueCode && lexiqueMap.value.size > 0) {
-          // Chercher l'ancêtre level 2 (catégorie) pour le groupement
           let cat = getLexiqueAncestor(lexiqueCode, 2)
-
-          // Si pas trouvé, essayer level 1 (peut-être seulement 2 niveaux)
           if (!cat) cat = getLexiqueAncestor(lexiqueCode, 1)
-
-          // Fallback : essayer point.type comme code lexique direct
           if (!cat && point.type) {
             const typeEntry = lexiqueMap.value.get(point.type)
             if (typeEntry) cat = typeEntry
@@ -463,7 +496,6 @@ export const useMapStore = defineStore('map', () => {
             categoryCode = cat.code
             categoryDisplay = getLexiqueDisplay(cat.code)
           } else {
-            // Peut-être que le point est directement au level 1 ou 2
             const direct = lexiqueMap.value.get(lexiqueCode)
             if (direct) {
               categoryCode = direct.code
@@ -471,7 +503,6 @@ export const useMapStore = defineStore('map', () => {
             }
           }
         } else if (point.type) {
-          // Fallback sans lexique : grouper par type brut
           categoryCode = point.type
           categoryDisplay = { label: point.type, icon: 'mdi-map-marker', color: '#3498db' }
         }
@@ -484,7 +515,6 @@ export const useMapStore = defineStore('map', () => {
           ? getLexiqueDisplay(lexiqueCode)
           : { label: '', icon: '', color: '' }
 
-        // Résoudre la catégorie (level 2) pour le label "Catégorie" dans le détail
         const catEntry = lexiqueCode && lexiqueMap.value.size > 0
           ? (getLexiqueAncestor(lexiqueCode, 2) || getLexiqueAncestor(lexiqueCode, 1))
           : null
@@ -506,9 +536,10 @@ export const useMapStore = defineStore('map', () => {
             icon_name: pointDisplay.icon || point.icon_name,
             photos: point.photos || [],
             custom_properties: point.custom_properties || {},
-            // Info catégorie pour le rendu carte
             _category_icon: categoryDisplay.icon,
             _category_color: categoryDisplay.color,
+            _project_id: projectId,
+            _project_name: projectName,
           }
         }
 
@@ -521,7 +552,7 @@ export const useMapStore = defineStore('map', () => {
         categoryGroups.get(categoryCode)!.features.push(feature)
       })
 
-      // Créer une couche par catégorie
+      // Créer une couche par catégorie (avec préfixe projectId pour éviter collision)
       const newLayers: Layer[] = []
       let colorIdx = 0
       categoryGroups.forEach((group, code) => {
@@ -531,7 +562,7 @@ export const useMapStore = defineStore('map', () => {
         if (geomType === 'Polygon' || geomType === 'MultiPolygon') layerType = 'polygons'
 
         newLayers.push({
-          id: code,
+          id: `${projectId}_${code}`,
           name: group.label,
           type: layerType,
           visible: true,
@@ -539,19 +570,30 @@ export const useMapStore = defineStore('map', () => {
           icon: group.icon,
           data: { type: 'FeatureCollection', features: group.features },
           projectId,
+          projectName,
         })
         colorIdx++
       })
 
       // Trier par nom
       newLayers.sort((a, b) => a.name.localeCompare(b.name))
-      layers.value = newLayers
+
+      // Retirer les anciennes couches de ce projet (au cas où on recharge)
+      layers.value = layers.value.filter(l => l.projectId !== projectId)
+      // Ajouter les nouvelles
+      layers.value.push(...newLayers)
 
     } catch (error) {
       console.error('Erreur chargement données:', error)
     } finally {
       loading.value = false
     }
+  }
+
+  // Ancien loadProjectData (compat)
+  async function loadProjectData(projectId: string) {
+    layers.value = layers.value.filter(l => !l.projectId || l.projectId === projectId)
+    await addProjectLayers(projectId)
   }
 
   // Ajouter une couche importée (méthode simple)
@@ -615,6 +657,10 @@ export const useMapStore = defineStore('map', () => {
     mapZoom,
     visibleLayers,
     lexiqueMap,
+    // Multi-projets
+    activeProjectIds,
+    toggleProject,
+    isProjectActive,
     // Zones API
     apiZones,
     apiZonesTree,
@@ -626,7 +672,9 @@ export const useMapStore = defineStore('map', () => {
     loadProjects,
     selectProject,
     loadProjectData,
+    addProjectLayers,
     loadLexique,
+    getLexiqueAncestor,
     getLexiqueDisplay,
     addImportedLayer,
     addLayer,
