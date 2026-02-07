@@ -2069,6 +2069,8 @@ watch(
 function renderLayers() {
   if (!map.value) return
 
+  console.log('[SIG] renderLayers called, layers:', mapStore.layers.length)
+
   // Supprimer les couches existantes de la carte (Leaflet gère le cleanup des events)
   layerGroups.value.forEach((group) => {
     removeLayerGroupFromMap(group, map.value!)
@@ -2079,9 +2081,15 @@ function renderLayers() {
   mapStore.layers.forEach(layer => {
     if (!layer.visible || !layer.data) return
 
+    console.log('[SIG] Adding layer:', layer.id, layer.name, 'features:', layer.data.features.length)
+    layer.data.features.forEach((f, i) => {
+      console.log(`[SIG]   Feature ${i}:`, f.geometry?.type, f.geometry?.coordinates, f.properties?.name)
+    })
+
     const group = createLeafletLayerGroup(layer)
     group.addTo(map.value!)
     layerGroups.value.set(layer.id, group)
+    console.log('[SIG] Layer added to map, group layers count:', group.getLayers().length)
   })
 }
 
